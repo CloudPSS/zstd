@@ -13,10 +13,19 @@ jobs:
         with:
           submodules: recursive
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn install --ignore-scripts --frozen-lockfile
+
       - name: Build
         run: |
           pwsh lib/build.ps1
-          pwsh lib/wasm.ps1
+          yarn build
 
       - name: Upload common artifacts
         uses: actions/upload-artifact@v3
@@ -25,6 +34,7 @@ jobs:
           path: |
             lib/zstd.c
             lib/zstd.js
+            dist/
 
   build:
     needs: build-common
@@ -50,7 +60,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-common
-          path: lib/
 
       - name: Prebuildify for ${{ matrix.os }}
         run: |
@@ -83,7 +92,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-common
-          path: lib/
 
       - name: Download prebuilt artifacts
         uses: actions/download-artifact@v3
@@ -94,11 +102,8 @@ jobs:
       - name: Install
         uses: bahmutov/npm-install@v1
 
-      - name: Build
-        run: yarn build
-
-      # - name: Run test with prebuilds
-      #   run: yarn test
+      - name: Run test with prebuilds
+        run: yarn test
 
   publish:
     needs: test
@@ -115,7 +120,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-common
-          path: lib/
 
       - name: Download prebuilt artifacts
         uses: actions/download-artifact@v3
@@ -125,9 +129,6 @@ jobs:
 
       - name: Install
         uses: bahmutov/npm-install@v1
-
-      - name: Build
-        run: yarn build
 
       # - name: Publish
       #   run: npm publish --access=public
