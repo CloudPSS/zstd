@@ -1,6 +1,6 @@
 # @cloudpss/zstd
 
-This package contains the [zstd](http://github.com/facebook/zstd) n-api addon for node.js & wasm for browsers.
+This is a [pure esm package](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) contains the [zstd](http://github.com/facebook/zstd) n-api addon for node.js & wasm for browsers.
 
 ## Installation
 
@@ -21,11 +21,11 @@ console.log(decompressed.toString()); // Hello World!
 
 ## API
 
-### compress(input: Buffer, level?: number): Buffer
+### `compress(input: Buffer, level?: number): Buffer`
 
 Compresses the input buffer with the given compression level (default: 4).
 
-### decompress(input: Buffer): Buffer
+### `decompress(input: Buffer): Buffer`
 
 Decompresses the input buffer.
 

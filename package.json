@@ -10,6 +10,7 @@
   },
   "keywords": [
     "zstd",
+    "zstandard",
     "n-api",
     "wasm",
     "compression",
@@ -18,7 +19,7 @@
     "decompress"
   ],
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=14.16"
   },
   "type": "module",
   "main": "dist/index.js",
