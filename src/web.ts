@@ -1,10 +1,21 @@
 import createModule from '../lib/zstd.js';
+import { DEFAULT_LEVEL, MAX_SIZE } from './config.js';
 
 const Module = await createModule();
 
+/** Convert to buffer */
+function asBuffer(data: ArrayBufferView): Uint8Array {
+    if (!ArrayBuffer.isView(data)) throw new Error('data must be an array buffer view');
+    if (data instanceof Uint8Array) return data;
+    return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+}
+
 /** 压缩 */
-export function compress(buf: Uint8Array, level = 4): Uint8Array {
+export function compress(data: ArrayBufferView, level = DEFAULT_LEVEL): Uint8Array {
+    if (!Number.isSafeInteger(level)) throw new Error('level must be an integer');
+    const buf = asBuffer(data);
     const bound = Module._ZSTD_compressBound(buf.byteLength);
+    if (bound > MAX_SIZE) throw new Error(`Input data is too large`);
     const compressed = Module._malloc(bound);
     const src = Module._malloc(buf.byteLength);
     Module.HEAPU8.set(buf, src);
@@ -32,7 +43,8 @@ const ZSTD_CONTENTSIZE_ERROR = -2;
 const ZSTD_CONTENTSIZE_UNKNOWN = -1;
 
 /** 解压 */
-export function decompress(buf: Uint8Array, maxSize?: number): Uint8Array {
+export function decompress(data: ArrayBufferView): Uint8Array {
+    const buf = asBuffer(data);
     const src = Module._malloc(buf.byteLength);
     Module.HEAP8.set(buf, src);
     const contentSize = Module._ZSTD_getFrameContentSize(src, buf.byteLength);
@@ -42,7 +54,7 @@ export function decompress(buf: Uint8Array, maxSize?: number): Uint8Array {
     if (contentSize === ZSTD_CONTENTSIZE_UNKNOWN) {
         throw new Error('Unknown content size');
     }
-    if (maxSize && contentSize > maxSize) {
+    if (contentSize > MAX_SIZE) {
         throw new Error(`Content size is too large`);
     }
     const heap = Module._malloc(contentSize);

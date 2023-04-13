@@ -7,6 +7,7 @@ import * as wasm from '@cloudpss/zstd/wasm';
 
 const testBuffer1 = randomBytes(1000);
 const testBuffer2 = Buffer.alloc(1000);
+const testBuffer3 = new Float64Array(1000 / 8);
 
 /**
  * Test if two buffers are equal
@@ -30,10 +31,11 @@ assertBufferEqual(node.decompress(node.compress(testBuffer2)), testBuffer2);
 assertBufferEqual(wasm.decompress(wasm.compress(testBuffer1)), testBuffer1);
 assertBufferEqual(wasm.decompress(wasm.compress(testBuffer2)), testBuffer2);
 
-// @ts-expect-error Pass uint8array to node
 assertBufferEqual(node.decompress(wasm.compress(testBuffer1)), testBuffer1);
-// @ts-expect-error Pass uint8array to node
 assertBufferEqual(node.decompress(wasm.compress(testBuffer2)), testBuffer2);
 
 assertBufferEqual(wasm.decompress(node.compress(testBuffer1)), testBuffer1);
 assertBufferEqual(wasm.decompress(node.compress(testBuffer2)), testBuffer2);
+
+assertBufferEqual(node.decompress(node.compress(testBuffer3)), testBuffer2);
+assertBufferEqual(wasm.decompress(wasm.compress(testBuffer3)), testBuffer2);
