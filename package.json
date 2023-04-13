@@ -1,12 +1,13 @@
 {
   "name": "@cloudpss/zstd",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Zstd n-api addon for node.js & wasm for browsers.",
   "author": "OpportunityLiu <opportunity@live.in>",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "types": "src/index.ts",
+  "browser": "dist/web.js",
   "exports": {
     ".": {
       "types": {
@@ -21,6 +22,7 @@
   "scripts": {
     "install": "node-gyp-build",
     "clean": "rimraf dist",
+    "clean:gyp": "rimraf build prebuilds",
     "build": "yarn clean && tsc",
     "watch": "yarn clean && tsc --watch",
     "test": "echo test",
