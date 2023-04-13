@@ -21,11 +21,11 @@ console.log(decompressed.toString()); // Hello World!
 
 ## API
 
-### `compress(input: Buffer, level?: number): Buffer`
+### `compress(input: ArrayBufferView, level?: number): Buffer`
 
 Compresses the input buffer with the given compression level (default: 4).
 
-### `decompress(input: Buffer): Buffer`
+### `decompress(input: ArrayBufferView): Buffer`
 
 Decompresses the input buffer.
 
