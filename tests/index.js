@@ -2,8 +2,8 @@ import assert from 'node:assert';
 import { randomBytes } from 'node:crypto';
 // Add this to make sure the bindings are loaded
 import '../dist/bindings.cjs';
-import * as node from '../dist/index.js';
-import * as wasm from '../dist/web.js';
+import * as node from '@cloudpss/zstd';
+import * as wasm from '@cloudpss/zstd/wasm';
 
 const testBuffer1 = randomBytes(1000);
 const testBuffer2 = Buffer.alloc(1000);
@@ -30,7 +30,9 @@ assertBufferEqual(node.decompress(node.compress(testBuffer2)), testBuffer2);
 assertBufferEqual(wasm.decompress(wasm.compress(testBuffer1)), testBuffer1);
 assertBufferEqual(wasm.decompress(wasm.compress(testBuffer2)), testBuffer2);
 
+// @ts-expect-error Pass uint8array to node
 assertBufferEqual(node.decompress(wasm.compress(testBuffer1)), testBuffer1);
+// @ts-expect-error Pass uint8array to node
 assertBufferEqual(node.decompress(wasm.compress(testBuffer2)), testBuffer2);
 
 assertBufferEqual(wasm.decompress(node.compress(testBuffer1)), testBuffer1);

@@ -33,6 +33,10 @@
       "browser": "./dist/web.js",
       "default": "./dist/index.js"
     },
+    "./wasm": {
+      "types": "./src/web.ts",
+      "default": "./dist/web.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
