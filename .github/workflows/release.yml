@@ -32,7 +32,7 @@ jobs:
         with:
           name: build-common
           path: |
-            lib/zstd.c
+            lib/zstd_lib.c
             lib/zstd.js
             dist/
 
