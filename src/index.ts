@@ -1,6 +1,6 @@
 let lib: typeof import('./bindings.cjs');
 try {
-    lib = await import('./bindings.cjs');
+    lib = (await import('./bindings.cjs')).default;
 } catch {
     const wasm = await import('./web.js');
     lib = {

@@ -41,7 +41,7 @@
     "clean:gyp": "rimraf build prebuilds",
     "build": "yarn clean && tsc",
     "watch": "yarn clean && tsc --watch",
-    "test": "echo test",
+    "test": "node ./tests/index.js",
     "prepare": "husky install",
     "format": "prettier --ignore-path .gitignore --write .",
     "lint": "eslint --ext .js,.ts ."

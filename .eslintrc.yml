@@ -1,5 +1,11 @@
 root: true
 extends: '@cloudpss'
 env:
-  es2020: true
+  es2021: true
   node: true
+parserOptions:
+  project: true
+overrides:
+  - files: tests/**/*
+    rules:
+      '@typescript-eslint/no-unsafe-argument': 0
