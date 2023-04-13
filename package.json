@@ -4,6 +4,22 @@
   "description": "Zstd n-api addon for node.js & wasm for browsers.",
   "author": "OpportunityLiu <opportunity@live.in>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cloudpss/zstd.git"
+  },
+  "keywords": [
+    "zstd",
+    "n-api",
+    "wasm",
+    "compression",
+    "decompression",
+    "compress",
+    "decompress"
+  ],
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "type": "module",
   "main": "dist/index.js",
   "types": "src/index.ts",
