@@ -93,8 +93,8 @@ jobs:
         run: |
           rm -f .gitignore .npmignore
           yarn prebuildify-cross --napi --strip \
-            -i centos7-devtoolset7 \
             -i alpine \
+            -i centos7-devtoolset7 \
             -i linux-arm64 \
             -i linux-arm64-musl
 
