@@ -3,14 +3,14 @@ Push-Location "$PSScriptRoot/zstd/build/single_file_libs"
 
 bash ./create_single_file_library.sh
 
-Copy-Item ./zstd.c ../../../zstd.c
+Copy-Item ./zstd.c ../../../zstd_lib.c
 
 Pop-Location
 
 Push-Location "$PSScriptRoot"
 
 docker run --rm -v ${PWD}:/src emscripten/emsdk `
-  emcc ./zstd.c -o ./zstd.js `
+  emcc ./zstd_lib.c -o ./zstd.js `
   -flto --closure 1 -O3 `
   --memory-init-file 0 `
   -s EXPORTED_FUNCTIONS="['_ZSTD_isError', '_ZSTD_getFrameContentSize', '_ZSTD_decompress', '_ZSTD_compress', '_ZSTD_compressBound', '_malloc', '_free']" `

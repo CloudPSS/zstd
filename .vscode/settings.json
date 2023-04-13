@@ -42,8 +42,5 @@
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["Zstd"],
-  "files.associations": {
-    "zstd.c": "cpp"
-  }
+  "cSpell.words": ["Zstd"]
 }
