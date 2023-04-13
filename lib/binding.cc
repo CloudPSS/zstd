@@ -1,6 +1,6 @@
 extern "C"
 {
-#include "./zstd/lib/zstd.h"
+#include "./zstd.c"
 }
 #include <napi.h>
 
