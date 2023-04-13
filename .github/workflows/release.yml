@@ -23,9 +23,12 @@ jobs:
 
       - name: Install
         uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn install --ignore-scripts --frozen-lockfile
 
       - name: Prebuildify for ${{ matrix.os }}
         run: |
+          pwsh lib/build.ps1
           yarn prebuildify --arch x86
           yarn prebuildify --arch x64
           yarn prebuildify --arch arm64
@@ -92,7 +95,9 @@ jobs:
         uses: bahmutov/npm-install@v1
 
       - name: Build
-        run: yarn build
+        run: |
+          pwsh lib/wasm.ps1
+          yarn build
 
       # - name: Publish
       #   run: npm publish --access=public
