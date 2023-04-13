@@ -15,8 +15,8 @@ jobs:
 
       - name: Build
         run: |
-          pwsh lib/wasm.ps1
           pwsh lib/build.ps1
+          pwsh lib/wasm.ps1
 
       - name: Upload common artifacts
         uses: actions/upload-artifact@v3
