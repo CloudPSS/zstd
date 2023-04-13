@@ -62,9 +62,11 @@ jobs:
           name: build-common
 
       - name: Prebuildify for ${{ matrix.os }}
+        shell: pwsh
         run: |
+          yarn prebuildify --arch x86 || $true
+          yarn prebuildify --arch arm64 || $true
           yarn prebuildify --arch x64
-          yarn prebuildify --arch arm64
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
