@@ -1,0 +1,6 @@
+/.*
+/build/
+*.ps1
+/lib/zstd/
+/*.tgz
+

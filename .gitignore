@@ -7,6 +7,7 @@
 /packages/*/*.deb
 /build/
 /prebuilds/
+/*.tgz
 
 # generated files
 *.g.*
