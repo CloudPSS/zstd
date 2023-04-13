@@ -59,6 +59,7 @@ jobs:
 
       - name: Prebuildify
         run: |
+          yarn prebuildify --arch x86 --napi --strip
           yarn prebuildify --arch x64 --napi --strip
 
       - name: Upload prebuild artifacts
