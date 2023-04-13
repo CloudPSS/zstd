@@ -92,9 +92,9 @@ jobs:
       - name: Prebuildify
         run: |
           yarn prebuildify-cross --napi --strip \
-            -i centos7-devtoolset7
-            -i alpine
-            -i linux-arm64
+            -i centos7-devtoolset7 \
+            -i alpine \
+            -i linux-arm64 \
             -i linux-arm64-musl
 
       - name: Upload prebuild artifacts
