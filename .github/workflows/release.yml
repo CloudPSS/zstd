@@ -60,8 +60,8 @@ jobs:
 
       - name: Prebuildify
         run: |
-          yarn prebuildify --arch arm64 --napi --strip$
-          yarn prebuildify --arch x86 --napi --strip
+          yarn prebuildify --arch arm64 --napi --strip
+          yarn prebuildify --arch ia32 --napi --strip
           yarn prebuildify --arch x64 --napi --strip
 
       - name: Upload prebuild artifacts
@@ -93,8 +93,8 @@ jobs:
 
       - name: Prebuildify
         run: |
-          yarn prebuildify-cross --napi --strip --tag-libc glibc -i centos7-devtoolset7
-          yarn prebuildify-cross --napi --strip --tag-libc musl  -i alpine
+          yarn prebuildify-cross --napi --strip -i centos7-devtoolset7
+          yarn prebuildify-cross --napi --strip -i alpine
           yarn prebuildify-cross --napi --strip --tag-libc glibc -i linux-arm64
           yarn prebuildify-cross --napi --strip --tag-libc musl  -i linux-arm64-musl
 
