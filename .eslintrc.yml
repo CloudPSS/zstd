@@ -7,5 +7,3 @@ parserOptions:
   project: true
 overrides:
   - files: tests/**/*
-    rules:
-      '@typescript-eslint/no-unsafe-argument': 0
