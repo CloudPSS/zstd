@@ -5,7 +5,29 @@ on:
     tags: ['*']
 
 jobs:
+  build-common:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Build
+        run: |
+          pwsh lib/wasm.ps1
+          pwsh lib/build.ps1
+
+      - name: Upload common artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-common
+          path: |
+            lib/zstd.c
+            lib/zstd.js
+
   build:
+    needs: build-common
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
@@ -14,8 +36,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
       - uses: actions/setup-node@v3
         with:
@@ -26,14 +46,18 @@ jobs:
         with:
           install-command: yarn install --ignore-scripts --frozen-lockfile
 
+      - name: Download common artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-common
+          path: lib/
+
       - name: Prebuildify for ${{ matrix.os }}
         run: |
-          pwsh lib/build.ps1
-          yarn prebuildify --arch x86
           yarn prebuildify --arch x64
           yarn prebuildify --arch arm64
 
-      - name: Upload artifacts
+      - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
         with:
           name: prebuilds
@@ -49,16 +73,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
       - name: Use Node.js ${{ matrix.node }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
 
+      - name: Download common artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-common
+          path: lib/
+
       - name: Download prebuilt artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: prebuilds
           path: prebuilds/
@@ -78,15 +106,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
       - uses: actions/setup-node@v3
         with:
           node-version: lts/*
 
+      - name: Download common artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-common
+          path: lib/
+
       - name: Download prebuilt artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: prebuilds
           path: prebuilds/
@@ -95,9 +127,7 @@ jobs:
         uses: bahmutov/npm-install@v1
 
       - name: Build
-        run: |
-          pwsh lib/wasm.ps1
-          yarn build
+        run: yarn build
 
       # - name: Publish
       #   run: npm publish --access=public
@@ -105,7 +135,7 @@ jobs:
       #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: pack
-        run: yarn build
+        run: yarn pack
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
