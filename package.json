@@ -6,12 +6,12 @@
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "src/index.ts",
   "exports": {
     ".": {
       "types": {
-        "browser": "./dist/web.d.ts",
-        "default": "./dist/index.js"
+        "browser": "./src/web.ts",
+        "default": "./src/index.ts"
       },
       "browser": "./dist/web.js",
       "default": "./dist/index.js"
@@ -21,6 +21,8 @@
   "scripts": {
     "install": "node-gyp-build",
     "clean": "rimraf dist",
+    "prebuildify": "prebuildify --napi --strip",
+    "build": "yarn clean && tsc",
     "watch": "yarn clean && tsc --watch",
     "prepare": "husky install",
     "format": "prettier --ignore-path .gitignore --write .",
