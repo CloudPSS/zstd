@@ -36,13 +36,9 @@ jobs:
             lib/zstd.js
             dist/
 
-  build:
+  build-windows:
     needs: build-common
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -61,12 +57,76 @@ jobs:
         with:
           name: build-common
 
-      - name: Prebuildify for ${{ matrix.os }}
-        shell: pwsh
+      - name: Prebuildify
         run: |
-          yarn prebuildify --arch x86 || $true
-          yarn prebuildify --arch arm64 || $true
-          yarn prebuildify --arch x64
+          yarn prebuildify --arch x64 --napi --strip
+
+      - name: Upload prebuild artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds/
+
+  build-linux:
+    needs: build-common
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn install --ignore-scripts --frozen-lockfile
+
+      - name: Download common artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-common
+
+      - name: Prebuildify
+        run: |
+          yarn prebuildify-cross --napi --strip \
+            -i centos7-devtoolset7
+            -i alpine
+            -i linux-arm64
+            -i linux-arm64-musl
+
+      - name: Upload prebuild artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds/
+
+  build-macos:
+    needs: build-common
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn install --ignore-scripts --frozen-lockfile
+
+      - name: Download common artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-common
+
+      - name: Prebuildify
+        run: |
+          yarn prebuildify --arch x64 --napi --strip
+          yarn prebuildify --arch arm64 --napi --strip
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
@@ -75,11 +135,11 @@ jobs:
           path: prebuilds/
 
   test:
+    needs: [build-linux, build-macos, build-windows]
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
         node: ['lts/-2', 'lts/-1', 'lts/*', 'latest']
-    needs: build
     runs-on: ${{ matrix.os }}
 
     steps:
