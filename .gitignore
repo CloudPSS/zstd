@@ -8,6 +8,10 @@
 /build/
 /prebuilds/
 /*.tgz
+/lib/zstd_lib.c
+/lib/zstd.js
+/lib/zstd.wasm
+
 
 # generated files
 *.g.*
