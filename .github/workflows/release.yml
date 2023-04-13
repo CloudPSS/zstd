@@ -164,8 +164,6 @@ jobs:
 
       - name: Install
         uses: bahmutov/npm-install@v1
-        env:
-          NODE_ENV: production
 
       - name: Run test with prebuilds
         run: yarn test
@@ -192,6 +190,9 @@ jobs:
         with:
           name: prebuilds
           path: prebuilds/
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
 
       - name: Publish
         run: npm publish --access=public
