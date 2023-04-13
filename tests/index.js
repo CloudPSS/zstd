@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict';
+import assert from 'node:assert';
 import { randomBytes } from 'node:crypto';
 // Add this to make sure the bindings are loaded
 import '../dist/bindings.cjs';
