@@ -24,9 +24,9 @@ jobs:
 
       - name: Build
         run: |
+          yarn build
           pwsh lib/build.ps1
           pwsh lib/build-wasm.ps1
-          yarn build
 
       - name: Upload common artifacts
         uses: actions/upload-artifact@v3
@@ -60,9 +60,9 @@ jobs:
 
       - name: Prebuildify
         run: |
+          yarn prebuildify --arch arm64 --napi --strip$
           yarn prebuildify --arch x86 --napi --strip
           yarn prebuildify --arch x64 --napi --strip
-          yarn prebuildify --arch arm64 --napi --strip
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
@@ -93,11 +93,10 @@ jobs:
 
       - name: Prebuildify
         run: |
-          yarn prebuildify-cross --napi --strip --tag-libc \
-            -i alpine \
-            -i centos7-devtoolset7 \
-            -i linux-arm64 \
-            -i linux-arm64-musl
+          yarn prebuildify-cross --napi --strip --tag-libc glibc -i centos7-devtoolset7
+          yarn prebuildify-cross --napi --strip --tag-libc musl  -i alpine
+          yarn prebuildify-cross --napi --strip --tag-libc glibc -i linux-arm64
+          yarn prebuildify-cross --napi --strip --tag-libc musl  -i linux-arm64-musl
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
