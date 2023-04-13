@@ -1,6 +1,6 @@
 {
   // 如果使用其他版本 TS，使用类似 "extends": "@cloudpss/tsconfig/4.2" 引入
-  "extends": "@cloudpss/tsconfig",
+  "extends": "@cloudpss/tsconfig/strict",
 
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
