@@ -1,0 +1,43 @@
+{
+  "name": "@cloudpss/node-zstd",
+  "version": "0.0.1",
+  "description": "Zstd N-API Addon for Node.js",
+  "author": "OpportunityLiu <opportunity@live.in>",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "watch": "yarn clean && tsc --watch",
+    "prepare": "husky install",
+    "format": "prettier --ignore-path .gitignore --write .",
+    "lint": "eslint --ext .js,.ts ."
+  },
+  "prettier": "@cloudpss/prettier-config",
+  "commitlint": {
+    "extends": "@cloudpss"
+  },
+  "devDependencies": {
+    "@cloudpss/commitlint-config": "^1.3.2",
+    "@cloudpss/eslint-config": "^1.3.2",
+    "@cloudpss/lint-staged-config": "^1.3.2",
+    "@cloudpss/prettier-config": "^1.3.2",
+    "@cloudpss/tsconfig": "^1.3.2",
+    "@types/bindings": "^1.5.1",
+    "husky": "^8.0.3",
+    "node-addon-api": "^6.0.0",
+    "node-gyp": "^9.3.1",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "bindings": "^1.5.0"
+  }
+}

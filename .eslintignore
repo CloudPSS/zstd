@@ -1,0 +1,26 @@
+# compiled output
+/dist/
+/deb-dist/
+/packages/*/dist/
+/packages/*/deb-dist/
+/build/
+
+# 3rd party
+/lib/
+
+# generated files
+*.g.*
+
+# packages
+node_modules/
+.pnp.js
+.pnp/
+
+# config files
+*.config.*
+.*.*
+
+# Tests
+coverage/
+.nyc_output/
+.eslint-report/
