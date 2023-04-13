@@ -62,6 +62,7 @@ jobs:
         run: |
           yarn prebuildify --arch x86 --napi --strip
           yarn prebuildify --arch x64 --napi --strip
+          yarn prebuildify --arch arm64 --napi --strip
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
@@ -92,8 +93,7 @@ jobs:
 
       - name: Prebuildify
         run: |
-          rm -f .gitignore .npmignore
-          yarn prebuildify-cross --napi --strip \
+          yarn prebuildify-cross --napi --strip --tag-libc \
             -i alpine \
             -i centos7-devtoolset7 \
             -i linux-arm64 \
