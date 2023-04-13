@@ -194,16 +194,7 @@ jobs:
       - name: Install
         uses: bahmutov/npm-install@v1
 
-      # - name: Publish
-      #   run: npm publish --access=public
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: pack
-        run: yarn pack
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: pack
-          path: '*.tgz'
+      - name: Publish
+        run: npm publish --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
