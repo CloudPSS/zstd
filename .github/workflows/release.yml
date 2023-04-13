@@ -61,7 +61,6 @@ jobs:
       - name: Prebuildify
         run: |
           yarn prebuildify --arch arm64 --napi --strip
-          yarn prebuildify --arch ia32 --napi --strip
           yarn prebuildify --arch x64 --napi --strip
 
       - name: Upload prebuild artifacts
@@ -179,6 +178,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: lts/*
+          registry-url: https://registry.npmjs.org
 
       - name: Download common artifacts
         uses: actions/download-artifact@v3
