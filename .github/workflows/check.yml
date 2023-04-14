@@ -23,13 +23,13 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: build
+          name: pack
 
       - name: Install
         uses: bahmutov/npm-install@v1
 
       - name: Pack
-        run: yarn Pack
+        run: yarn pack
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
