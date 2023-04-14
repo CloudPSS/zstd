@@ -25,7 +25,6 @@ jobs:
         run: |
           yarn build
           pwsh lib/build.ps1
-          pwsh lib/build-wasm.ps1
 
       - name: Upload common artifacts
         uses: actions/upload-artifact@v3
