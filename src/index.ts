@@ -1,22 +1,24 @@
-let lib: Omit<typeof import('./napi.js'), 'TYPE'> &
-    Pick<typeof import('./napi.js') | typeof import('./wasm.js'), 'TYPE'>;
+import type * as Napi from './napi.js';
+import type * as Wasm from './wasm.js';
 
-try {
-    lib = await import('./napi.js');
-} catch {
-    const { compress, decompress, TYPE } = await import('./wasm.js');
-    lib = {
-        compress: (data, level) => {
-            const result = compress(data, level);
-            return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
-        },
-        decompress: (data) => {
-            const result = decompress(data);
-            return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
-        },
-        TYPE,
-    };
-}
+const lib: Omit<typeof Napi, 'TYPE'> & Pick<typeof Wasm | typeof Napi, 'TYPE'> = await (async () => {
+    try {
+        return await import('./napi.js');
+    } catch {
+        const { compress, decompress, TYPE } = await import('./wasm.js');
+        return {
+            compress: (data, level) => {
+                const result = compress(data, level);
+                return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
+            },
+            decompress: (data) => {
+                const result = decompress(data);
+                return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
+            },
+            TYPE,
+        };
+    }
+})();
 
 /** ZStandard compress */
 export const compress = lib.compress;
