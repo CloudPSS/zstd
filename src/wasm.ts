@@ -4,14 +4,15 @@ import { DEFAULT_LEVEL, MAX_SIZE } from './config.js';
 const Module = await createModule();
 
 /** Convert to buffer */
-function asBuffer(data: ArrayBufferView): Uint8Array {
+function asBuffer(data: unknown): Uint8Array {
+    if (data instanceof ArrayBuffer) return Buffer.from(data);
     if (!ArrayBuffer.isView(data)) throw new Error('data must be an array buffer view');
     if (data instanceof Uint8Array) return data;
     return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
 }
 
-/** 压缩 */
-export function compress(data: ArrayBufferView, level = DEFAULT_LEVEL): Uint8Array {
+/** ZStandard compress */
+export function compress(data: BinaryData, level = DEFAULT_LEVEL): Uint8Array {
     if (!Number.isSafeInteger(level)) throw new Error('level must be an integer');
     const buf = asBuffer(data);
     const bound = Module._ZSTD_compressBound(buf.byteLength);
@@ -42,8 +43,8 @@ export function compress(data: ArrayBufferView, level = DEFAULT_LEVEL): Uint8Arr
 const ZSTD_CONTENTSIZE_ERROR = -2;
 const ZSTD_CONTENTSIZE_UNKNOWN = -1;
 
-/** 解压 */
-export function decompress(data: ArrayBufferView): Uint8Array {
+/** ZStandard decompress */
+export function decompress(data: BinaryData): Uint8Array {
     const buf = asBuffer(data);
     const src = Module._malloc(buf.byteLength);
     Module.HEAP8.set(buf, src);
@@ -78,3 +79,5 @@ export function decompress(data: ArrayBufferView): Uint8Array {
         Module._free(src);
     }
 }
+
+export const TYPE = 'wasm';

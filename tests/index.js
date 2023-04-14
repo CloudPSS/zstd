@@ -1,9 +1,18 @@
 import assert from 'node:assert';
 import { randomBytes } from 'node:crypto';
-// Add this to make sure the bindings are loaded
-import '../dist/bindings.cjs';
-import * as node from '@cloudpss/zstd';
+
+import * as napi from '@cloudpss/zstd/napi';
 import * as wasm from '@cloudpss/zstd/wasm';
+import * as root from '@cloudpss/zstd';
+import * as config from '@cloudpss/zstd/config';
+
+assert.ok(Number.isSafeInteger(config.DEFAULT_LEVEL));
+assert.ok(Number.isSafeInteger(config.MAX_SIZE));
+assert.match(config.ZSTD_VERSION, /^v\d+\.\d+\.\d+$/);
+
+assert.strictEqual(napi.TYPE, 'napi');
+assert.strictEqual(wasm.TYPE, 'wasm');
+assert.strictEqual(root.TYPE, 'napi');
 
 const testBuffer1 = randomBytes(1000);
 const testBuffer2 = Buffer.alloc(1000);
@@ -22,20 +31,20 @@ function assertBufferEqual(a, b) {
     }
 }
 
-assertBufferEqual(node.compress(testBuffer1), wasm.compress(testBuffer1));
-assertBufferEqual(node.compress(testBuffer2), wasm.compress(testBuffer2));
+assertBufferEqual(napi.compress(testBuffer1), wasm.compress(testBuffer1));
+assertBufferEqual(napi.compress(testBuffer2), wasm.compress(testBuffer2));
 
-assertBufferEqual(node.decompress(node.compress(testBuffer1)), testBuffer1);
-assertBufferEqual(node.decompress(node.compress(testBuffer2)), testBuffer2);
+assertBufferEqual(napi.decompress(napi.compress(testBuffer1)), testBuffer1);
+assertBufferEqual(napi.decompress(napi.compress(testBuffer2)), testBuffer2);
 
 assertBufferEqual(wasm.decompress(wasm.compress(testBuffer1)), testBuffer1);
 assertBufferEqual(wasm.decompress(wasm.compress(testBuffer2)), testBuffer2);
 
-assertBufferEqual(node.decompress(wasm.compress(testBuffer1)), testBuffer1);
-assertBufferEqual(node.decompress(wasm.compress(testBuffer2)), testBuffer2);
+assertBufferEqual(napi.decompress(wasm.compress(testBuffer1)), testBuffer1);
+assertBufferEqual(napi.decompress(wasm.compress(testBuffer2)), testBuffer2);
 
-assertBufferEqual(wasm.decompress(node.compress(testBuffer1)), testBuffer1);
-assertBufferEqual(wasm.decompress(node.compress(testBuffer2)), testBuffer2);
+assertBufferEqual(wasm.decompress(napi.compress(testBuffer1)), testBuffer1);
+assertBufferEqual(wasm.decompress(napi.compress(testBuffer2)), testBuffer2);
 
-assertBufferEqual(node.decompress(node.compress(testBuffer3)), testBuffer2);
+assertBufferEqual(napi.decompress(napi.compress(testBuffer3)), testBuffer2);
 assertBufferEqual(wasm.decompress(wasm.compress(testBuffer3)), testBuffer2);
