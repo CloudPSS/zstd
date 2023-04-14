@@ -36,6 +36,7 @@ jobs:
             dist/
 
   build-wasm:
+    needs: build-common
     runs-on: ubuntu-latest
 
     steps:
