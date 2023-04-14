@@ -3,4 +3,5 @@
 *.ps1
 /lib/zstd/
 /*.tgz
-
+/tests/
+tsconfig.json
