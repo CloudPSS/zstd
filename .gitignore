@@ -6,11 +6,10 @@
 /*.deb
 /packages/*/*.deb
 /build/
-/prebuilds/
+/prebuilds/**/*.node
+/prebuilds/**/*.js
 /*.tgz
 /lib/zstd.c
-/lib/zstd.js
-/lib/zstd.wasm
 
 
 # generated files
