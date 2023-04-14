@@ -1,8 +1,9 @@
-name: release
+name: check
 
 on:
   push:
-    tags: ['*']
+    branches: ['*']
+  pull_request:
 
 jobs:
   build:
@@ -18,7 +19,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: lts/*
-          registry-url: https://registry.npmjs.org
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -26,7 +26,11 @@ jobs:
       - name: Install
         uses: bahmutov/npm-install@v1
 
-      - name: Publish
-        run: npm publish --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Pack
+        run: yarn Pack
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: '*.tgz'

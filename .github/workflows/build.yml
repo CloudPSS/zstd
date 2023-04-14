@@ -1,0 +1,211 @@
+name: build
+
+on:
+  workflow_call:
+
+jobs:
+  build-common:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn install --ignore-scripts --frozen-lockfile
+
+      - name: Build
+        run: |
+          yarn build
+          pwsh lib/build.ps1
+          pwsh lib/build-wasm.ps1
+
+      - name: Upload common artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-common
+          path: |
+            lib/zstd.c
+            dist/
+
+  build-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn install --ignore-scripts --frozen-lockfile
+
+      - name: Download common artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-common
+
+      - name: Build wasm
+        run: pwsh lib/build-wasm.ps1
+
+      - name: Upload prebuild artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-common
+          path: lib/zstd.js
+
+  build-windows:
+    needs: build-common
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn install --ignore-scripts --frozen-lockfile
+
+      - name: Download common artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-common
+
+      - name: Prebuildify
+        run: |
+          yarn prebuildify --arch arm64 --napi --strip
+          yarn prebuildify --arch x64 --napi --strip
+
+      - name: Upload prebuild artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds/
+
+  build-linux:
+    needs: build-common
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn install --ignore-scripts --frozen-lockfile
+
+      - name: Download common artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-common
+
+      - name: Prebuildify
+        run: |
+          yarn prebuildify-cross --napi --strip -i centos7-devtoolset7
+          yarn prebuildify-cross --napi --strip -i alpine
+          yarn prebuildify-cross --napi --strip --tag-libc glibc -i linux-arm64
+          yarn prebuildify-cross --napi --strip --tag-libc musl  -i linux-arm64-musl
+
+      - name: Upload prebuild artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds/
+
+  build-macos:
+    needs: build-common
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
+        with:
+          install-command: yarn install --ignore-scripts --frozen-lockfile
+
+      - name: Download common artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-common
+
+      - name: Prebuildify
+        run: |
+          yarn prebuildify --arch x64 --napi --strip
+          yarn prebuildify --arch arm64 --napi --strip
+
+      - name: Upload prebuild artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds/
+
+  test:
+    needs: [build-linux, build-macos, build-windows, build-wasm]
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        node: ['lts/-2', 'lts/-1', 'lts/*', 'latest']
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
+
+      - name: Run test with prebuilds
+        run: yarn test
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Install
+        uses: bahmutov/npm-install@v1
+
+      - name: Publish
+        run: npm publish --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
