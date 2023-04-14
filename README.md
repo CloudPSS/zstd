@@ -1,5 +1,7 @@
 # @cloudpss/zstd
 
+[![check](https://img.shields.io/github/actions/workflow/status/CloudPSS/zstd/check.yml?event=push&logo=github)](https://github.com/CloudPSS/zstd/actions/workflows/check.yml) [![npm version](https://img.shields.io/npm/v/@cloudpss/zstd?logo=npm)](https://npmjs.org/package/@cloudpss/zstd)
+
 This is a [pure esm package](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) contains the [zstd](http://github.com/facebook/zstd) n-api addon for node.js & wasm for browsers.
 
 ## Installation
