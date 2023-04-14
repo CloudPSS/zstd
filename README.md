@@ -28,35 +28,35 @@ To explicitly use the wasm or the n-api version, import `@cloudpss/zstd/wasm` an
 
 ## API
 
-### `@cloudpss/zstd` / `@cloudpss/zstd/wasm` / `@cloudpss/zstd/napi`
+### Module `@cloudpss/zstd` / `@cloudpss/zstd/wasm` / `@cloudpss/zstd/napi`
+
+Notice: If you are using this library in a browser, the `Buffer` classes is replaced with `Uint8Array` classes.
 
 #### `compress(input: BinaryData, level?: number): Buffer`
 
-Compresses the input buffer with the given compression level (default: 4).
+> Compresses the input buffer with the given compression level (default: 4).
 
 #### `decompress(input: BinaryData): Buffer`
 
-Decompresses the input buffer.
+> Decompresses the input buffer.
 
 #### `TYPE: 'napi' | 'wasm'`
 
-The type of the current module.
+> The type of the current module.
 
-> Notice: If you are using this library in a browser, the `Buffer` classes is replaced with `Uint8Array` classes.
-
-### `@cloudpss/zstd/config`
+### Module `@cloudpss/zstd/config`
 
 #### `ZSTD_VERSION: string`
 
-The version of the zstd library.
+> The version of the zstd library.
 
 #### `MAX_SIZE: number`
 
-The maximum size of the input/output buffer.
+> The maximum size of the input/output buffer.
 
 #### `DEFAULT_LEVEL: number`
 
-The default compression level.
+> The default compression level.
 
 ## License
 
