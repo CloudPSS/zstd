@@ -3,6 +3,7 @@
  * https://jestjs.io/docs/configuration
  */
 
+/** @type {import('jest').Config} */
 export default {
     // All imported modules in your tests should be mocked automatically
     // automock: false,
@@ -40,7 +41,14 @@ export default {
     // ],
 
     // An object that configures minimum threshold enforcement for coverage results
-    // coverageThreshold: undefined,
+    coverageThreshold: {
+        global: {
+            functions: 100,
+            branches: 85,
+            lines: 90,
+            statements: 90,
+        },
+    },
 
     // A path to a custom dependency extractor
     // dependencyExtractor: undefined,
