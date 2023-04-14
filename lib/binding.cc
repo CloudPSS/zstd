@@ -67,17 +67,17 @@ Napi::Value decompress(const Napi::CallbackInfo &info)
   auto outSize = ZSTD_getFrameContentSize(inBuffer.Data(), inBuffer.Length());
   if (outSize == ZSTD_CONTENTSIZE_ERROR)
   {
-    Napi::Error::New(env, "Invalid frame").ThrowAsJavaScriptException();
+    Napi::Error::New(env, "Invalid compressed data").ThrowAsJavaScriptException();
     return env.Null();
   }
   if (outSize == ZSTD_CONTENTSIZE_UNKNOWN)
   {
-    Napi::Error::New(env, "Unknown frame size").ThrowAsJavaScriptException();
+    Napi::Error::New(env, "Unknown content size").ThrowAsJavaScriptException();
     return env.Null();
   }
   if (outSize > (uint64_t)maxSize)
   {
-    Napi::Error::New(env, "Frame size is too large")
+    Napi::Error::New(env, "Content size is too large")
         .ThrowAsJavaScriptException();
     return env.Null();
   }
