@@ -162,8 +162,35 @@ jobs:
           name: prebuilds
           path: prebuilds/
 
+  pack:
+    needs: [build-common, build-linux, build-macos, build-windows, build-wasm]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download common artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-common
+
+      - name: Download prebuilt artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: pack
+          path: |
+            lib/zstd.c
+            prebuilds/
+            dist/
+
   test:
-    needs: [build-linux, build-macos, build-windows, build-wasm]
+    needs: pack
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
@@ -178,53 +205,13 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Download common artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: build-common
-
-      - name: Download prebuilt artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: prebuilds
-          path: prebuilds/
+          name: pack
 
       - name: Install
         uses: bahmutov/npm-install@v1
 
       - name: Run test with prebuilds
         run: yarn test
-
-  publish:
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-
-      - name: Download common artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: build-common
-
-      - name: Download prebuilt artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: prebuilds
-          path: prebuilds/
-
-      - name: Install
-        uses: bahmutov/npm-install@v1
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build
-          path: |
-            ./
-            !.*
-            !node_modules

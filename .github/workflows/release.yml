@@ -23,7 +23,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: build
+          name: pack
 
       - name: Install
         uses: bahmutov/npm-install@v1
