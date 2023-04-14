@@ -1,8 +1,8 @@
 
-Push-Location "$PSScriptRoot"
+Push-Location "$PSScriptRoot/.."
 
 docker run --rm -v ${PWD}:/src emscripten/emsdk `
-  emcc ./zstd.c -o ./zstd.js `
+  emcc ./lib/zstd.c -o ./prebuilds/zstd.js `
   -flto --closure 1 -O3 `
   --memory-init-file 0 `
   -s EXPORTED_FUNCTIONS="['_ZSTD_isError', '_ZSTD_getFrameContentSize', '_ZSTD_decompress', '_ZSTD_compress', '_ZSTD_compressBound', '_malloc', '_free']" `

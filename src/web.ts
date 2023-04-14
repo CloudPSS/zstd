@@ -1,4 +1,4 @@
-import createModule from '../lib/zstd.js';
+import createModule from '../prebuilds/zstd.js';
 import { DEFAULT_LEVEL, MAX_SIZE } from './config.js';
 
 const Module = await createModule();

@@ -61,8 +61,8 @@ jobs:
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-common
-          path: lib/zstd.js
+          name: prebuilds
+          path: prebuilds/zstd.js
 
   build-windows:
     needs: build-common
@@ -178,8 +178,16 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Download artifacts
+      - name: Download common artifacts
         uses: actions/download-artifact@v3
+        with:
+          name: build-common
+
+      - name: Download prebuilt artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds/
 
       - name: Install
         uses: bahmutov/npm-install@v1
@@ -197,15 +205,26 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: lts/*
-          registry-url: https://registry.npmjs.org
 
-      - name: Download artifacts
+      - name: Download common artifacts
         uses: actions/download-artifact@v3
+        with:
+          name: build-common
+
+      - name: Download prebuilt artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds/
 
       - name: Install
         uses: bahmutov/npm-install@v1
 
-      - name: Publish
-        run: npm publish --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: |
+            ./
+            !.*
+            !node_modules
