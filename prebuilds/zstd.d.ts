@@ -15,4 +15,3 @@ type Module = {
     _free(ptr: Ptr): void;
 };
 export default function createModule(): Promise<Module>;
-export const VERSION: string;
