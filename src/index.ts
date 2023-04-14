@@ -1,48 +1,27 @@
-import { DEFAULT_LEVEL, MAX_SIZE } from './config.js';
-
-let lib: typeof import('./index.js');
-
-/** Convert to buffer */
-function asBuffer(data: ArrayBufferView): Buffer {
-    if (!ArrayBuffer.isView(data)) throw new Error('data must be an array buffer view');
-    if (Buffer.isBuffer(data)) return data;
-    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
-}
+let lib: Omit<typeof import('./napi.js'), 'TYPE'> &
+    Pick<typeof import('./napi.js') | typeof import('./wasm.js'), 'TYPE'>;
 
 try {
-    const napi = (await import('./bindings.cjs')).default;
-    lib = {
-        compress: (data, level = DEFAULT_LEVEL) => {
-            if (!Number.isSafeInteger(level)) throw new Error('level must be an integer');
-            const buf = asBuffer(data);
-            if (data.byteLength > MAX_SIZE) throw new Error(`Input data is too large`);
-            return napi.compress(buf, level);
-        },
-        decompress: (data) => {
-            const buf = asBuffer(data);
-            return napi.decompress(buf, MAX_SIZE);
-        },
-    };
+    lib = await import('./napi.js');
 } catch {
-    const wasm = await import('./web.js');
+    const { compress, decompress, TYPE } = await import('./wasm.js');
     lib = {
-        compress: (data, level = DEFAULT_LEVEL) => {
-            const result = wasm.compress(data, level);
+        compress: (data, level) => {
+            const result = compress(data, level);
             return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
         },
         decompress: (data) => {
-            const result = wasm.decompress(data);
+            const result = decompress(data);
             return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
         },
+        TYPE,
     };
 }
 
-/** 压缩 */
-export function compress(data: ArrayBufferView, level = DEFAULT_LEVEL): Buffer {
-    return lib.compress(data, level);
-}
+/** ZStandard compress */
+export const compress = lib.compress;
 
-/** 解压缩 */
-export function decompress(data: ArrayBufferView): Buffer {
-    return lib.decompress(data);
-}
+/** ZStandard decompress */
+export const decompress = lib.decompress;
+
+export const TYPE: typeof import('./napi.js').TYPE | typeof import('./wasm.js').TYPE = lib.TYPE;

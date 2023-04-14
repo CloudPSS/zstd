@@ -23,28 +23,40 @@
   },
   "type": "module",
   "main": "dist/index.js",
-  "types": "src/index.ts",
+  "types": "dist/index.d.ts",
   "browser": "dist/web.js",
   "exports": {
     ".": {
       "types": {
-        "browser": "./src/web.ts",
-        "default": "./src/index.ts"
+        "browser": "./dist/wasm.d.ts",
+        "default": "./dist/index.d.ts"
       },
-      "browser": "./dist/web.js",
+      "browser": "./dist/wasm.js",
       "default": "./dist/index.js"
     },
     "./wasm": {
-      "types": "./src/web.ts",
-      "default": "./dist/web.js"
+      "types": "./dist/wasm.d.ts",
+      "default": "./dist/wasm.js"
+    },
+    "./napi": {
+      "types": "./dist/napi.d.ts",
+      "default": "./dist/napi.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "default": "./dist/config.js"
     },
     "./package.json": "./package.json"
   },
   "scripts": {
     "install": "node-gyp-build",
     "clean": "rimraf dist",
-    "clean:gyp": "rimraf build prebuilds",
+    "clean:gyp": "rimraf build prebuilds/*/*.node",
+    "clean:wasm": "rimraf prebuilds/zstd.js",
     "build": "yarn clean && tsc",
+    "build:deps": "pwsh lib/build.ps1",
+    "build:gyp": "prebuildify --napi --strip",
+    "build:wasm": "pwsh lib/build-wasm.ps1",
     "watch": "yarn clean && tsc --watch",
     "test": "node ./tests/index.js",
     "prepare": "husky install",

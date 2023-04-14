@@ -19,13 +19,15 @@ const decompressed = decompress(compressed);
 console.log(decompressed.toString()); // Hello World!
 ```
 
+To explicitly use the wasm or the n-api version, import `@cloudpss/zstd/wasm` and `@cloudpss/zstd/napi` respectively.
+
 ## API
 
-### `compress(input: ArrayBufferView, level?: number): Buffer`
+### `compress(input: BinaryData, level?: number): Buffer`
 
 Compresses the input buffer with the given compression level (default: 4).
 
-### `decompress(input: ArrayBufferView): Buffer`
+### `decompress(input: BinaryData): Buffer`
 
 Decompresses the input buffer.
 
