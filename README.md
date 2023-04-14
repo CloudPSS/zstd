@@ -34,3 +34,7 @@ Compresses the input buffer with the given compression level (default: 4).
 Decompresses the input buffer.
 
 > Notice: If you are using this library in a browser, the `Buffer` classes is replaced with `Uint8Array` classes.
+
+## License
+
+MIT
