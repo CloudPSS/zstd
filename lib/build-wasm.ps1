@@ -1,16 +1,20 @@
 
 Push-Location "$PSScriptRoot/.."
 
+$DEBUG = $false
+
 docker run --rm -v ${PWD}:/src emscripten/emsdk `
   emcc ./lib/zstd.c -o ./prebuilds/zstd.js `
-  -flto --closure 1 -O3 `
   --memory-init-file 0 `
-  -s EXPORTED_FUNCTIONS="['_ZSTD_isError', '_ZSTD_getFrameContentSize', '_ZSTD_decompress', '_ZSTD_compress', '_ZSTD_compressBound', '_malloc', '_free']" `
-  -s FILESYSTEM=0 `
-  -s ALLOW_MEMORY_GROWTH=1 `
-  -s SINGLE_FILE=1 `
-  -s INCOMING_MODULE_JS_API="[]" `
-  -s ENVIRONMENT="web,worker" `
-  -s EXPORT_ES6
+  -sSTRICT `
+  -sMALLOC=emmalloc `
+  -sEXPORTED_FUNCTIONS="['_ZSTD_isError', '_ZSTD_getFrameContentSize', '_ZSTD_decompress', '_ZSTD_compress', '_ZSTD_compressBound', '_malloc', '_free']" `
+  -sFILESYSTEM=0 `
+  -sALLOW_MEMORY_GROWTH=1 `
+  -sSINGLE_FILE=1 `
+  -sINCOMING_MODULE_JS_API="[]" `
+  -sMODULARIZE `
+  -sEXPORT_ES6 `
+$(if ($DEBUG) { "-O1", "-g3", "-sASSERTIONS=1" } else { "-flto", "-O3", "--closure", "1" } )
 
 Pop-Location
