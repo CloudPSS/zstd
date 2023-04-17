@@ -58,7 +58,7 @@
     "build:gyp": "prebuildify --napi --strip",
     "build:wasm": "pwsh lib/build-wasm.ps1",
     "watch": "yarn clean && tsc --watch",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "cross-env \"NODE_OPTIONS=$NODE_OPTIONS --experimental-vm-modules\" jest",
     "prepare": "husky install",
     "format": "prettier --ignore-path .gitignore --write .",
     "lint": "eslint --ext .js,.ts ."

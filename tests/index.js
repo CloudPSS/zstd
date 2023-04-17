@@ -208,6 +208,18 @@ describe('should reject bad level', () => {
     });
 });
 
+describe('should accept huge input', () => {
+    it('napi', () => {
+        const hugeBuffer = Buffer.alloc(2 * 1024 * 1024 * 1024);
+        expect(napi.compress(hugeBuffer)).toBeDefined();
+    });
+    it('wasm', () => {
+        // For wasm, the max heap size is 2GB, so we can only allocate 1GB for input
+        const hugeBuffer = Buffer.alloc(0.95 * 1024 * 1024 * 1024);
+        expect(wasm.compress(hugeBuffer)).toBeDefined();
+    });
+});
+
 describe('should reject huge input', () => {
     const bufferOf3GB = Buffer.alloc(3 * 1024 * 1024 * 1024);
     /** will decompress to 3147483645 bytes */
@@ -221,6 +233,8 @@ describe('should reject huge input', () => {
         expect(() => napi.decompress(compressed3GB)).toThrow(`Content size is too large`);
     });
     it('wasm', () => {
+        const hugeBuffer = Buffer.alloc(1 * 1024 * 1024 * 1024);
+        expect(() => wasm.compress(hugeBuffer)).toThrow(`Failed to allocate memory`);
         expect(() => wasm.compress(bufferOf3GB)).toThrow(`Input data is too large`);
         expect(() => wasm.decompress(bufferOf3GB)).toThrow(`Input data is too large`);
         expect(() => wasm.decompress(compressed3GB)).toThrow(`Content size is too large: ${compressed3GBSize}`);
