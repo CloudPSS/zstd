@@ -11,11 +11,9 @@ const emptyFloat64Array = new Float64Array(1000 / 8);
 const emptyDataView = new DataView(emptyFloat64Array.buffer);
 
 /**
- * 转换 buffer
- *
- * @param {ArrayBufferView} data 数据
+ * convert to buffer
  */
-function asBuffer(data) {
+function asBuffer(data: ArrayBufferView): Buffer {
     return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
 }
 
