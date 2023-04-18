@@ -21,15 +21,13 @@ function uint(value: number): number {
     return value;
 }
 
-/** Finalize */
-type Finalizer = () => void;
 /** Helper class */
 class Helper {
     /** Warp malloc to throw error */
     malloc(size: number): Ptr {
         const ptr = Module._malloc(size);
         if (ptr === 0) throw new Error('Failed to allocate memory');
-        this.finalizers.push(() => Module._free(ptr));
+        this.allocated.push(ptr);
         return ptr;
     }
 
@@ -46,13 +44,13 @@ class Helper {
         return new Uint8Array(Module.HEAPU8.buffer, ptr, size).slice();
     }
 
-    private finalizers: Finalizer[] = [];
+    private allocated: Ptr[] = [];
     /** finalize */
     finalize(): void {
-        for (const fn of this.finalizers) {
-            fn();
+        for (const ptr of this.allocated) {
+            Module._free(ptr);
         }
-        this.finalizers = [];
+        this.allocated = [];
     }
 }
 
