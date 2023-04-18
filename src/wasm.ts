@@ -54,6 +54,13 @@ class Helper {
     }
 }
 
+/** check zstd error */
+function checkError(code: number): void {
+    if (Module._ZSTD_isError(code)) {
+        throw new Error(`Zstd failed with code ${code}`);
+    }
+}
+
 /** ZStandard compress */
 export function compress(data: BinaryData, level = DEFAULT_LEVEL): Uint8Array {
     if (!Number.isSafeInteger(level)) throw new Error('level must be an integer');
@@ -66,9 +73,7 @@ export function compress(data: BinaryData, level = DEFAULT_LEVEL): Uint8Array {
         const dst = h.malloc(dstSize);
         /* @See https://facebook.github.io/zstd/zstd_manual.html#Chapter3 */
         const sizeOrError = Module._ZSTD_compress(dst, dstSize, src, buf.byteLength, level);
-        if (Module._ZSTD_isError(sizeOrError)) {
-            throw new Error(`Failed to compress with code ${sizeOrError}`);
-        }
+        checkError(sizeOrError);
         return h.fromHeap(dst, uint(sizeOrError));
     } finally {
         h.finalize();
@@ -98,9 +103,7 @@ export function decompress(data: BinaryData): Uint8Array {
         const dst = h.malloc(contentSize);
         /* @See https://facebook.github.io/zstd/zstd_manual.html#Chapter3 */
         const sizeOrError = Module._ZSTD_decompress(dst, contentSize, src, buf.byteLength);
-        if (Module._ZSTD_isError(sizeOrError)) {
-            throw new Error(`Failed to decompress with code ${sizeOrError}`);
-        }
+        checkError(sizeOrError);
         return h.fromHeap(dst, uint(sizeOrError));
     } finally {
         h.finalize();

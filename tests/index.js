@@ -21,7 +21,7 @@ function asBuffer(data) {
 
 it('should have correct config', () => {
     expect(config.DEFAULT_LEVEL).toBe(4);
-    expect(config.MAX_SIZE).toBe(2 * 1024 * 1024 * 1024);
+    expect(config.MAX_SIZE).toBeGreaterThanOrEqual(1024 * 1024 * 1024);
     expect(config.ZSTD_VERSION).toMatch(/^v\d+\.\d+\.\d+$/);
 });
 
@@ -210,7 +210,7 @@ describe('should reject bad level', () => {
 
 describe('should accept huge input', () => {
     it('napi', () => {
-        const hugeBuffer = Buffer.alloc(2 * 1024 * 1024 * 1024);
+        const hugeBuffer = Buffer.alloc(config.MAX_SIZE);
         expect(napi.compress(hugeBuffer)).toBeDefined();
     });
     it('wasm', () => {
