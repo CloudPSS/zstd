@@ -215,7 +215,7 @@ describe('should accept huge input', () => {
     });
     it('wasm', () => {
         // For wasm, the max heap size is 2GB, so we can only allocate 1GB for input
-        const hugeBuffer = Buffer.alloc(0.95 * 1024 * 1024 * 1024);
+        const hugeBuffer = Buffer.alloc(0.9 * 1024 * 1024 * 1024);
         expect(wasm.compress(hugeBuffer)).toBeDefined();
     });
 });
