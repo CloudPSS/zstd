@@ -1,7 +1,6 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "NodeNext",
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
