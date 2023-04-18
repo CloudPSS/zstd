@@ -22,13 +22,18 @@ function asBuffer(data) {
 it('should have correct config', () => {
     expect(config.DEFAULT_LEVEL).toBe(4);
     expect(config.MAX_SIZE).toBeGreaterThanOrEqual(1024 * 1024 * 1024);
-    expect(config.ZSTD_VERSION).toMatch(/^v\d+\.\d+\.\d+$/);
 });
 
 it('should have correct TYPE', () => {
     expect(napi.TYPE).toBe('napi');
     expect(wasm.TYPE).toBe('wasm');
     expect(root.TYPE).toBe('napi');
+});
+
+it('should have correct VERSION', () => {
+    expect(napi.ZSTD_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(wasm.ZSTD_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(root.ZSTD_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
 });
 
 test('napi api should return buffer', () => {
@@ -214,8 +219,8 @@ describe('should accept huge input', () => {
         expect(napi.compress(hugeBuffer)).toBeDefined();
     });
     it('wasm', () => {
-        // For wasm, the max heap size is 2GB, so we can only allocate 1GB for input
-        const hugeBuffer = Buffer.alloc(0.9 * 1024 * 1024 * 1024);
+        // For wasm, the max heap size is 2GB, so we can only allocate 0.8GB for input
+        const hugeBuffer = Buffer.alloc(0.8 * 1024 * 1024 * 1024);
         expect(wasm.compress(hugeBuffer)).toBeDefined();
     });
 });

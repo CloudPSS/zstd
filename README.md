@@ -44,11 +44,11 @@ Decompresses the input buffer.
 
 The type of the current module.
 
-### Module `@cloudpss/zstd/config`
-
 #### `ZSTD_VERSION: string`
 
 The version of the zstd library.
+
+### Module `@cloudpss/zstd/config`
 
 #### `MAX_SIZE: number`
 
