@@ -110,4 +110,11 @@ export function decompress(data: BinaryData): Uint8Array {
     }
 }
 
+// MAJOR * 10000 + MINOR * 100 + PATCH to MAJOR.MINOR.PATCH
+const ZSTD_VERSION_NUMBER = Module._ZSTD_versionNumber();
+const ZSTD_MAJOR = Math.floor(ZSTD_VERSION_NUMBER / 10000);
+const ZSTD_MINOR = Math.floor((ZSTD_VERSION_NUMBER % 10000) / 100);
+const ZSTD_PATCH = ZSTD_VERSION_NUMBER % 100;
+export const ZSTD_VERSION = `${ZSTD_MAJOR}.${ZSTD_MINOR}.${ZSTD_PATCH}`;
+
 export const TYPE = 'wasm';

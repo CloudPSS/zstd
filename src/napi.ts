@@ -3,12 +3,14 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { DEFAULT_LEVEL, MAX_SIZE } from './config.js';
 
-/** node 模块 */
+/** node bindings */
 interface Binding {
-    /** 压缩 */
+    /** compress */
     compress(data: Buffer, level: number): Buffer;
-    /** 解压缩 */
+    /** decompress */
     decompress(data: Buffer, maxSize: number): Buffer;
+    /** Get zstd version */
+    version(): string;
 }
 const require = createRequire(import.meta.url);
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), './../');
@@ -37,5 +39,7 @@ export function decompress(data: BinaryData): Buffer {
     if (buf.byteLength > MAX_SIZE) throw new Error(`Input data is too large`);
     return bindings.decompress(buf, MAX_SIZE);
 }
+
+export const ZSTD_VERSION = bindings.version();
 
 export const TYPE = 'napi';

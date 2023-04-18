@@ -6,6 +6,7 @@ type Module = {
     readonly HEAP8: Int8Array;
     readonly HEAPU8: Uint8Array;
 
+    _ZSTD_versionNumber(): number;
     _ZSTD_isError(code: number): number;
     _ZSTD_compressBound(size: number): number;
     _ZSTD_compress(outPtr: Ptr, outSize: number, inPtr: Ptr, inSize: number, level: number): number;

@@ -8,7 +8,7 @@ docker run --rm -v ${PWD}:/src emscripten/emsdk `
   --memory-init-file 0 `
   -sSTRICT `
   -sMALLOC=emmalloc `
-  -sEXPORTED_FUNCTIONS="['_ZSTD_isError', '_ZSTD_getFrameContentSize', '_ZSTD_decompress', '_ZSTD_compress', '_ZSTD_compressBound', '_malloc', '_free']" `
+  -sEXPORTED_FUNCTIONS="['_ZSTD_versionNumber', '_ZSTD_isError', '_ZSTD_getFrameContentSize', '_ZSTD_decompress', '_ZSTD_compress', '_ZSTD_compressBound', '_malloc', '_free']" `
   -sFILESYSTEM=0 `
   -sALLOW_MEMORY_GROWTH=1 `
   -sSINGLE_FILE=1 `

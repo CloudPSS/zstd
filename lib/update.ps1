@@ -9,6 +9,4 @@ Write-Output "Latest zstd version: $latest"
 
 git checkout "tags/$latest"
 
-"export const ZSTD_VERSION = '$latest';" > "$PSScriptRoot/../src/version.ts"
-
 Pop-Location
