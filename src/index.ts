@@ -1,4 +1,4 @@
-let lib: Omit<typeof import('./napi.js'), 'TYPE'> &
+let lib: Omit<typeof import('./napi.js'), 'TYPE' | `_${string}`> &
     Pick<typeof import('./napi.js') | typeof import('./wasm.js'), 'TYPE'>;
 
 try {
@@ -25,5 +25,5 @@ export const compress = lib.compress;
 /** ZStandard decompress */
 export const decompress = lib.decompress;
 
-export const TYPE: typeof lib.TYPE = lib.TYPE;
+export const TYPE: typeof import('./napi.js')['TYPE'] | typeof import('./wasm.js')['TYPE'] = lib.TYPE;
 export const ZSTD_VERSION = lib.ZSTD_VERSION;
