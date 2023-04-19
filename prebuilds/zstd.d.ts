@@ -1,7 +1,5 @@
 /* eslint-disable jsdoc/require-jsdoc */
-
-import { Opaque } from 'type-fest';
-type Ptr = Opaque<number, 'void*'>;
+type Ptr = number & { ptr: 'void*' };
 type Module = {
     readonly HEAP8: Int8Array;
     readonly HEAPU8: Uint8Array;
@@ -14,5 +12,6 @@ type Module = {
     _ZSTD_decompress(outPtr: Ptr, outSize: number, inPtr: Ptr, inSize: number): number;
     _malloc(size: number): Ptr;
     _free(ptr: Ptr): void;
+    _usedmem(): number;
 };
 export default function createModule(): Promise<Module>;

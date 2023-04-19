@@ -56,6 +56,7 @@
     "build": "yarn clean && tsc",
     "build:deps": "pwsh lib/build.ps1",
     "build:gyp": "prebuildify --napi --strip",
+    "build:gyp-cross": "prebuildify-cross --napi --strip",
     "build:wasm": "pwsh lib/build-wasm.ps1",
     "watch": "yarn clean && tsc --watch",
     "test": "cross-env \"NODE_OPTIONS=$NODE_OPTIONS --experimental-vm-modules\" jest",
