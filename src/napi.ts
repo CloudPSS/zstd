@@ -43,3 +43,5 @@ export function decompress(data: BinaryData): Buffer {
 export const ZSTD_VERSION = bindings.version();
 
 export const TYPE = 'napi';
+
+export const _NapiBindings = bindings;

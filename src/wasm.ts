@@ -118,3 +118,5 @@ const ZSTD_PATCH = ZSTD_VERSION_NUMBER % 100;
 export const ZSTD_VERSION = `${ZSTD_MAJOR}.${ZSTD_MINOR}.${ZSTD_PATCH}`;
 
 export const TYPE = 'wasm';
+
+export const _WasmModule = Module;
