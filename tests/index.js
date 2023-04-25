@@ -12,7 +12,6 @@ const emptyDataView = new DataView(emptyFloat64Array.buffer);
 
 /**
  * 转换 buffer
- *
  * @param {ArrayBufferView} data 数据
  */
 function asBuffer(data) {
@@ -193,6 +192,7 @@ describe('should reject bad level', () => {
         // @ts-expect-error ts(2345)
         expect(() => napi.compress(emptyBuffer, null)).toThrow();
         // @ts-expect-error ts(2345)
+        // eslint-disable-next-line unicorn/new-for-builtins
         expect(() => napi.compress(emptyBuffer, new Number(1))).toThrow();
         // @ts-expect-error ts(2345)
         expect(() => napi.compress(emptyBuffer, true)).toThrow();
@@ -207,6 +207,7 @@ describe('should reject bad level', () => {
         // @ts-expect-error ts(2345)
         expect(() => wasm.compress(emptyBuffer, null)).toThrow();
         // @ts-expect-error ts(2345)
+        // eslint-disable-next-line unicorn/new-for-builtins
         expect(() => wasm.compress(emptyBuffer, new Number(1))).toThrow();
         // @ts-expect-error ts(2345)
         expect(() => wasm.compress(emptyBuffer, true)).toThrow();
@@ -228,10 +229,8 @@ describe('should accept huge input', () => {
 describe('should reject huge input', () => {
     const bufferOf3GB = Buffer.alloc(3 * 1024 * 1024 * 1024);
     /** will decompress to 3147483645 bytes */
-    const compressed3GBSize = 3147483645;
-    const compressed3GB = root.decompress(
-        Buffer.from('KLUv/aBLdwEAPQEA+Ci1L/2AWP3JmrtUAAAQAAABAPv/OcACAgAQAOtPBgABAKfcnbsx', 'base64'),
-    );
+    const compressed3GBSize = 3_147_483_645;
+    const compressed3GB = root.decompress(Buffer.from('KLUv/aBLdwEAPQEA+Ci1L/2AWP3JmrtUAAAQAAABAPv/OcACAgAQAOtPBgABAKfcnbsx', 'base64'));
     it('napi', () => {
         expect(() => napi.compress(bufferOf3GB)).toThrow(`Input data is too large`);
         expect(() => napi.decompress(bufferOf3GB)).toThrow(`Input data is too large`);
@@ -249,10 +248,10 @@ describe('should reject huge input', () => {
 describe('should accept rle first block', () => {
     const data = Buffer.from('KLUv/aQAABAAAgAQAAIAEAACABAAAgAQAAIAEAACABAAAgAQAAMAEADxPhbh', 'base64');
     it('napi', () => {
-        expect(napi.decompress(data)).toHaveProperty('length', 1048576);
+        expect(napi.decompress(data)).toHaveProperty('length', 1_048_576);
     });
     it('wasm', () => {
-        expect(wasm.decompress(data)).toHaveProperty('length', 1048576);
+        expect(wasm.decompress(data)).toHaveProperty('length', 1_048_576);
     });
 });
 

@@ -1,5 +1,4 @@
-let lib: Omit<typeof import('./napi.js'), 'TYPE' | `_${string}`> &
-    Pick<typeof import('./napi.js') | typeof import('./wasm.js'), 'TYPE'>;
+let lib: Omit<typeof import('./napi.js'), 'TYPE' | `_${string}`> & Pick<typeof import('./napi.js') | typeof import('./wasm.js'), 'TYPE'>;
 
 try {
     lib = await import('./napi.js');
