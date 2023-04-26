@@ -30,9 +30,9 @@ it('should have correct TYPE', () => {
 });
 
 it('should have correct VERSION', () => {
-    expect(napi.ZSTD_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(wasm.ZSTD_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(root.ZSTD_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(napi.ZSTD_VERSION()).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(wasm.ZSTD_VERSION()).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(root.ZSTD_VERSION()).toMatch(/^\d+\.\d+\.\d+$/);
 });
 
 test('napi api should return buffer', () => {
