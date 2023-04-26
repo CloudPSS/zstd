@@ -44,7 +44,7 @@ Decompresses the input buffer.
 
 The type of the current module.
 
-#### `ZSTD_VERSION: string`
+#### `ZSTD_VERSION(): string`
 
 The version of the zstd library.
 

@@ -12,6 +12,7 @@ interface Binding {
     /** Get zstd version */
     version(): string;
 }
+
 const require = createRequire(import.meta.url);
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), './../');
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
@@ -40,7 +41,7 @@ export function decompress(data: BinaryData): Buffer {
     return bindings.decompress(buf, MAX_SIZE);
 }
 
-export const ZSTD_VERSION = bindings.version();
+export const ZSTD_VERSION = (): string => bindings.version();
 
 export const TYPE = 'napi';
 

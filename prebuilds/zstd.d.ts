@@ -23,4 +23,4 @@ type Module = {
 
     UTF8ToString(ptr: Ptr, maxBytesToRead?: number): string;
 };
-export default function createModule(): Promise<Module>;
+export default function createModule(): Module;
