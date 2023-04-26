@@ -6,7 +6,7 @@ const Module = await createModule();
 /** Convert to buffer */
 function asBuffer(data: unknown): Uint8Array {
     let buf;
-    if (data instanceof ArrayBuffer) buf = Buffer.from(data);
+    if (data instanceof ArrayBuffer) buf = new Uint8Array(data, 0, data.byteLength);
     else if (!ArrayBuffer.isView(data)) throw new Error('Input data must be an array buffer view');
     else if (data instanceof Uint8Array) buf = data;
     else buf = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
@@ -65,7 +65,6 @@ function checkError(code: number): void {
 export function compress(data: BinaryData, level = DEFAULT_LEVEL): Uint8Array {
     if (!Number.isSafeInteger(level)) throw new Error('level must be an integer');
     const buf = asBuffer(data);
-    if (buf.byteLength > MAX_SIZE) throw new Error(`Input data is too large`);
     const h = new Helper();
     try {
         const dstSize = uint(Module._ZSTD_compressBound(buf.byteLength));
@@ -86,7 +85,6 @@ const ZSTD_CONTENTSIZE_UNKNOWN = 2 ** 32 - 1;
 /** ZStandard decompress */
 export function decompress(data: BinaryData): Uint8Array {
     const buf = asBuffer(data);
-    if (buf.byteLength > MAX_SIZE) throw new Error(`Input data is too large`);
     const h = new Helper();
     try {
         const src = h.toHeap(buf);
