@@ -1,6 +1,6 @@
 {
   "name": "@cloudpss/zstd",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Zstd n-api addon for node.js & wasm for browsers.",
   "author": "OpportunityLiu <opportunity@live.in>",
   "license": "MIT",
