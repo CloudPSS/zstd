@@ -1,7 +1,12 @@
+param(
+  [switch]$DEBUG
+)
 
 Push-Location "$PSScriptRoot/.."
 
-$DEBUG = $false
+# We use -sSINGLE_FILE=1 to encode the wasm binary into the js file, so environment is useless, 
+# to avoid nodejs module require (require("node:fs")) which is problematic in some bundlers, we use -sENVIRONMENT="web"
+# To load this module in nodejs, -sASSERTIONS=0 is required, since the asset will reject the nodejs environment
 
 docker run --rm -v ${PWD}:/src emscripten/emsdk `
   emcc ./lib/wasm.c -o ./prebuilds/zstd.js `
@@ -13,9 +18,11 @@ docker run --rm -v ${PWD}:/src emscripten/emsdk `
   -sALLOW_MEMORY_GROWTH=1 `
   -sSINGLE_FILE=1 `
   -sINCOMING_MODULE_JS_API="[]" `
-  -sEXTRA_EXPORTED_RUNTIME_METHODS="['UTF8ToString']" `
+  -sEXPORTED_RUNTIME_METHODS="['UTF8ToString']" `
+  -sENVIRONMENT="web" `
+  -sASSERTIONS=0 `
   -sMODULARIZE `
   -sEXPORT_ES6 `
-$(if ($DEBUG) { "-O1", "-g3", "-sASSERTIONS=1", "-DDEBUG" } else { "-flto", "-O3", "--closure", "1", "-DNDEBUG" } )
+$(if ($DEBUG) { "-O1", "-g3", "-DDEBUG" } else { "-flto", "-O3", "--closure", "1", "-DNDEBUG" } )
 
 Pop-Location
