@@ -8,8 +8,10 @@
 /build/
 /prebuilds/**/*.node
 /prebuilds/**/*.js
+/prebuilds/**/*.wasm
 /*.tgz
 /lib/zstd.c
+/lib/zstd/
 
 
 # generated files

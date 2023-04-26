@@ -57,7 +57,7 @@ class Helper {
 /** check zstd error */
 function checkError(code: number): void {
     if (Module._ZSTD_isError(code)) {
-        throw new Error(`Zstd failed with code ${code}`);
+        throw new Error(Module.UTF8ToString(Module._ZSTD_getErrorName(code)));
     }
 }
 
