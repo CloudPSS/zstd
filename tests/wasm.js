@@ -1,5 +1,6 @@
 import * as wasm from '@cloudpss/zstd/wasm';
 import { randomBytes } from 'node:crypto';
+import { Buffer } from 'node:buffer';
 
 describe('should have no memory leak', () => {
     beforeAll(() => {
@@ -22,6 +23,30 @@ describe('should have no memory leak', () => {
         const decompressed = wasm.decompress(compressed);
         const after = wasm._WasmModule._usedmem();
         expect(after - before).toBe(0);
+        expect(uncompressed.equals(decompressed)).toBe(true);
+    });
+});
+
+describe('should work without node buffer', () => {
+    beforeAll(() => {
+        // @ts-expect-error remove global Buffer
+        global.Buffer = undefined;
+    });
+    afterAll(() => {
+        global.Buffer = Buffer;
+    });
+    let uncompressed = randomBytes(10_000_000);
+    /** @type {Uint8Array} */
+    let compressed;
+    it('compress', () => {
+        compressed = wasm.compress(uncompressed.buffer);
+        expect(compressed).toBeInstanceOf(Uint8Array);
+        expect(compressed).not.toBeInstanceOf(Buffer);
+    });
+    it('decompress', () => {
+        const decompressed = wasm.decompress(compressed.buffer);
+        expect(decompressed).toBeInstanceOf(Uint8Array);
+        expect(decompressed).not.toBeInstanceOf(Buffer);
         expect(uncompressed.equals(decompressed)).toBe(true);
     });
 });
