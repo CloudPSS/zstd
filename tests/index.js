@@ -264,3 +264,13 @@ describe('should reject empty block', () => {
         expect(() => wasm.decompress(data)).toThrow(`Unknown content size`);
     });
 });
+
+describe('should reject uncompleted block', () => {
+    const data = wasm.compress(randomBytes(100)).slice(0, -1);
+    it('napi', () => {
+        expect(() => napi.decompress(data)).toThrow(`Src size is incorrect`);
+    });
+    it('wasm', () => {
+        expect(() => wasm.decompress(data)).toThrow(`Src size is incorrect`);
+    });
+});
