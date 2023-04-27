@@ -1,4 +1,4 @@
-import { Module, type Ptr } from './wasm-loader.js';
+import Module, { type Ptr } from '../prebuilds/zstd.js';
 import { DEFAULT_LEVEL, MAX_SIZE } from './config.js';
 
 /** Convert to buffer */
