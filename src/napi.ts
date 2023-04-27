@@ -46,3 +46,5 @@ export const ZSTD_VERSION = (): string => bindings.version();
 export const TYPE = 'napi';
 
 export const _NapiBindings = bindings;
+
+export default null;

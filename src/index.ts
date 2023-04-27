@@ -15,6 +15,7 @@ try {
         },
         TYPE,
         ZSTD_VERSION,
+        default: null,
     };
 }
 
@@ -26,3 +27,5 @@ export const decompress = lib.decompress;
 
 export const TYPE: typeof import('./napi.js')['TYPE'] | typeof import('./wasm.js')['TYPE'] = lib.TYPE;
 export const ZSTD_VERSION = lib.ZSTD_VERSION;
+
+export default null;
