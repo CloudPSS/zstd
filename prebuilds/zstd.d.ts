@@ -1,6 +1,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
-type Ptr = number & { ptr: 'void*' };
-type Module = {
+export type Ptr = number & { ptr: 'void*' };
+export type Module = {
     readonly HEAP8: Int8Array;
     readonly HEAPU8: Uint8Array;
     readonly HEAP16: Int16Array;
@@ -23,4 +23,5 @@ type Module = {
 
     UTF8ToString(ptr: Ptr, maxBytesToRead?: number): string;
 };
-export default function createModule(): Module;
+
+export default function createModule(): Promise<Module>;
