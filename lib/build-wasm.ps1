@@ -22,7 +22,7 @@ docker run --rm -v ${PWD}:/src emscripten/emsdk `
   -sENVIRONMENT="web" `
   -sASSERTIONS=0 `
   -sMODULARIZE `
-  -sEXPORT_ES6 `
+  --extern-post-js ./lib/post.js `
 $(if ($DEBUG) { "-O1", "-g3", "-DDEBUG" } else { "-flto", "-O3", "--closure", "1", "-DNDEBUG" } )
 
 Pop-Location
