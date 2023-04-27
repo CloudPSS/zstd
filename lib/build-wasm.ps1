@@ -23,7 +23,6 @@ docker run --rm -v ${PWD}:/src emscripten/emsdk `
   -sASSERTIONS=0 `
   -sMODULARIZE `
   -sEXPORT_ES6 `
-  -sWASM_ASYNC_COMPILATION=0 `
 $(if ($DEBUG) { "-O1", "-g3", "-DDEBUG" } else { "-flto", "-O3", "--closure", "1", "-DNDEBUG" } )
 
 Pop-Location
