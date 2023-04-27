@@ -1,5 +1,7 @@
-import Module, { type Ptr } from '../prebuilds/zstd.js';
+import createModule, { type Ptr } from '../prebuilds/zstd.js';
 import { DEFAULT_LEVEL, MAX_SIZE } from './config.js';
+
+const Module = await createModule();
 
 /** Convert to buffer */
 function asBuffer(data: unknown): Uint8Array {
@@ -118,3 +120,5 @@ export const ZSTD_VERSION = (): string => {
 export const TYPE = 'wasm';
 
 export const _WasmModule = Module;
+
+export default null;
