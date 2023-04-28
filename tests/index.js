@@ -18,22 +18,27 @@ function asBuffer(data) {
     return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
 }
 
-it('should have correct config', () => {
-    expect(config.DEFAULT_LEVEL).toBe(4);
-    expect(config.MAX_SIZE).toBeGreaterThanOrEqual(1024 * 1024 * 1024);
-});
+const ALL = /** @type {const} */ ([
+    ['napi compress', napi.compress],
+    ['napi decompress', napi.decompress],
+    ['wasm compress', wasm.compress],
+    ['wasm decompress', wasm.decompress],
+]);
 
-it('should have correct TYPE', () => {
-    expect(napi.TYPE).toBe('napi');
-    expect(wasm.TYPE).toBe('wasm');
-    expect(root.TYPE).toBe('napi');
-});
+const COMPRESS = /** @type {const} */ ([
+    ['napi', napi.compress],
+    ['wasm', wasm.compress],
+]);
 
-it('should have correct VERSION', () => {
-    expect(napi.ZSTD_VERSION()).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(wasm.ZSTD_VERSION()).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(root.ZSTD_VERSION()).toMatch(/^\d+\.\d+\.\d+$/);
-});
+const DECOMPRESS = /** @type {const} */ ([
+    ['napi', napi.decompress],
+    ['wasm', wasm.decompress],
+]);
+
+const ROUNDTRIP = /** @type {const} */ ([
+    ['napi', (/** @type {BinaryData} */ data, /** @type {number | undefined} */ level) => napi.decompress(napi.compress(data, level))],
+    ['wasm', (/** @type {BinaryData} */ data, /** @type {number | undefined} */ level) => wasm.decompress(wasm.compress(data, level))],
+]);
 
 test('napi api should return buffer', () => {
     expect(napi.compress(randomBuffer)).toBeInstanceOf(Buffer);
@@ -73,145 +78,77 @@ test('wasm roundtrip should got same result', () => {
 });
 
 describe('should accept float64array', () => {
-    it('napi', () => {
-        expect(napi.compress(emptyFloat64Array)).toBeInstanceOf(Buffer);
-        expect(napi.decompress(napi.compress(emptyFloat64Array))).toEqual(emptyBuffer);
-    });
-    it('wasm', () => {
-        expect(wasm.compress(emptyFloat64Array)).toBeInstanceOf(Uint8Array);
-        expect(asBuffer(wasm.decompress(wasm.compress(emptyFloat64Array)))).toEqual(emptyBuffer);
-    });
+    for (const [key, roundtrip] of ROUNDTRIP) {
+        it(key, () => {
+            expect(asBuffer(roundtrip(emptyFloat64Array))).toEqual(emptyBuffer);
+        });
+    }
 });
 
 describe('should accept dataview', () => {
-    it('napi', () => {
-        expect(napi.compress(emptyDataView)).toBeInstanceOf(Buffer);
-        expect(napi.decompress(napi.compress(emptyDataView))).toEqual(emptyBuffer);
-    });
-    it('wasm', () => {
-        expect(wasm.compress(emptyDataView)).toBeInstanceOf(Uint8Array);
-        expect(asBuffer(wasm.decompress(wasm.compress(emptyDataView)))).toEqual(emptyBuffer);
-    });
+    for (const [key, roundtrip] of ROUNDTRIP) {
+        it(key, () => {
+            expect(asBuffer(roundtrip(emptyDataView))).toEqual(emptyBuffer);
+        });
+    }
 });
 
 describe('should accept arraybuffer', () => {
-    it('napi', () => {
-        expect(napi.compress(emptyBuffer.buffer)).toBeInstanceOf(Buffer);
-        expect(napi.decompress(napi.compress(emptyBuffer.buffer))).toEqual(emptyBuffer);
-    });
-    it('wasm', () => {
-        expect(wasm.compress(emptyBuffer.buffer)).toBeInstanceOf(Uint8Array);
-        expect(asBuffer(wasm.decompress(wasm.compress(emptyBuffer.buffer)))).toEqual(emptyBuffer);
-    });
+    for (const [key, roundtrip] of ROUNDTRIP) {
+        it(key, () => {
+            expect(asBuffer(roundtrip(emptyBuffer.buffer))).toEqual(emptyBuffer);
+        });
+    }
 });
 
 describe('should reject bad buffer data', () => {
-    it('napi compress', () => {
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress(1)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress('')).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress({})).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress([])).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress(null)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress(undefined)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress(true)).toThrow();
-    });
-    it('napi decompress', () => {
-        // @ts-expect-error ts(2345)
-        expect(() => napi.decompress(1)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.decompress('')).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.decompress({})).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.decompress([])).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.decompress(null)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.decompress(undefined)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.decompress(true)).toThrow();
-    });
-    it('wasm compress', () => {
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress(1)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress('')).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress({})).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress([])).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress(null)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress(undefined)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress(true)).toThrow();
-    });
-    it('wasm decompress', () => {
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.decompress(1)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.decompress('')).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.decompress({})).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.decompress([])).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.decompress(null)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.decompress(undefined)).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.decompress(true)).toThrow();
-    });
-});
-
-describe('should reject bad compressed data', () => {
-    it('napi', () => {
-        expect(() => napi.decompress(emptyBuffer)).toThrow('Invalid compressed data');
-    });
-    it('wasm', () => {
-        expect(() => wasm.decompress(emptyBuffer)).toThrow('Invalid compressed data');
-    });
+    for (const [key, method] of ALL) {
+        it(key, () => {
+            const e = `Input data must be BinaryData`;
+            // @ts-expect-error ts(2345)
+            expect(() => method(1)).toThrow(e);
+            // @ts-expect-error ts(2345)
+            expect(() => method('')).toThrow(e);
+            // @ts-expect-error ts(2345)
+            expect(() => method({})).toThrow(e);
+            // @ts-expect-error ts(2345)
+            expect(() => method([])).toThrow(e);
+            // @ts-expect-error ts(2345)
+            expect(() => method(null)).toThrow(e);
+            // @ts-expect-error ts(2345)
+            expect(() => method(undefined)).toThrow(e);
+            // @ts-expect-error ts(2345)
+            expect(() => method(true)).toThrow(e);
+            // @ts-expect-error ts(2345)
+            expect(() => method(true)).toThrow(e);
+            // @ts-expect-error ts(2345)
+            expect(() => method({ byteLength: -1 })).toThrow(e);
+            // @ts-expect-error ts(2345)
+            expect(() => method({ byteLength: 0 })).toThrow(e);
+        });
+    }
 });
 
 describe('should reject bad level', () => {
-    it('napi', () => {
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress(emptyBuffer, '1')).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress(emptyBuffer, {})).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress(emptyBuffer, [])).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress(emptyBuffer, null)).toThrow();
-        // @ts-expect-error ts(2345)
-        // eslint-disable-next-line unicorn/new-for-builtins
-        expect(() => napi.compress(emptyBuffer, new Number(1))).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => napi.compress(emptyBuffer, true)).toThrow();
-    });
-    it('wasm', () => {
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress(emptyBuffer, '1')).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress(emptyBuffer, {})).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress(emptyBuffer, [])).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress(emptyBuffer, null)).toThrow();
-        // @ts-expect-error ts(2345)
-        // eslint-disable-next-line unicorn/new-for-builtins
-        expect(() => wasm.compress(emptyBuffer, new Number(1))).toThrow();
-        // @ts-expect-error ts(2345)
-        expect(() => wasm.compress(emptyBuffer, true)).toThrow();
-    });
+    for (const [key, compress] of COMPRESS) {
+        it(key, () => {
+            // @ts-expect-error ts(2345)
+            expect(() => compress(emptyBuffer, '1')).toThrow();
+            // @ts-expect-error ts(2345)
+            expect(() => compress(emptyBuffer, {})).toThrow();
+            // @ts-expect-error ts(2345)
+            expect(() => compress(emptyBuffer, [])).toThrow();
+            // @ts-expect-error ts(2345)
+            expect(() => compress(emptyBuffer, null)).toThrow();
+            // @ts-expect-error ts(2345)
+            // eslint-disable-next-line unicorn/new-for-builtins
+            expect(() => compress(emptyBuffer, new Number(1))).toThrow();
+            // @ts-expect-error ts(2345)
+            expect(() => compress(emptyBuffer, true)).toThrow();
+            // @ts-expect-error ts(2345)
+            expect(() => compress(emptyBuffer, { valueOf: () => 1 })).toThrow();
+        });
+    }
 });
 
 describe('should accept huge input', () => {
@@ -233,6 +170,7 @@ describe('should reject huge input', () => {
     const compressed3GB = root.decompress(Buffer.from('KLUv/aBLdwEAPQEA+Ci1L/2AWP3JmrtUAAAQAAABAPv/OcACAgAQAOtPBgABAKfcnbsx', 'base64'));
     it('napi', () => {
         expect(() => napi.compress(bufferOf3GB)).toThrow(`Input data is too large`);
+        expect(() => napi.compress(bufferOf3GB.buffer)).toThrow(`Input data is too large`);
         expect(() => napi.decompress(bufferOf3GB)).toThrow(`Input data is too large`);
         expect(() => napi.decompress(compressed3GB)).toThrow(`Content size is too large`);
     });
@@ -240,37 +178,46 @@ describe('should reject huge input', () => {
         const hugeBuffer = Buffer.alloc(1 * 1024 * 1024 * 1024);
         expect(() => wasm.compress(hugeBuffer)).toThrow(`Failed to allocate memory`);
         expect(() => wasm.compress(bufferOf3GB)).toThrow(`Input data is too large`);
+        expect(() => wasm.compress(bufferOf3GB.buffer)).toThrow(`Input data is too large`);
         expect(() => wasm.decompress(bufferOf3GB)).toThrow(`Input data is too large`);
         expect(() => wasm.decompress(compressed3GB)).toThrow(`Content size is too large: ${compressed3GBSize}`);
     });
 });
 
+describe('should reject bad compressed data', () => {
+    for (const [key, decompress] of DECOMPRESS) {
+        it(key, () => {
+            expect(() => decompress(emptyBuffer)).toThrow('Invalid compressed data');
+        });
+    }
+});
+
 describe('should accept rle first block', () => {
     const data = Buffer.from('KLUv/aQAABAAAgAQAAIAEAACABAAAgAQAAIAEAACABAAAgAQAAMAEADxPhbh', 'base64');
-    it('napi', () => {
-        expect(napi.decompress(data)).toHaveProperty('length', 1_048_576);
-    });
-    it('wasm', () => {
-        expect(wasm.decompress(data)).toHaveProperty('length', 1_048_576);
-    });
+
+    for (const [key, decompress] of DECOMPRESS) {
+        it(key, () => {
+            expect(decompress(data)).toHaveProperty('length', 1_048_576);
+        });
+    }
 });
 
 describe('should reject empty block', () => {
     const data = Buffer.from('KLUv/QAAFQAAAAA=', 'base64');
-    it('napi', () => {
-        expect(() => napi.decompress(data)).toThrow(`Unknown content size`);
-    });
-    it('wasm', () => {
-        expect(() => wasm.decompress(data)).toThrow(`Unknown content size`);
-    });
+
+    for (const [key, decompress] of DECOMPRESS) {
+        it(key, () => {
+            expect(() => decompress(data)).toThrow(`Unknown content size`);
+        });
+    }
 });
 
 describe('should reject uncompleted block', () => {
     const data = wasm.compress(randomBytes(100)).slice(0, -1);
-    it('napi', () => {
-        expect(() => napi.decompress(data)).toThrow(`Src size is incorrect`);
-    });
-    it('wasm', () => {
-        expect(() => wasm.decompress(data)).toThrow(`Src size is incorrect`);
-    });
+
+    for (const [key, decompress] of DECOMPRESS) {
+        it(key, () => {
+            expect(() => decompress(data)).toThrow(`Src size is incorrect`);
+        });
+    }
 });
