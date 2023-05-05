@@ -58,6 +58,14 @@ The maximum size of the input/output buffer.
 
 The default compression level.
 
+#### `MIN_LEVEL: number`
+
+Minimum compression level.
+
+#### `MAX_LEVEL: number`
+
+Maximum compression level.
+
 ## License
 
 MIT

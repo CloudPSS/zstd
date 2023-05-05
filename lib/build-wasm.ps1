@@ -8,12 +8,14 @@ Push-Location "$PSScriptRoot/.."
 # to avoid nodejs module require (require("node:fs")) which is problematic in some bundlers, we use -sENVIRONMENT="web"
 # To load this module in nodejs, -sASSERTIONS=0 is required, since the asset will reject the nodejs environment
 
+$ExportedFunctions = 'ZSTD_versionNumber', 'ZSTD_isError', 'ZSTD_getErrorName', 'ZSTD_getFrameContentSize', 'ZSTD_decompress', 'ZSTD_compress', 'ZSTD_compressBound', 'malloc', 'free', 'usedmem'
+
 docker run --rm -v ${PWD}:/src emscripten/emsdk `
   emcc ./lib/wasm.c -o ./prebuilds/zstd.js `
   --memory-init-file 0 `
   -sSTRICT `
   -sMALLOC=emmalloc `
-  -sEXPORTED_FUNCTIONS="['_ZSTD_versionNumber', '_ZSTD_isError', '_ZSTD_getErrorName', '_ZSTD_getFrameContentSize', '_ZSTD_decompress', '_ZSTD_compress', '_ZSTD_compressBound', '_malloc', '_free', '_usedmem']" `
+  -sEXPORTED_FUNCTIONS="[$($ExportedFunctions | ForEach-Object { "_$_" } | Join-String -Separator ',' -SingleQuote )]" `
   -sFILESYSTEM=0 `
   -sALLOW_MEMORY_GROWTH=1 `
   -sSINGLE_FILE=1 `

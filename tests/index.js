@@ -36,8 +36,16 @@ const DECOMPRESS = /** @type {const} */ ([
 ]);
 
 const ROUNDTRIP = /** @type {const} */ ([
-    ['napi', (/** @type {BinaryData} */ data, /** @type {number | undefined} */ level) => napi.decompress(napi.compress(data, level))],
-    ['wasm', (/** @type {BinaryData} */ data, /** @type {number | undefined} */ level) => wasm.decompress(wasm.compress(data, level))],
+    [
+        'napi',
+        (/** @type {BinaryData} */ data, /** @type {number | undefined} */ level) =>
+            napi.decompress(napi.compress(data, level)),
+    ],
+    [
+        'wasm',
+        (/** @type {BinaryData} */ data, /** @type {number | undefined} */ level) =>
+            wasm.decompress(wasm.compress(data, level)),
+    ],
 ]);
 
 test('napi api should return buffer', () => {
@@ -151,6 +159,23 @@ describe('should reject bad level', () => {
     }
 });
 
+describe('should accept allowed level', () => {
+    for (const [key, compress] of COMPRESS) {
+        it(key, () => {
+            expect(() => compress(emptyBuffer, 0)).not.toThrow();
+            expect(() => compress(emptyBuffer, 1.2)).not.toThrow();
+            expect(() => compress(emptyBuffer, Number.NaN)).not.toThrow();
+            expect(() => compress(emptyBuffer, Number.MAX_VALUE)).not.toThrow();
+            expect(() => compress(emptyBuffer, -Number.MAX_VALUE)).not.toThrow();
+            expect(() => compress(emptyBuffer, -Number.MIN_VALUE)).not.toThrow();
+            expect(() => compress(emptyBuffer, -Infinity)).not.toThrow();
+            expect(() => compress(emptyBuffer, Infinity)).not.toThrow();
+            expect(() => compress(emptyBuffer, Number.MAX_SAFE_INTEGER)).not.toThrow();
+            expect(() => compress(emptyBuffer, Number.MIN_SAFE_INTEGER)).not.toThrow();
+        });
+    }
+});
+
 describe('should accept huge input', () => {
     it('napi', () => {
         const hugeBuffer = Buffer.alloc(config.MAX_SIZE);
@@ -167,7 +192,9 @@ describe('should reject huge input', () => {
     const bufferOf3GB = Buffer.alloc(3 * 1024 * 1024 * 1024);
     /** will decompress to 3147483645 bytes */
     const compressed3GBSize = 3_147_483_645;
-    const compressed3GB = root.decompress(Buffer.from('KLUv/aBLdwEAPQEA+Ci1L/2AWP3JmrtUAAAQAAABAPv/OcACAgAQAOtPBgABAKfcnbsx', 'base64'));
+    const compressed3GB = root.decompress(
+        Buffer.from('KLUv/aBLdwEAPQEA+Ci1L/2AWP3JmrtUAAAQAAABAPv/OcACAgAQAOtPBgABAKfcnbsx', 'base64'),
+    );
     it('napi', () => {
         expect(() => napi.compress(bufferOf3GB)).toThrow(`Input data is too large`);
         expect(() => napi.compress(bufferOf3GB.buffer)).toThrow(`Input data is too large`);

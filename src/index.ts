@@ -1,9 +1,10 @@
-let lib: Omit<typeof import('./napi.js'), 'TYPE' | `_${string}`> & Pick<typeof import('./napi.js') | typeof import('./wasm.js'), 'TYPE'>;
+let lib: Omit<typeof import('./napi.js'), 'TYPE' | `_${string}`> &
+    Pick<typeof import('./napi.js') | typeof import('./wasm.js'), 'TYPE'>;
 
 try {
     lib = await import('./napi.js');
 } catch {
-    const { compress, decompress, TYPE, ZSTD_VERSION } = await import('./wasm.js');
+    const { compress, decompress, ...rest } = await import('./wasm.js');
     lib = {
         compress: (data, level) => {
             const result = compress(data, level);
@@ -13,19 +14,20 @@ try {
             const result = decompress(data);
             return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
         },
-        TYPE,
-        ZSTD_VERSION,
-        default: null,
+        ...rest,
     };
 }
 
 /** ZStandard compress */
-export const compress = lib.compress;
+export const { compress } = lib;
 
 /** ZStandard decompress */
-export const decompress = lib.decompress;
+export const { decompress } = lib;
 
+/** The type of the current module. */
 export const TYPE: typeof import('./napi.js')['TYPE'] | typeof import('./wasm.js')['TYPE'] = lib.TYPE;
-export const ZSTD_VERSION = lib.ZSTD_VERSION;
+
+/** The version of the zstd library. */
+export const { ZSTD_VERSION } = lib;
 
 export default null;
