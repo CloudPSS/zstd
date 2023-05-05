@@ -62,6 +62,24 @@ Napi::String version(const Napi::CallbackInfo &info)
   return Napi::String::New(env, ZSTD_versionString());
 }
 
+Napi::Number minLevel(const Napi::CallbackInfo &info)
+{
+  Napi::Env env = info.Env();
+  return Napi::Number::New(env, ZSTD_minCLevel());
+}
+
+Napi::Number maxLevel(const Napi::CallbackInfo &info)
+{
+  Napi::Env env = info.Env();
+  return Napi::Number::New(env, ZSTD_maxCLevel());
+}
+
+Napi::Number defaultLevel(const Napi::CallbackInfo &info)
+{
+  Napi::Env env = info.Env();
+  return Napi::Number::New(env, ZSTD_defaultCLevel());
+}
+
 Napi::Object Init(Napi::Env env, Napi::Object exports)
 {
   exports.Set(Napi::String::New(env, "compress"),
@@ -70,6 +88,12 @@ Napi::Object Init(Napi::Env env, Napi::Object exports)
               Napi::Function::New(env, decompress));
   exports.Set(Napi::String::New(env, "version"),
               Napi::Function::New(env, version));
+  exports.Set(Napi::String::New(env, "minLevel"),
+              Napi::Function::New(env, minLevel));
+  exports.Set(Napi::String::New(env, "maxLevel"),
+              Napi::Function::New(env, maxLevel));
+  exports.Set(Napi::String::New(env, "defaultLevel"),
+              Napi::Function::New(env, defaultLevel));
   return exports;
 }
 

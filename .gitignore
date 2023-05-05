@@ -22,6 +22,9 @@ node_modules/
 .pnp.js
 .pnp/
 
+# test files
+/benchmark/files/
+
 # Logs
 logs
 *.log

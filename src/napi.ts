@@ -12,6 +12,12 @@ interface Binding {
     decompress(data: Buffer, maxSize: number): Buffer;
     /** Get zstd version */
     version(): string;
+    /** min compress level */
+    minLevel(): number;
+    /** max compress level */
+    maxLevel(): number;
+    /** default compress level */
+    defaultLevel(): number;
 }
 
 const require = createRequire(import.meta.url);

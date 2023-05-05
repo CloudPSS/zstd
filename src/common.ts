@@ -1,4 +1,5 @@
-import { MAX_SIZE } from './config.js';
+import { DEFAULT_LEVEL } from './config.js';
+import { MAX_SIZE, MIN_LEVEL, MAX_LEVEL } from './config.js';
 
 /** check input before coercion */
 function checkInput(input: unknown): void {
@@ -9,7 +10,10 @@ function checkInput(input: unknown): void {
         return;
     }
 
-    if ((typeof ArrayBuffer == 'function' && input instanceof ArrayBuffer) || (typeof SharedArrayBuffer == 'function' && input instanceof SharedArrayBuffer)) {
+    if (
+        (typeof ArrayBuffer == 'function' && input instanceof ArrayBuffer) ||
+        (typeof SharedArrayBuffer == 'function' && input instanceof SharedArrayBuffer)
+    ) {
         if (input.byteLength > MAX_SIZE) throw new Error(`Input data is too large`);
         return;
     }
@@ -30,8 +34,12 @@ export function createModule<TBinary extends Uint8Array>(options: {
 } {
     const { coercion, compress, decompress } = options;
     return {
-        compress: (data: BinaryData, level = 4) => {
-            if (!Number.isSafeInteger(level)) throw new Error('level must be an integer');
+        compress: (data: BinaryData, level = DEFAULT_LEVEL) => {
+            if (typeof level != 'number') throw new Error(`level must be an integer`);
+            if (Number.isNaN(level)) level = DEFAULT_LEVEL;
+            else if (level < MIN_LEVEL) level = MIN_LEVEL;
+            else if (level > MAX_LEVEL) level = MAX_LEVEL;
+            else level = Math.round(level);
             checkInput(data);
             const input = coercion(data);
             const output = compress(input, level);
