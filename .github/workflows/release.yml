@@ -16,18 +16,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          registry-url: https://registry.npmjs.org
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
           name: build
 
       - name: Install
-        uses: bahmutov/npm-install@v1
+        uses: NullVoxPopuli/action-setup-pnpm@v2
+        with:
+          node-version: lts/*
+          pnpm-version: 8
 
       - name: Publish
         run: npm publish --access=public
