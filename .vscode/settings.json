@@ -1,5 +1,5 @@
 {
-  "npm.packageManager": "yarn",
+  "npm.packageManager": "pnpm",
   "typescript.tsdk": "./node_modules/typescript/lib",
   "files.eol": "\n",
   "editor.tabSize": 2,
