@@ -82,6 +82,7 @@
     "prebuildify": "^5.0.1",
     "prebuildify-cross": "^5.0.0",
     "pretty-bytes": "^6.1.0",
+    "rimraf": "^5.0.0",
     "typescript": "^5.0.4"
   },
   "dependencies": {
