@@ -4,5 +4,7 @@
 /lib/zstd/
 /*.tgz
 /tests/
+/benchmark/
+/coverage/
 tsconfig.json
 *.config.js
