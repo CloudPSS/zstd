@@ -12,19 +12,17 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions/setup-node@v3
+      - name: Install
+        uses: NullVoxPopuli/action-setup-pnpm@v2
         with:
           node-version: lts/*
-
-      - name: Install
-        uses: bahmutov/npm-install@v1
-        with:
-          install-command: yarn install --ignore-scripts --frozen-lockfile
+          pnpm-version: 8
+          args: --ignore-scripts
 
       - name: Build
         run: |
-          yarn build
-          yarn build:deps
+          pnpm build
+          pnpm build:deps
 
       - name: Upload common artifacts
         uses: actions/upload-artifact@v3
@@ -41,14 +39,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Install
+        uses: NullVoxPopuli/action-setup-pnpm@v2
         with:
           node-version: lts/*
-
-      - name: Install
-        uses: bahmutov/npm-install@v1
-        with:
-          install-command: yarn install --ignore-scripts --frozen-lockfile
+          pnpm-version: 8
+          args: --ignore-scripts
 
       - name: Download common artifacts
         uses: actions/download-artifact@v3
@@ -56,7 +52,7 @@ jobs:
           name: build-common
 
       - name: Build wasm
-        run: yarn build:wasm
+        run: pnpm build:wasm
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
@@ -71,14 +67,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Install
+        uses: NullVoxPopuli/action-setup-pnpm@v2
         with:
           node-version: lts/*
-
-      - name: Install
-        uses: bahmutov/npm-install@v1
-        with:
-          install-command: yarn install --ignore-scripts --frozen-lockfile
+          pnpm-version: 8
+          args: --ignore-scripts
 
       - name: Download common artifacts
         uses: actions/download-artifact@v3
@@ -87,8 +81,8 @@ jobs:
 
       - name: Prebuildify
         run: |
-          yarn build:gyp --arch arm64
-          yarn build:gyp --arch x64
+          pnpm build:gyp --arch arm64
+          pnpm build:gyp --arch x64
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
@@ -103,14 +97,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Install
+        uses: NullVoxPopuli/action-setup-pnpm@v2
         with:
           node-version: lts/*
-
-      - name: Install
-        uses: bahmutov/npm-install@v1
-        with:
-          install-command: yarn install --ignore-scripts --frozen-lockfile
+          pnpm-version: 8
+          args: --ignore-scripts
 
       - name: Download common artifacts
         uses: actions/download-artifact@v3
@@ -119,10 +111,10 @@ jobs:
 
       - name: Prebuildify
         run: |
-          yarn build:gyp-cross -i centos7-devtoolset7
-          yarn build:gyp-cross -i alpine
-          yarn build:gyp-cross --tag-libc glibc -i linux-arm64
-          yarn build:gyp-cross --tag-libc musl  -i linux-arm64-musl
+          pnpm build:gyp-cross -i centos7-devtoolset7
+          pnpm build:gyp-cross -i alpine
+          pnpm build:gyp-cross --tag-libc glibc -i linux-arm64
+          pnpm build:gyp-cross --tag-libc musl  -i linux-arm64-musl
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
@@ -137,14 +129,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Install
+        uses: NullVoxPopuli/action-setup-pnpm@v2
         with:
           node-version: lts/*
-
-      - name: Install
-        uses: bahmutov/npm-install@v1
-        with:
-          install-command: yarn install --ignore-scripts --frozen-lockfile
+          pnpm-version: 8
+          args: --ignore-scripts
 
       - name: Download common artifacts
         uses: actions/download-artifact@v3
@@ -153,8 +143,8 @@ jobs:
 
       - name: Prebuildify
         run: |
-          yarn build:gyp --arch x64
-          yarn build:gyp --arch arm64
+          pnpm build:gyp --arch x64
+          pnpm build:gyp --arch arm64
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v3
@@ -200,21 +190,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js ${{ matrix.node }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
           name: build
 
       - name: Install
-        uses: bahmutov/npm-install@v1
+        uses: NullVoxPopuli/action-setup-pnpm@v2
+        with:
+          node-version: ${{ matrix.node }}
+          pnpm-version: 8
 
       - name: Run test with prebuilds
-        run: yarn test
+        run: pnpm test
 
       - name: Send coverage report
         uses: codacy/codacy-coverage-reporter-action@v1
