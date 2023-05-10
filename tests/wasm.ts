@@ -9,9 +9,8 @@ describe('should have no memory leak', () => {
         wasm.decompress(compressed);
     });
 
-    let uncompressed = randomBytes(10_000_000);
-    /** @type {Uint8Array} */
-    let compressed;
+    const uncompressed = randomBytes(10_000_000);
+    let compressed: Uint8Array;
     it('compress', () => {
         const before = wasm._WasmModule._usedmem();
         compressed = wasm.compress(uncompressed);
@@ -35,9 +34,8 @@ describe('should work without node buffer', () => {
     afterAll(() => {
         global.Buffer = Buffer;
     });
-    let uncompressed = randomBytes(10_000_000);
-    /** @type {Uint8Array} */
-    let compressed;
+    const uncompressed = randomBytes(10_000_000);
+    let compressed: Uint8Array;
     it('compress', () => {
         compressed = wasm.compress(uncompressed.buffer);
         expect(compressed).toBeInstanceOf(Uint8Array);

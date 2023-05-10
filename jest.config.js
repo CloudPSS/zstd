@@ -3,8 +3,8 @@
  * https://jestjs.io/docs/configuration
  */
 
-/** @type {import('jest').Config} */
-export default {
+// @ts-check
+export default /** @type {import('jest').Config} */ ({
     // All imported modules in your tests should be mocked automatically
     // automock: false,
 
@@ -99,7 +99,7 @@ export default {
     // notifyMode: "failure-change",
 
     // A preset that is used as a base for Jest's configuration
-    // preset: undefined,
+    preset: 'ts-jest/presets/js-with-ts-esm',
 
     // Run tests from one or more projects
     // projects: undefined,
@@ -188,4 +188,4 @@ export default {
 
     // Whether to use watchman for file crawling
     // watchman: true,
-};
+});

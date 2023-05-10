@@ -75,6 +75,7 @@
     "@cloudpss/lint-staged-config": "^1.4.2",
     "@cloudpss/prettier-config": "^1.4.2",
     "@cloudpss/tsconfig": "^1.4.2",
+    "@jest/globals": "^29.5.0",
     "@types/jest": "^29.5.1",
     "@types/node": "^20.1.0",
     "husky": "^8.0.3",
@@ -83,6 +84,7 @@
     "prebuildify-cross": "^5.0.0",
     "pretty-bytes": "^6.1.0",
     "rimraf": "^5.0.0",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.0.4"
   },
   "dependencies": {
