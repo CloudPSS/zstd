@@ -12,41 +12,32 @@ const emptyDataView = new DataView(emptyFloat64Array.buffer);
 
 /**
  * 转换 buffer
- * @param {ArrayBufferView} data 数据
  */
-function asBuffer(data) {
+function asBuffer(data: ArrayBufferView): Buffer {
     return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
 }
 
-const ALL = /** @type {const} */ ([
+const ALL = [
     ['napi compress', napi.compress],
     ['napi decompress', napi.decompress],
     ['wasm compress', wasm.compress],
     ['wasm decompress', wasm.decompress],
-]);
+] as const;
 
-const COMPRESS = /** @type {const} */ ([
+const COMPRESS = [
     ['napi', napi.compress],
     ['wasm', wasm.compress],
-]);
+] as const;
 
-const DECOMPRESS = /** @type {const} */ ([
+const DECOMPRESS = [
     ['napi', napi.decompress],
     ['wasm', wasm.decompress],
-]);
+] as const;
 
-const ROUNDTRIP = /** @type {const} */ ([
-    [
-        'napi',
-        (/** @type {BinaryData} */ data, /** @type {number | undefined} */ level) =>
-            napi.decompress(napi.compress(data, level)),
-    ],
-    [
-        'wasm',
-        (/** @type {BinaryData} */ data, /** @type {number | undefined} */ level) =>
-            wasm.decompress(wasm.compress(data, level)),
-    ],
-]);
+const ROUNDTRIP = [
+    ['napi', (data: BinaryData, level?: number) => napi.decompress(napi.compress(data, level))],
+    ['wasm', (data: BinaryData, level?: number) => wasm.decompress(wasm.compress(data, level))],
+] as const;
 
 test('napi api should return buffer', () => {
     expect(napi.compress(randomBuffer)).toBeInstanceOf(Buffer);
