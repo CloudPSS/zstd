@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 
 jest.mock('node-gyp-build', () => {
-    return jest.fn(() => {
+    return jest.fn((): never => {
         throw new Error(`Can't load bindings`);
     });
 });
