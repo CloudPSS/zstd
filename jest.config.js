@@ -174,7 +174,7 @@ export default /** @type {import('ts-jest').JestConfigWithTsJest} */ ({
             'ts-jest',
             {
                 useESM: true,
-                tsconfig: 'tests/tsconfig.json',
+                tsconfig: '<rootDir>/tests/tsconfig.json',
             },
         ],
     },

@@ -1,0 +1,7 @@
+plugins:
+  eslint:
+    enabled: true
+    config:
+    extensions: [.js, .ts]
+  cppcheck:
+    enabled: true
