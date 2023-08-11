@@ -5,7 +5,7 @@
 [![Codacy Badge](https://img.shields.io/codacy/grade/c0b6811e7e5f45eeb46383607cac81a8?logo=codacy)](https://app.codacy.com/gh/CloudPSS/zstd/dashboard)
 [![npm version](https://img.shields.io/npm/v/@cloudpss/zstd?logo=npm)](https://npmjs.org/package/@cloudpss/zstd)
 
-This is a [pure esm package](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) contains the [zstd](http://github.com/facebook/zstd) n-api addon for node.js & wasm for browsers.
+This is a [pure esm package](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) contains the [zstd](https://github.com/facebook/zstd) n-api addon for node.js & wasm for browsers.
 
 ## Installation
 

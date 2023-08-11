@@ -25,7 +25,7 @@ export const { compress } = lib;
 export const { decompress } = lib;
 
 /** The type of the current module. */
-export const TYPE: typeof import('./napi.js')['TYPE'] | typeof import('./wasm.js')['TYPE'] = lib.TYPE;
+export const TYPE: (typeof import('./napi.js'))['TYPE'] | (typeof import('./wasm.js'))['TYPE'] = lib.TYPE;
 
 /** The version of the zstd library. */
 export const { ZSTD_VERSION } = lib;
