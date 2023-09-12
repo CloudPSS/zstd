@@ -10,7 +10,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     secrets: inherit
 
-  publish:
+  pack:
     needs: build
     runs-on: ubuntu-latest
 
