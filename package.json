@@ -70,25 +70,25 @@
     "extends": "@cloudpss"
   },
   "devDependencies": {
-    "@cloudpss/commitlint-config": "^1.5.6",
-    "@cloudpss/eslint-config": "^1.5.6",
-    "@cloudpss/lint-staged-config": "^1.5.6",
-    "@cloudpss/prettier-config": "^1.5.6",
-    "@cloudpss/tsconfig": "^1.5.6",
-    "@jest/globals": "^29.6.2",
-    "@types/jest": "^29.5.3",
-    "@types/node": "^20.4.9",
+    "@cloudpss/commitlint-config": "^1.5.7",
+    "@cloudpss/eslint-config": "^1.5.7",
+    "@cloudpss/lint-staged-config": "^1.5.7",
+    "@cloudpss/prettier-config": "^1.5.7",
+    "@cloudpss/tsconfig": "^1.5.7",
+    "@jest/globals": "^29.6.4",
+    "@types/jest": "^29.5.4",
+    "@types/node": "^20.6.0",
     "husky": "^8.0.3",
-    "jest": "^29.6.2",
+    "jest": "^29.6.4",
     "prebuildify": "^5.0.1",
     "prebuildify-cross": "^5.0.0",
     "pretty-bytes": "^6.1.1",
     "rimraf": "^5.0.1",
     "ts-jest": "^29.1.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "node-addon-api": "^7.0.0",
-    "node-gyp-build": "^4.6.0"
+    "node-gyp-build": "^4.6.1"
   }
 }
