@@ -20,5 +20,26 @@
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["napi", "zstd"]
+  "cSpell.words": ["napi", "zstd"],
+  "files.associations": {
+    "**/.git/config": "gitconfig",
+    "**/.xmake/**/*": "lua",
+    "**/build/.deps/**/*.d": "lua",
+    "*.caddy": "caddyfile",
+    "*.cu": "cpp",
+    "*.cuh": "cpp",
+    "*.js.snap": "javascript",
+    "*.pscx": "xml",
+    "*.pslx": "xml",
+    "*.resjson": "json",
+    ".yarnrc": "properties",
+    "Caddyfile": "caddyfile",
+    "algorithm": "cpp",
+    "functional": "cpp",
+    "optional": "cpp",
+    "system_error": "cpp",
+    "type_traits": "cpp",
+    "xtr1common": "cpp",
+    "xutility": "cpp"
+  }
 }

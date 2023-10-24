@@ -11,18 +11,18 @@ interface Binding {
     /** decompress */
     decompress(data: Buffer, maxSize: number): Buffer;
     /** Get zstd version */
-    version(): string;
+    version: string;
     /** min compress level */
-    minLevel(): number;
+    minLevel: number;
     /** max compress level */
-    maxLevel(): number;
+    maxLevel: number;
     /** default compress level */
-    defaultLevel(): number;
+    defaultLevel: number;
 }
 
 const require = createRequire(import.meta.url);
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), './../');
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 const bindings = require('node-gyp-build')(rootDir) as Binding;
 
 export const { compress, decompress } = createModule({
@@ -35,7 +35,7 @@ export const { compress, decompress } = createModule({
     decompress: (data) => bindings.decompress(data, MAX_SIZE),
 });
 
-export const ZSTD_VERSION = (): string => bindings.version();
+export const ZSTD_VERSION = (): string => bindings.version;
 
 export const TYPE = 'napi';
 
