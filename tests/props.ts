@@ -4,9 +4,9 @@ import * as root from '@cloudpss/zstd';
 import * as config from '@cloudpss/zstd/config';
 
 it('should have correct config', () => {
-    expect(config.DEFAULT_LEVEL satisfies number).toBe(napi._NapiBindings.defaultLevel());
-    expect(config.MIN_LEVEL satisfies number).toBe(napi._NapiBindings.minLevel());
-    expect(config.MAX_LEVEL satisfies number).toBe(napi._NapiBindings.maxLevel());
+    expect(config.DEFAULT_LEVEL satisfies number).toBe(napi._NapiBindings.defaultLevel);
+    expect(config.MIN_LEVEL satisfies number).toBe(napi._NapiBindings.minLevel);
+    expect(config.MAX_LEVEL satisfies number).toBe(napi._NapiBindings.maxLevel);
     expect(config.MAX_SIZE satisfies number).toBeGreaterThanOrEqual(1024 * 1024 * 1024);
 });
 

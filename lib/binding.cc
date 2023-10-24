@@ -56,44 +56,20 @@ Napi::Value decompress(const Napi::CallbackInfo &info)
   return outBuffer;
 }
 
-Napi::String version(const Napi::CallbackInfo &info)
-{
-  Napi::Env env = info.Env();
-  return Napi::String::New(env, ZSTD_versionString());
-}
+#define EXPORT_FUNCTION(name) \
+  exports.Set(#name, Napi::Function::New(env, name, #name));
 
-Napi::Number minLevel(const Napi::CallbackInfo &info)
-{
-  Napi::Env env = info.Env();
-  return Napi::Number::New(env, ZSTD_minCLevel());
-}
-
-Napi::Number maxLevel(const Napi::CallbackInfo &info)
-{
-  Napi::Env env = info.Env();
-  return Napi::Number::New(env, ZSTD_maxCLevel());
-}
-
-Napi::Number defaultLevel(const Napi::CallbackInfo &info)
-{
-  Napi::Env env = info.Env();
-  return Napi::Number::New(env, ZSTD_defaultCLevel());
-}
+#define EXPORT_VALUE(name, value) \
+  exports.Set(#name, value);
 
 Napi::Object Init(Napi::Env env, Napi::Object exports)
 {
-  exports.Set(Napi::String::New(env, "compress"),
-              Napi::Function::New(env, compress));
-  exports.Set(Napi::String::New(env, "decompress"),
-              Napi::Function::New(env, decompress));
-  exports.Set(Napi::String::New(env, "version"),
-              Napi::Function::New(env, version));
-  exports.Set(Napi::String::New(env, "minLevel"),
-              Napi::Function::New(env, minLevel));
-  exports.Set(Napi::String::New(env, "maxLevel"),
-              Napi::Function::New(env, maxLevel));
-  exports.Set(Napi::String::New(env, "defaultLevel"),
-              Napi::Function::New(env, defaultLevel));
+  EXPORT_FUNCTION(compress);
+  EXPORT_FUNCTION(decompress);
+  EXPORT_VALUE(version, Napi::String::New(env, ZSTD_versionString()));
+  EXPORT_VALUE(minLevel, ZSTD_minCLevel());
+  EXPORT_VALUE(maxLevel, ZSTD_maxCLevel());
+  EXPORT_VALUE(defaultLevel, ZSTD_defaultCLevel());
   return exports;
 }
 

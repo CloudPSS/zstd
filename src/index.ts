@@ -6,11 +6,11 @@ try {
 } catch {
     const { compress, decompress, ...rest } = await import('./wasm.js');
     lib = {
-        compress: (data, level) => {
+        compress: (data: BinaryData, level?: number): Buffer => {
             const result = compress(data, level);
             return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
         },
-        decompress: (data) => {
+        decompress: (data: BinaryData): Buffer => {
             const result = decompress(data);
             return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
         },
