@@ -4,6 +4,14 @@ let lib: Omit<typeof import('./napi.js'), 'TYPE' | `_${string}`> &
 try {
     lib = await import('./napi.js');
 } catch {
+    // only emit warning if running in node, checking for process is not enough since some polyfills define it
+    if (
+        typeof process == 'object' &&
+        typeof process.emitWarning == 'function' &&
+        typeof process.versions?.node == 'string'
+    ) {
+        process.emitWarning('Failed to load napi bindings, falling back to wasm bindings.', undefined, 'ZSTD');
+    }
     const { compress, decompress, ...rest } = await import('./wasm.js');
     lib = {
         compress: (data: BinaryData, level?: number): Buffer => {
