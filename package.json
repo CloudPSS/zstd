@@ -77,7 +77,7 @@
     "@cloudpss/tsconfig": "^1.5.11",
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.6",
-    "@types/node": "^20.8.8",
+    "@types/node": "^20.8.9",
     "husky": "^8.0.3",
     "jest": "^29.7.0",
     "prebuildify": "^5.0.1",
