@@ -20,10 +20,9 @@ interface Binding {
     defaultLevel: number;
 }
 
-const require = createRequire(import.meta.url);
+const nodeRequire = createRequire(import.meta.url);
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), './../');
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-const bindings = require('node-gyp-build')(rootDir) as Binding;
+const bindings = (nodeRequire('node-gyp-build') as (root: string) => Binding)(rootDir);
 
 export const { compress, decompress } = createModule({
     coercion: (data) => {
@@ -39,6 +38,7 @@ export const ZSTD_VERSION = (): string => bindings.version;
 
 export const TYPE = 'napi';
 
+// For testing purpose
 export const _NapiBindings = bindings;
 
 export default null;
