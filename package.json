@@ -27,25 +27,12 @@
   "browser": "dist/wasm.js",
   "exports": {
     ".": {
-      "types": {
-        "browser": "./dist/wasm.d.ts",
-        "default": "./dist/index.d.ts"
-      },
       "browser": "./dist/wasm.js",
       "default": "./dist/index.js"
     },
-    "./wasm": {
-      "types": "./dist/wasm.d.ts",
-      "default": "./dist/wasm.js"
-    },
-    "./napi": {
-      "types": "./dist/napi.d.ts",
-      "default": "./dist/napi.js"
-    },
-    "./config": {
-      "types": "./dist/config.d.ts",
-      "default": "./dist/config.js"
-    },
+    "./wasm": "./dist/wasm.js",
+    "./napi": "./dist/napi.js",
+    "./config": "./dist/config.js",
     "./package.json": "./package.json"
   },
   "scripts": {
