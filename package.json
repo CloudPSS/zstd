@@ -61,9 +61,9 @@
     "watch": "pnpm clean && tsc --watch",
     "test": "NODE_OPTIONS=\"${NODE_OPTIONS:-} --experimental-vm-modules\" jest",
     "benchmark": "node ./benchmark/index.js",
-    "prepare": "husky install",
-    "format": "prettier --ignore-path .gitignore --write .",
-    "lint": "eslint --ext .js,.ts ."
+    "prepare": "husky install || echo Failed to initialize husky",
+    "format": "prettier --cache --cache-strategy content --ignore-path .gitignore --write .",
+    "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ --cache-strategy content --ext .js,.ts ."
   },
   "prettier": "@cloudpss/prettier-config",
   "commitlint": {
@@ -76,8 +76,8 @@
     "@cloudpss/prettier-config": "^2.0.0",
     "@cloudpss/tsconfig": "^2.0.0",
     "@jest/globals": "^29.7.0",
-    "@types/jest": "^29.5.7",
-    "@types/node": "^20.8.10",
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
     "husky": "^8.0.3",
     "jest": "^29.7.0",
     "prebuildify": "^5.0.1",

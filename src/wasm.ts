@@ -51,7 +51,7 @@ function checkError(code: number): void {
 }
 
 const ZSTD_CONTENTSIZE_ERROR = 2 ** 32 - 2;
-const ZSTD_CONTENTSIZE_UNKNOWN = 2 ** 32 - 1;
+//const ZSTD_CONTENTSIZE_UNKNOWN = 2 ** 32 - 1;
 
 export const { compress, decompress } = createModule({
     coercion: (data) => {
@@ -77,19 +77,16 @@ export const { compress, decompress } = createModule({
         const h = new Helper();
         try {
             const src = h.toHeap(buf);
-            const contentSize = uint(Module._ZSTD_getFrameContentSize(src, buf.byteLength));
-            if (contentSize === ZSTD_CONTENTSIZE_ERROR) {
+            const dstSize = uint(Module._ZSTD_decompressBound(src, buf.byteLength));
+            if (dstSize === ZSTD_CONTENTSIZE_ERROR) {
                 throw new Error('Invalid compressed data');
             }
-            if (contentSize === ZSTD_CONTENTSIZE_UNKNOWN) {
-                throw new Error('Unknown content size');
+            if (dstSize > MAX_SIZE) {
+                throw new Error(`Content size is too large: ${dstSize}`);
             }
-            if (contentSize > MAX_SIZE) {
-                throw new Error(`Content size is too large: ${contentSize}`);
-            }
-            const dst = h.malloc(contentSize);
+            const dst = h.malloc(dstSize);
             /* @See https://facebook.github.io/zstd/zstd_manual.html#Chapter3 */
-            const sizeOrError = Module._ZSTD_decompress(dst, contentSize, src, buf.byteLength);
+            const sizeOrError = Module._ZSTD_decompress(dst, dstSize, src, buf.byteLength);
             checkError(sizeOrError);
             return h.fromHeap(dst, uint(sizeOrError));
         } finally {
