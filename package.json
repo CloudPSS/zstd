@@ -80,6 +80,7 @@
     "@types/node": "^20.9.0",
     "husky": "^8.0.3",
     "jest": "^29.7.0",
+    "node-gyp": "^10.0.1",
     "prebuildify": "^5.0.1",
     "prebuildify-cross": "^5.0.0",
     "pretty-bytes": "^6.1.1",
