@@ -43,17 +43,17 @@ Napi::Value decompress(const Napi::CallbackInfo &info)
   THROW_TYPE_ERROR_IF_FAILED(info[1].IsNumber(), "Wrong argument 1");
   auto inBuffer = info[0].As<Napi::Buffer<char>>();
   auto maxSize = info[1].As<Napi::Number>().Int64Value();
-  auto outSize = ZSTD_getFrameContentSize(inBuffer.Data(), inBuffer.Length());
+  auto outSize = ZSTD_decompressBound(inBuffer.Data(), inBuffer.Length());
   THROW_IF_FAILED(outSize != ZSTD_CONTENTSIZE_ERROR,
                   "Invalid compressed data");
-  THROW_IF_FAILED(outSize != ZSTD_CONTENTSIZE_UNKNOWN,
-                  "Unknown content size");
   THROW_IF_FAILED(outSize < (uint64_t)maxSize, "Content size is too large");
   auto outBuffer = Napi::Buffer<char>::New(env, outSize);
   auto code = ZSTD_decompress(outBuffer.Data(), outSize, inBuffer.Data(),
                               inBuffer.Length());
   THROW_IF_FAILED(!ZSTD_isError(code), ZSTD_getErrorName(code));
-  return outBuffer;
+  if (code == outSize)
+    return outBuffer;
+  return Napi::Buffer<char>::Copy(env, outBuffer.Data(), code);
 }
 
 #define EXPORT_FUNCTION(name) \

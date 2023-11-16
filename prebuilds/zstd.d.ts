@@ -15,7 +15,7 @@ export type Module = {
     _ZSTD_getErrorName(code: number): Ptr;
     _ZSTD_compressBound(size: number): number;
     _ZSTD_compress(outPtr: Ptr, outSize: number, inPtr: Ptr, inSize: number, level: number): number;
-    _ZSTD_getFrameContentSize(src: number, size: number): number;
+    _ZSTD_decompressBound(src: number, size: number): number;
     _ZSTD_decompress(outPtr: Ptr, outSize: number, inPtr: Ptr, inSize: number): number;
     _malloc(size: number): Ptr;
     _free(ptr: Ptr): void;

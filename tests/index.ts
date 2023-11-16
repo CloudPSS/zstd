@@ -220,12 +220,12 @@ describe('should accept rle first block', () => {
     }
 });
 
-describe('should reject empty block', () => {
+describe('should accept empty block', () => {
     const data = Buffer.from('KLUv/QAAFQAAAAA=', 'base64');
 
     for (const [key, decompress] of DECOMPRESS) {
         it(key, () => {
-            expect(() => decompress(data)).toThrow(`Unknown content size`);
+            expect(decompress(data)).toHaveProperty('length', 0);
         });
     }
 });
@@ -235,7 +235,7 @@ describe('should reject uncompleted block', () => {
 
     for (const [key, decompress] of DECOMPRESS) {
         it(key, () => {
-            expect(() => decompress(data)).toThrow(`Src size is incorrect`);
+            expect(() => decompress(data)).toThrow(`Invalid compressed data`);
         });
     }
 });
