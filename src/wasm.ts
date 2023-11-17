@@ -66,7 +66,7 @@ export const { compress, decompress } = createModule({
             const src = h.toHeap(buf);
             const dst = h.malloc(dstSize);
             /* @See https://facebook.github.io/zstd/zstd_manual.html#Chapter3 */
-            const sizeOrError = Module._ZSTD_compress(dst, dstSize, src, buf.byteLength, level);
+            const sizeOrError = Module._compress(dst, dstSize, src, buf.byteLength, level);
             checkError(sizeOrError);
             return h.fromHeap(dst, uint(sizeOrError));
         } finally {
@@ -86,7 +86,7 @@ export const { compress, decompress } = createModule({
             }
             const dst = h.malloc(dstSize);
             /* @See https://facebook.github.io/zstd/zstd_manual.html#Chapter3 */
-            const sizeOrError = Module._ZSTD_decompress(dst, dstSize, src, buf.byteLength);
+            const sizeOrError = Module._decompress(dst, dstSize, src, buf.byteLength);
             checkError(sizeOrError);
             return h.fromHeap(dst, uint(sizeOrError));
         } finally {

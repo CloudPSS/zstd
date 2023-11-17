@@ -4,7 +4,7 @@ import { Buffer } from 'node:buffer';
 
 describe('should have no memory leak', () => {
     beforeAll(() => {
-        const dummy = Buffer.from('dummy');
+        const dummy = randomBytes(10_000_000);
         const compressed = wasm.compress(dummy);
         wasm.decompress(compressed);
     });
