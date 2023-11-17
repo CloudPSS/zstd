@@ -18,6 +18,7 @@ extern "C"
     return env.Null();                                             \
   }
 
+static ZSTD_CCtx *const compressCtx = ZSTD_createCCtx();
 Napi::Value compress(const Napi::CallbackInfo &info)
 {
   Napi::Env env = info.Env();
@@ -26,15 +27,17 @@ Napi::Value compress(const Napi::CallbackInfo &info)
   THROW_TYPE_ERROR_IF_FAILED(info[1].IsNumber(), "Wrong argument 1");
   auto inBuffer = info[0].As<Napi::Buffer<char>>();
   auto level = info[1].As<Napi::Number>().Int32Value();
-
   auto maxSize = ZSTD_compressBound(inBuffer.Length());
   auto outBuffer = Napi::Buffer<char>::New(env, maxSize);
-  auto codeOrSize = ZSTD_compress(outBuffer.Data(), maxSize, inBuffer.Data(),
-                                  inBuffer.Length(), level);
+  auto codeOrSize = ZSTD_compressCCtx(compressCtx,
+                                      outBuffer.Data(), maxSize,
+                                      inBuffer.Data(), inBuffer.Length(),
+                                      level);
   THROW_IF_FAILED(!ZSTD_isError(codeOrSize), ZSTD_getErrorName(codeOrSize));
   return Napi::Buffer<char>::Copy(env, outBuffer.Data(), codeOrSize);
 }
 
+static ZSTD_DCtx *const decompressCtx = ZSTD_createDCtx();
 Napi::Value decompress(const Napi::CallbackInfo &info)
 {
   Napi::Env env = info.Env();
@@ -48,8 +51,9 @@ Napi::Value decompress(const Napi::CallbackInfo &info)
                   "Invalid compressed data");
   THROW_IF_FAILED(outSize < (uint64_t)maxSize, "Content size is too large");
   auto outBuffer = Napi::Buffer<char>::New(env, outSize);
-  auto code = ZSTD_decompress(outBuffer.Data(), outSize, inBuffer.Data(),
-                              inBuffer.Length());
+  auto code = ZSTD_decompressDCtx(decompressCtx,
+                                  outBuffer.Data(), outSize,
+                                  inBuffer.Data(), inBuffer.Length());
   THROW_IF_FAILED(!ZSTD_isError(code), ZSTD_getErrorName(code));
   if (code == outSize)
     return outBuffer;
