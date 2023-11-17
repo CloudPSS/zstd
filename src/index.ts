@@ -22,6 +22,8 @@ try {
             const result = decompress(data);
             return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
         },
+        Compressor: undefined as unknown as (typeof import('./napi.js'))['Compressor'],
+        Decompressor: undefined as unknown as (typeof import('./napi.js'))['Decompressor'],
         ...rest,
     };
 }
@@ -31,6 +33,12 @@ export const { compress } = lib;
 
 /** ZStandard decompress */
 export const { decompress } = lib;
+
+/** NodeJs Transform stream Compressor */
+export const { Compressor } = lib;
+
+/** NodeJs Transform stream Decompressor */
+export const { Decompressor } = lib;
 
 /** The type of the current module. */
 export const TYPE: (typeof import('./napi.js'))['TYPE'] | (typeof import('./wasm.js'))['TYPE'] = lib.TYPE;

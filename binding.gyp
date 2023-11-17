@@ -9,7 +9,11 @@
                 "<!(node -p \"require('node-addon-api').include_dir\")",
                 "lib",
             ],
-            "defines": ["NAPI_DISABLE_CPP_EXCEPTIONS", "NDEBUG"],
+            "defines": [
+                "NAPI_DISABLE_CPP_EXCEPTIONS",
+                "NODE_ADDON_API_ENABLE_MAYBE",
+                "NDEBUG",
+            ],
         }
     ]
 }
