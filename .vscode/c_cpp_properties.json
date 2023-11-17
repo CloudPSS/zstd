@@ -1,0 +1,15 @@
+{
+  "configurations": [
+    {
+      "name": "Win32",
+      "includePath": ["${workspaceFolder}/**", "${env:LOCALAPPDATA}/node-gyp/Cache/18.16.1/include/node"],
+      "defines": ["NAPI_DISABLE_CPP_EXCEPTIONS", "NODE_ADDON_API_ENABLE_MAYBE", "NDEBUG", "UNICODE", "_UNICODE"],
+      "windowsSdkVersion": "10.0.22621.0",
+      "compilerPath": "cl.exe",
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "windows-msvc-x64"
+    }
+  ],
+  "version": 4
+}

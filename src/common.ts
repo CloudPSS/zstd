@@ -2,7 +2,7 @@ import { DEFAULT_LEVEL } from './config.js';
 import { MAX_SIZE, MIN_LEVEL, MAX_LEVEL } from './config.js';
 
 /** check input before coercion */
-function checkInput(input: unknown): void {
+export function checkInput(input: unknown): asserts input is BinaryData {
     if (input == null || typeof input != 'object') throw new TypeError(`Input data must be BinaryData`);
 
     if (ArrayBuffer.isView(input)) {
@@ -21,6 +21,16 @@ function checkInput(input: unknown): void {
     throw new TypeError(`Input data must be BinaryData`);
 }
 
+/** check and clamp compress level */
+export function checkLevel(level: number | undefined): number {
+    if (level == null) return DEFAULT_LEVEL;
+    if (typeof level != 'number') throw new Error(`level must be an integer`);
+    if (Number.isNaN(level)) return DEFAULT_LEVEL;
+    if (level < MIN_LEVEL) return MIN_LEVEL;
+    if (level > MAX_LEVEL) return MAX_LEVEL;
+    return Math.trunc(level);
+}
+
 /** warp module */
 export function createModule<TBinary extends Uint8Array>(options: {
     coercion: (input: BinaryData) => TBinary;
@@ -35,11 +45,7 @@ export function createModule<TBinary extends Uint8Array>(options: {
     const { coercion, compress, decompress } = options;
     return {
         compress: (data: BinaryData, level = DEFAULT_LEVEL) => {
-            if (typeof level != 'number') throw new Error(`level must be an integer`);
-            if (Number.isNaN(level)) level = DEFAULT_LEVEL;
-            else if (level < MIN_LEVEL) level = MIN_LEVEL;
-            else if (level > MAX_LEVEL) level = MAX_LEVEL;
-            else level = Math.round(level);
+            level = checkLevel(level);
             checkInput(data);
             const input = coercion(data);
             const output = compress(input, level);
