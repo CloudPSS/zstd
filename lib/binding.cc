@@ -271,10 +271,10 @@ private:
 };
 
 #define EXPORT_FUNCTION(name) \
-  exports.Set(#name, Napi::Function::New(env, name, #name));
+  exports.Set(#name, Napi::Function::New(env, name, #name))
 
 #define EXPORT_VALUE(name, value) \
-  exports.Set(#name, value);
+  exports.Set(#name, value)
 
 Napi::Object Init(Napi::Env env, Napi::Object exports)
 {
