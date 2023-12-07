@@ -138,8 +138,6 @@ describe('should reject bad level', () => {
             // @ts-expect-error ts(2345)
             expect(() => compress(emptyBuffer, [])).toThrow();
             // @ts-expect-error ts(2345)
-            expect(() => compress(emptyBuffer, null)).toThrow();
-            // @ts-expect-error ts(2345)
             // eslint-disable-next-line unicorn/new-for-builtins
             expect(() => compress(emptyBuffer, new Number(1))).toThrow();
             // @ts-expect-error ts(2345)
@@ -153,7 +151,9 @@ describe('should reject bad level', () => {
 describe('should accept allowed level', () => {
     for (const [key, compress] of COMPRESS) {
         it(key, () => {
-            expect(() => compress(emptyBuffer, 0)).not.toThrow();
+            // @ts-expect-error ts(2345)
+            expect(() => compress(emptyBuffer, null)).not.toThrow();
+            expect(() => compress(emptyBuffer, undefined)).not.toThrow();
             expect(() => compress(emptyBuffer, 1.2)).not.toThrow();
             expect(() => compress(emptyBuffer, Number.NaN)).not.toThrow();
             expect(() => compress(emptyBuffer, Number.MAX_VALUE)).not.toThrow();
