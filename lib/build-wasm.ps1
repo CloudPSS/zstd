@@ -12,7 +12,6 @@ $ExportedFunctions = 'ZSTD_versionNumber', 'ZSTD_isError', 'ZSTD_getErrorName', 
 
 docker run --rm -v ${PWD}:/src emscripten/emsdk `
   emcc ./lib/wasm.cc -o ./prebuilds/zstd.js `
-  --memory-init-file 0 `
   -sSTRICT `
   -sMALLOC=emmalloc `
   -sEXPORTED_FUNCTIONS="[$($ExportedFunctions | ForEach-Object { "_$_" } | Join-String -Separator ',' -SingleQuote )]" `
