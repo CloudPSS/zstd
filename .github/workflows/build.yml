@@ -207,5 +207,6 @@ jobs:
 
       - name: Send coverage report
         uses: codacy/codacy-coverage-reporter-action@v1
+        if: github.secret_source == 'Actions'
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
