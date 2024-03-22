@@ -48,7 +48,7 @@
     "watch": "pnpm clean && tsc --watch",
     "test": "NODE_OPTIONS=\"${NODE_OPTIONS:-} --experimental-vm-modules\" jest",
     "benchmark": "node ./benchmark/index.js",
-    "prepare": "husky install || echo Failed to initialize husky",
+    "prepare": "husky || echo Failed to initialize husky",
     "format": "prettier --cache --cache-strategy content --ignore-path .gitignore --write .",
     "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ --cache-strategy content --ext .js,.ts ."
   },
@@ -57,26 +57,26 @@
     "extends": "@cloudpss"
   },
   "devDependencies": {
-    "@cloudpss/commitlint-config": "^2.0.0",
-    "@cloudpss/eslint-config": "^2.0.0",
-    "@cloudpss/lint-staged-config": "^2.0.0",
-    "@cloudpss/prettier-config": "^2.0.0",
-    "@cloudpss/tsconfig": "^2.0.0",
+    "@cloudpss/commitlint-config": "^2.1.0",
+    "@cloudpss/eslint-config": "^2.1.0",
+    "@cloudpss/lint-staged-config": "^2.1.0",
+    "@cloudpss/prettier-config": "^2.1.0",
+    "@cloudpss/tsconfig": "^2.1.0",
     "@jest/globals": "^29.7.0",
-    "@types/jest": "^29.5.11",
-    "@types/node": "^20.10.3",
-    "husky": "^8.0.3",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.30",
+    "husky": "^9.0.11",
     "jest": "^29.7.0",
     "node-gyp": "^10.0.1",
-    "prebuildify": "^5.0.1",
-    "prebuildify-cross": "^5.0.0",
+    "prebuildify": "^6.0.0",
+    "prebuildify-cross": "^5.1.0",
     "pretty-bytes": "^6.1.1",
     "rimraf": "^5.0.5",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.3.3"
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.3"
   },
   "dependencies": {
-    "node-addon-api": "^7.0.0",
-    "node-gyp-build": "^4.7.1"
+    "node-addon-api": "^8.0.0",
+    "node-gyp-build": "^4.8.0"
   }
 }
