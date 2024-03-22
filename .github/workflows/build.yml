@@ -25,7 +25,7 @@ jobs:
           pnpm build:deps
 
       - name: Upload common artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-common
           path: |
@@ -47,7 +47,7 @@ jobs:
           args: --ignore-scripts
 
       - name: Download common artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-common
 
@@ -55,9 +55,9 @@ jobs:
         run: pnpm build:wasm
 
       - name: Upload prebuild artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: prebuilds
+          name: prebuilds-wasm
           path: prebuilds/zstd.js
 
   build-windows:
@@ -75,7 +75,7 @@ jobs:
           args: --ignore-scripts
 
       - name: Download common artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-common
 
@@ -85,9 +85,9 @@ jobs:
           pnpm build:gyp --arch x64
 
       - name: Upload prebuild artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: prebuilds
+          name: prebuilds-windows
           path: prebuilds/
 
   build-linux:
@@ -105,7 +105,7 @@ jobs:
           args: --ignore-scripts
 
       - name: Download common artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-common
 
@@ -117,9 +117,9 @@ jobs:
           pnpm build:gyp-cross --tag-libc musl  -i linux-arm64-musl
 
       - name: Upload prebuild artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: prebuilds
+          name: prebuilds-linux
           path: prebuilds/
 
   build-macos:
@@ -137,7 +137,7 @@ jobs:
           args: --ignore-scripts
 
       - name: Download common artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-common
 
@@ -147,9 +147,9 @@ jobs:
           pnpm build:gyp --arch arm64
 
       - name: Upload prebuild artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: prebuilds
+          name: prebuilds-macos
           path: prebuilds/
 
   pack:
@@ -160,18 +160,19 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download common artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build-common
 
       - name: Download prebuilt artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: prebuilds
+          pattern: prebuilds-*
           path: prebuilds/
+          merge-multiple: true
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build
           path: |
@@ -191,7 +192,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build
 
