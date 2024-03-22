@@ -1,14 +1,8 @@
 /* eslint-disable jsdoc/require-jsdoc */
 export type Ptr = number & { ptr: 'void*' };
 export type Module = {
-    readonly HEAP8: Int8Array;
     readonly HEAPU8: Uint8Array;
-    readonly HEAP16: Int16Array;
-    readonly HEAPU16: Uint16Array;
-    readonly HEAP32: Int32Array;
-    readonly HEAPU32: Uint32Array;
-    readonly HEAPF32: Float32Array;
-    readonly HEAPF64: Float64Array;
+    UTF8ToString(ptr: Ptr, maxBytesToRead?: number): string;
 
     _ZSTD_versionNumber(): number;
     _ZSTD_isError(code: number): number;
@@ -20,8 +14,6 @@ export type Module = {
     _malloc(size: number): Ptr;
     _free(ptr: Ptr): void;
     _usedmem(): number;
-
-    UTF8ToString(ptr: Ptr, maxBytesToRead?: number): string;
 };
 
 export default function createModule(): Promise<Module>;

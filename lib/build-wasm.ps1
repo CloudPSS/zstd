@@ -19,7 +19,7 @@ docker run --rm -v ${PWD}:/src emscripten/emsdk `
   -sALLOW_MEMORY_GROWTH=1 `
   -sSINGLE_FILE=1 `
   -sINCOMING_MODULE_JS_API="[]" `
-  -sEXPORTED_RUNTIME_METHODS="['UTF8ToString']" `
+  -sEXPORTED_RUNTIME_METHODS="['UTF8ToString', 'HEAPU8']" `
   -sENVIRONMENT="web" `
   -sASSERTIONS=0 `
   -sMODULARIZE `
