@@ -111,10 +111,11 @@ jobs:
 
       - name: Prebuildify
         run: |
-          pnpm build:gyp-cross -i centos7-devtoolset7
-          pnpm build:gyp-cross -i alpine
-          pnpm build:gyp-cross -i linux-arm64-lts
-          pnpm build:gyp-cross -i linux-arm64-musl
+          # https://github.com/prebuild/docker-images?tab=readme-ov-file#images
+          pnpm build:gyp-cross                  -i centos7-devtoolset7
+          pnpm build:gyp-cross                  -i alpine
+          pnpm build:gyp-cross --tag-libc glibc -i linux-arm64-lts
+          pnpm build:gyp-cross --tag-libc musl  -i linux-arm64-musl
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v4
