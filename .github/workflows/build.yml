@@ -13,10 +13,8 @@ jobs:
           submodules: recursive
 
       - name: Install
-        uses: wyvox/action-setup-pnpm@v3
+        uses: ./.github/actions/install.yml
         with:
-          node-version: lts/*
-          pnpm-version: 8
           args: --ignore-scripts
 
       - name: Build
@@ -40,10 +38,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install
-        uses: wyvox/action-setup-pnpm@v3
+        uses: ./.github/actions/install.yml
         with:
-          node-version: lts/*
-          pnpm-version: 8
           args: --ignore-scripts
 
       - name: Download common artifacts
@@ -68,10 +64,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install
-        uses: wyvox/action-setup-pnpm@v3
+        uses: ./.github/actions/install.yml
         with:
-          node-version: lts/*
-          pnpm-version: 8
           args: --ignore-scripts
 
       - name: Download common artifacts
@@ -98,10 +92,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install
-        uses: wyvox/action-setup-pnpm@v3
+        uses: ./.github/actions/install.yml
         with:
-          node-version: lts/*
-          pnpm-version: 8
           args: --ignore-scripts
 
       - name: Download common artifacts
@@ -131,10 +123,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install
-        uses: wyvox/action-setup-pnpm@v3
+        uses: ./.github/actions/install.yml
         with:
-          node-version: lts/*
-          pnpm-version: 8
           args: --ignore-scripts
 
       - name: Download common artifacts
@@ -198,10 +188,9 @@ jobs:
           name: build
 
       - name: Install
-        uses: wyvox/action-setup-pnpm@v3
+        uses: ./.github/actions/install.yml
         with:
           node-version: ${{ matrix.node }}
-          pnpm-version: 8
 
       - name: Run test with prebuilds
         run: pnpm test
