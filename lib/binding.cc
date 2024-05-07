@@ -88,7 +88,7 @@ public:
     return exports;
   }
 
-  Compressor(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Compressor>(info), ctx(nullptr)
+  explicit Compressor(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Compressor>(info), ctx(nullptr)
   {
     Napi::Env env = info.Env();
     THROW_TYPE_ERROR_IF_FAILED_VOID(info.Length() == 1, "Wrong number of arguments");
@@ -190,7 +190,7 @@ public:
     return exports;
   }
 
-  Decompressor(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Decompressor>(info), ctx(nullptr)
+  explicit Decompressor(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Decompressor>(info), ctx(nullptr)
   {
     Napi::Env env = info.Env();
     THROW_TYPE_ERROR_IF_FAILED_VOID(info.Length() == 0, "Wrong number of arguments");
