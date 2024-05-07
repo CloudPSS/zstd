@@ -17,14 +17,25 @@ function asBuffer(data: ArrayBufferView): Buffer {
 /**
  * 转换 buffer
  */
-function asReadable(data: BodyInit): ReadableStream<Uint8Array> {
-    return new Response(data).body!;
+function asReadable(data: Uint8Array): ReadableStream<Uint8Array> {
+    let ptr = 0;
+    return new RS<Uint8Array>({
+        pull(controller) {
+            const chunk = data.slice(ptr, ptr + 1024);
+            if (chunk.byteLength) {
+                controller.enqueue(chunk);
+            } else {
+                controller.close();
+            }
+            ptr += 1024;
+        },
+    }) as ReadableStream<Uint8Array>;
 }
 
 /** 生成数据 */
 function hugeReadable(): ReadableStream<Uint8Array> {
     let count = 0;
-    return new ReadableStream({
+    return new RS<Uint8Array>({
         pull(controller) {
             if (count++ < 1024 * 1024) {
                 controller.enqueue(randomBuffer);
@@ -32,7 +43,7 @@ function hugeReadable(): ReadableStream<Uint8Array> {
                 controller.close();
             }
         },
-    });
+    }) as ReadableStream<Uint8Array>;
 }
 
 const MODULE = [
