@@ -10,13 +10,13 @@ it('should have correct config', () => {
     expect(config.MAX_SIZE satisfies number).toBeGreaterThanOrEqual(1024 * 1024 * 1024);
 });
 
-describe('should have correct TYPE', () => {
+it('should have correct TYPE', () => {
     expect(napi.TYPE satisfies 'napi').toBe('napi');
     expect(wasm.TYPE satisfies 'wasm').toBe('wasm');
     expect(root.TYPE satisfies 'wasm' | 'napi').toBe('napi');
 });
 
-describe('should have correct VERSION', () => {
+it('should have correct VERSION', () => {
     expect(napi.ZSTD_VERSION() satisfies string).toMatch(/^\d+\.\d+\.\d+$/);
     expect(wasm.ZSTD_VERSION() satisfies string).toMatch(/^\d+\.\d+\.\d+$/);
     expect(root.ZSTD_VERSION() satisfies string).toMatch(/^\d+\.\d+\.\d+$/);
