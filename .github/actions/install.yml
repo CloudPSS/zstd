@@ -1,0 +1,24 @@
+name: Install
+inputs:
+  node-version:
+    description: "Override the default node version, or override what is specified in your project's volta config"
+    required: false
+    default: lts/*
+  pnpm-version:
+    description: 'Override the default pnpm version, which defaults to the latest 8.x'
+    required: false
+    default: '8'
+  args:
+    description: 'Directly pass args to pnpm'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install
+      uses: wyvox/action-setup-pnpm@v3
+      with:
+        node-version: ${{ inputs.node-version }}
+        node-version-file: ''
+        pnpm-version: ${{ inputs.pnpm-version }}
+        args: ${{ inputs.args }}
