@@ -25,16 +25,14 @@ const decompressed = decompress(compressed);
 console.log(decompressed.toString()); // Hello World!
 ```
 
-To explicitly use the wasm or the n-api version,
-import `@cloudpss/zstd/wasm` and `@cloudpss/zstd/napi` respectively.
+To explicitly use the wasm or the n-api version, import `@cloudpss/zstd/wasm` and `@cloudpss/zstd/napi` respectively.
 
 ## API
 
 ### Module `@cloudpss/zstd` / `@cloudpss/zstd/wasm` / `@cloudpss/zstd/napi`
 
 > [!NOTE]
-> If you are using this library in a browser,
-> the `Buffer` classes is replaced with `Uint8Array` classes.
+> If you are using this library in a browser, the `Buffer` classes is replaced with `Uint8Array` classes.
 
 #### `compress(input: BinaryData, level?: number): Buffer`
 
