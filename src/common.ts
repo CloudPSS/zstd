@@ -36,15 +36,22 @@ export function createModule<TBinary extends Uint8Array>(options: {
     coercion: (input: BinaryData) => TBinary;
     compress: (data: TBinary, level: number) => TBinary;
     decompress: (data: TBinary) => TBinary;
+    Compressor: new (level: number) => Transformer<BinaryData, TBinary>;
+    Decompressor: new () => Transformer<BinaryData, TBinary>;
+    TransformStream: typeof globalThis.TransformStream;
 }): {
     /** ZStandard compress */
     compress: (data: BinaryData, level?: number) => Uint8Array;
     /** ZStandard decompress */
     decompress: (data: BinaryData) => Uint8Array;
+    /** create ZStandard stream compressor */
+    compressor: (level?: number) => TransformStream<BinaryData, Uint8Array>;
+    /** create ZStandard stream decompressor */
+    decompressor: () => TransformStream<BinaryData, Uint8Array>;
 } {
-    const { coercion, compress, decompress } = options;
+    const { coercion, compress, decompress, Compressor, Decompressor, TransformStream } = options;
     return {
-        compress: (data: BinaryData, level = DEFAULT_LEVEL) => {
+        compress: (data: BinaryData, level: number | undefined) => {
             level = checkLevel(level);
             checkInput(data);
             const input = coercion(data);
@@ -56,6 +63,15 @@ export function createModule<TBinary extends Uint8Array>(options: {
             const input = coercion(data);
             const output = decompress(input);
             return output;
+        },
+        compressor: ((level: number | undefined) => {
+            level = checkLevel(level);
+            const transformer = new TransformStream<BinaryData, TBinary>(new Compressor(level));
+            return transformer;
+        }) as (level?: number, nodeStream?: boolean) => TransformStream<BinaryData, Uint8Array>,
+        decompressor: () => {
+            const transformer = new TransformStream<BinaryData, TBinary>(new Decompressor());
+            return transformer;
         },
     };
 }

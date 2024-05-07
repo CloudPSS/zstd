@@ -1,5 +1,5 @@
 import wasmModule, { type Ptr, type ZSTD_CStream, type ZSTD_DStream } from '../prebuilds/zstd.js';
-import { createModule } from './common.js';
+import { checkInput, createModule } from './common.js';
 import { MAX_SIZE } from './config.js';
 
 const Module = await wasmModule({
@@ -19,82 +19,64 @@ const COMPRESSORS = new Map<ZSTD_CStream, TransformStreamDefaultController<Uint8
 const DECOMPRESSORS = new Map<ZSTD_DStream, TransformStreamDefaultController<Uint8Array>>();
 
 /** Stream compressor */
-class Compressor implements Transformer<BinaryData, Uint8Array> {
+class WebCompressor implements Transformer<BinaryData, Uint8Array> {
     constructor(readonly level: number) {}
 
     private ctx: ZSTD_CStream | null = null;
     /** @inheritdoc */
     start(controller: TransformStreamDefaultController<Uint8Array>): void {
-        try {
-            this.ctx = checkError(Module._CompressorCreate(this.level));
-            COMPRESSORS.set(this.ctx, controller);
-        } catch (ex) {
-            controller.error(ex);
-        }
+        this.ctx = checkError(Module._CompressorCreate(this.level));
+        COMPRESSORS.set(this.ctx, controller);
     }
 
     /** @inheritdoc */
-    transform(chunk: BinaryData, controller: TransformStreamDefaultController<Uint8Array>): void {
+    transform(chunk: BinaryData): void {
         const helper = new Helper();
         try {
-            const src = toUint8Array(chunk);
+            checkInput(chunk);
+            const src = coercion(chunk);
             const srcSize = src.byteLength;
             const srcPtr = helper.toHeap(src);
             checkError(Module._CompressorData(this.ctx!, srcPtr, srcSize));
-        } catch (ex) {
-            controller.error(ex);
         } finally {
             helper.finalize();
         }
     }
 
     /** @inheritdoc */
-    flush(controller: TransformStreamDefaultController<Uint8Array>): void {
-        try {
-            checkError(Module._CompressorEnd(this.ctx!));
-            this.ctx = null;
-        } catch (ex) {
-            controller.error(ex);
-        }
+    flush(): void {
+        checkError(Module._CompressorEnd(this.ctx!));
+        this.ctx = null;
     }
 }
 
 /** Stream decompressor */
-class Decompressor implements Transformer<BinaryData, Uint8Array> {
+class WebDecompressor implements Transformer<BinaryData, Uint8Array> {
     private ctx: ZSTD_DStream | null = null;
     /** @inheritdoc */
     start(controller: TransformStreamDefaultController<Uint8Array>): void {
-        try {
-            this.ctx = checkError(Module._DecompressorCreate());
-            DECOMPRESSORS.set(this.ctx, controller);
-        } catch (ex) {
-            controller.error(ex);
-        }
+        this.ctx = checkError(Module._DecompressorCreate());
+        DECOMPRESSORS.set(this.ctx, controller);
     }
 
     /** @inheritdoc */
-    transform(chunk: BinaryData, controller: TransformStreamDefaultController<Uint8Array>): void {
+    transform(chunk: BinaryData): void {
         const helper = new Helper();
         try {
-            const src = toUint8Array(chunk);
+            checkInput(chunk);
+            const src = coercion(chunk);
             const srcSize = src.byteLength;
             const srcPtr = helper.toHeap(src);
             checkError(Module._DecompressorData(this.ctx!, srcPtr, srcSize));
-        } catch (ex) {
-            controller.error(ex);
         } finally {
             helper.finalize();
         }
     }
 
     /** @inheritdoc */
-    flush(controller: TransformStreamDefaultController<Uint8Array>): void {
-        try {
-            checkError(Module._DecompressorEnd(this.ctx!));
-            this.ctx = null;
-        } catch (ex) {
-            controller.error(ex);
-        }
+    flush(): void {
+        checkError(Module._DecompressorEnd(this.ctx!));
+        this.ctx = null;
     }
 }
 
@@ -146,7 +128,7 @@ function checkError<T extends number>(code: T): T {
 }
 
 /** to Uint8Array */
-function toUint8Array(data: BinaryData): Uint8Array {
+function coercion(data: BinaryData): Uint8Array {
     if (data instanceof Uint8Array) return data;
     if (ArrayBuffer.isView(data)) return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
     return new Uint8Array(data, 0, data.byteLength);
@@ -155,8 +137,8 @@ function toUint8Array(data: BinaryData): Uint8Array {
 const ZSTD_CONTENTSIZE_ERROR = 2 ** 32 - 2;
 //const ZSTD_CONTENTSIZE_UNKNOWN = 2 ** 32 - 1;
 
-export const { compress, decompress } = createModule({
-    coercion: toUint8Array,
+export const { compress, decompress, compressor, decompressor } = createModule({
+    coercion,
     compress: (buf, level) => {
         const h = new Helper();
         try {
@@ -191,17 +173,10 @@ export const { compress, decompress } = createModule({
             h.finalize();
         }
     },
+    Compressor: WebCompressor,
+    Decompressor: WebDecompressor,
+    TransformStream,
 });
-
-/** create stream compressor */
-export function compressor(level: number): TransformStream<BinaryData, Uint8Array> {
-    return new TransformStream(new Compressor(level));
-}
-
-/** create stream decompressor */
-export function decompressor(): TransformStream<BinaryData, Uint8Array> {
-    return new TransformStream(new Decompressor());
-}
 
 let _ZSTD_VERSION: string;
 export const ZSTD_VERSION = (): string => {

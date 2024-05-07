@@ -2,8 +2,9 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { Transform, type TransformCallback } from 'node:stream';
+import { TransformStream } from 'node:stream/web';
 import { MAX_SIZE } from './config.js';
-import { checkLevel, createModule } from './common.js';
+import { checkInput, checkLevel, createModule } from './common.js';
 
 /** Compressor class */
 declare class _Compressor {
@@ -64,15 +65,9 @@ const coercion = (data: BinaryData): Buffer => {
     return Buffer.from(data, 0, data.byteLength);
 };
 
-export const { compress, decompress } = createModule({
-    coercion,
-    compress: (data, level) => bindings.compress(data, level),
-    decompress: (data) => bindings.decompress(data, MAX_SIZE),
-});
-
 /** NodeJs Transform stream Compressor */
 export class Compressor extends Transform {
-    private _binding?: _Compressor | undefined;
+    private _binding: _Compressor | null = null;
     private readonly _level: number;
     constructor(level?: number) {
         super({ objectMode: false });
@@ -90,6 +85,7 @@ export class Compressor extends Transform {
     /** @inheritdoc */
     override _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {
         try {
+            checkInput(chunk);
             if (this._binding == null) throw new Error(`Compressor is destroyed`);
             this._binding.data(chunk, (data) => this.push(data));
             callback();
@@ -110,7 +106,7 @@ export class Compressor extends Transform {
     /** @inheritdoc */
     override _destroy(error: Error | null, callback: (error: Error | null) => void): void {
         try {
-            this._binding = undefined;
+            this._binding = null;
             callback(error);
         } catch (ex) {
             callback(ex as Error);
@@ -119,7 +115,7 @@ export class Compressor extends Transform {
 }
 /** NodeJs Transform stream Decompressor */
 export class Decompressor extends Transform {
-    private _binding?: _Decompressor | undefined;
+    private _binding: _Decompressor | null = null;
     constructor() {
         super({ objectMode: false });
     }
@@ -135,6 +131,7 @@ export class Decompressor extends Transform {
     /** @inheritdoc */
     override _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {
         try {
+            checkInput(chunk);
             if (this._binding == null) throw new Error(`Decompressor is destroyed`);
             this._binding.data(chunk, (data) => this.push(data));
             callback();
@@ -155,13 +152,66 @@ export class Decompressor extends Transform {
     /** @inheritdoc */
     override _destroy(error: Error | null, callback: (error: Error | null) => void): void {
         try {
-            this._binding = undefined;
+            this._binding = null;
             callback(error);
         } catch (ex) {
             callback(ex as Error);
         }
     }
 }
+
+/** Stream compressor */
+class WebCompressor implements Transformer<BinaryData, Uint8Array> {
+    constructor(readonly level: number) {}
+
+    private _binding: _Compressor | null = null;
+    /** @inheritdoc */
+    start(): void {
+        this._binding = new bindings.Compressor(this.level);
+    }
+
+    /** @inheritdoc */
+    transform(chunk: BinaryData, controller: TransformStreamDefaultController<Uint8Array>): void {
+        checkInput(chunk);
+        this._binding!.data(coercion(chunk), (data) => controller.enqueue(data));
+    }
+
+    /** @inheritdoc */
+    flush(controller: TransformStreamDefaultController<Uint8Array>): void {
+        this._binding!.end((data) => controller.enqueue(data));
+        this._binding = null;
+    }
+}
+
+/** Stream decompressor */
+class WebDecompressor implements Transformer<BinaryData, Uint8Array> {
+    private _binding: _Compressor | null = null;
+    /** @inheritdoc */
+    start(): void {
+        this._binding = new bindings.Decompressor();
+    }
+
+    /** @inheritdoc */
+    transform(chunk: BinaryData, controller: TransformStreamDefaultController<Uint8Array>): void {
+        checkInput(chunk);
+        this._binding!.data(coercion(chunk), (data) => controller.enqueue(data));
+    }
+
+    /** @inheritdoc */
+    flush(controller: TransformStreamDefaultController<Uint8Array>): void {
+        this._binding!.end((data) => controller.enqueue(data));
+        this._binding = null;
+    }
+}
+
+export const { compress, decompress, compressor, decompressor } = createModule({
+    coercion,
+    compress: (data, level) => bindings.compress(data, level),
+    decompress: (data) => bindings.decompress(data, MAX_SIZE),
+    Compressor: WebCompressor,
+    Decompressor: WebDecompressor,
+    TransformStream: TransformStream as typeof globalThis.TransformStream,
+});
 
 export const ZSTD_VERSION = (): string => bindings.version;
 
