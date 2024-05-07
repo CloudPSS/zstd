@@ -175,7 +175,10 @@ export const { compress, decompress, compressor, decompressor } = createModule({
     },
     Compressor: WebCompressor,
     Decompressor: WebDecompressor,
-    TransformStream,
+    TransformStream:
+        typeof TransformStream == 'function'
+            ? TransformStream
+            : ((await import('node:stream/web')).TransformStream as typeof TransformStream),
 });
 
 let _ZSTD_VERSION: string;
