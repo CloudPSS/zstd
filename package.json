@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cloudpss/zstd.git"
+    "url": "git+https://github.com/cloudpss/zstd.git"
   },
   "keywords": [
     "zstd",
