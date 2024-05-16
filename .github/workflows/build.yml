@@ -176,7 +176,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        node: ['lts/-2', 'lts/-1', 'lts/*', 'latest']
+        node: ['lts/-1', 'lts/*', 'latest']
     runs-on: ${{ matrix.os }}
 
     steps:
