@@ -29,8 +29,16 @@ declare class _Decompressor {
 interface Binding {
     /** compress */
     compress(data: Buffer, level: number): Buffer;
+    /** compress_async */
+    compress_async(data: Buffer, level: number, callback: (error: string | null, data: Buffer | null) => void): void;
     /** decompress */
     decompress(data: Buffer, maxSize: number): Buffer;
+    /** decompress_async */
+    decompress_async(
+        data: Buffer,
+        maxSize: number,
+        callback: (error: string | null, data: Buffer | null) => void,
+    ): void;
     /** Get zstd version */
     version: string;
     /** min compress level */
@@ -204,10 +212,24 @@ class WebDecompressor implements Transformer<BinaryData, Uint8Array> {
     }
 }
 
-export const { compress, decompress, compressor, decompressor } = createModule({
+export const { compressSync, compress, decompressSync, decompress, compressor, decompressor } = createModule({
     coercion,
-    compress: (data, level) => bindings.compress(data, level),
-    decompress: (data) => bindings.decompress(data, MAX_SIZE),
+    compressSync: (data, level) => bindings.compress(data, level),
+    decompressSync: (data) => bindings.decompress(data, MAX_SIZE),
+    compress: (data, level) =>
+        new Promise((resolve, reject) => {
+            bindings.compress_async(data, level, (error, data) => {
+                if (error) reject(new Error(error));
+                else resolve(data!);
+            });
+        }),
+    decompress: (data) =>
+        new Promise((resolve, reject) => {
+            bindings.decompress_async(data, MAX_SIZE, (error, data) => {
+                if (error) reject(new Error(error));
+                else resolve(data!);
+            });
+        }),
     Compressor: WebCompressor,
     Decompressor: WebDecompressor,
     TransformStream: TransformStream as typeof globalThis.TransformStream,

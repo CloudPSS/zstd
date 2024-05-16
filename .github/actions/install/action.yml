@@ -20,7 +20,7 @@ runs:
     - name: Install
       uses: wyvox/action-setup-pnpm@v3
       with:
-        node-version: ${{ inputs.node-version }}
         node-version-file: ''
+        node-version: ${{ inputs.node-version }}
         pnpm-version: ${{ inputs.pnpm-version }}
         args: ${{ inputs.args }}

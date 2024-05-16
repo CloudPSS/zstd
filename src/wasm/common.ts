@@ -1,8 +1,8 @@
-import wasmModule, { type Ptr, type ZSTD_CStream, type ZSTD_DStream } from '../prebuilds/zstd.js';
-import { checkInput, createModule } from './common.js';
-import { MAX_SIZE } from './config.js';
+import wasmModule, { type Ptr, type ZSTD_CStream, type ZSTD_DStream } from '../../prebuilds/zstd.js';
+import { checkInput } from '../common.js';
+import { MAX_SIZE } from '../config.js';
 
-const Module = await wasmModule({
+export const Module = await wasmModule({
     onCompressorData(ctx, dst, dstSize) {
         const compressor = COMPRESSORS.get(ctx);
         if (!compressor) throw new Error('Invalid compressor context');
@@ -19,7 +19,7 @@ const COMPRESSORS = new Map<ZSTD_CStream, TransformStreamDefaultController<Uint8
 const DECOMPRESSORS = new Map<ZSTD_DStream, TransformStreamDefaultController<Uint8Array>>();
 
 /** Stream compressor */
-class WebCompressor implements Transformer<BinaryData, Uint8Array> {
+export class WebCompressor implements Transformer<BinaryData, Uint8Array> {
     constructor(readonly level: number) {}
 
     private ctx: ZSTD_CStream | null = null;
@@ -51,7 +51,7 @@ class WebCompressor implements Transformer<BinaryData, Uint8Array> {
 }
 
 /** Stream decompressor */
-class WebDecompressor implements Transformer<BinaryData, Uint8Array> {
+export class WebDecompressor implements Transformer<BinaryData, Uint8Array> {
     private ctx: ZSTD_DStream | null = null;
     /** @inheritdoc */
     start(controller: TransformStreamDefaultController<Uint8Array>): void {
@@ -128,7 +128,7 @@ function checkError<T extends number>(code: T): T {
 }
 
 /** to Uint8Array */
-function coercion(data: BinaryData): Uint8Array {
+export function coercion(data: BinaryData): Uint8Array {
     if (data instanceof Uint8Array) return data;
     if (ArrayBuffer.isView(data)) return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
     return new Uint8Array(data, 0, data.byteLength);
@@ -136,50 +136,6 @@ function coercion(data: BinaryData): Uint8Array {
 
 const ZSTD_CONTENTSIZE_ERROR = 2 ** 32 - 2;
 //const ZSTD_CONTENTSIZE_UNKNOWN = 2 ** 32 - 1;
-
-export const { compress, decompress, compressor, decompressor } = createModule({
-    coercion,
-    compress: (buf, level) => {
-        const h = new Helper();
-        try {
-            const dstSize = uint(Module._ZSTD_compressBound(buf.byteLength));
-            const src = h.toHeap(buf);
-            const dst = h.malloc(dstSize);
-            /* @See https://facebook.github.io/zstd/zstd_manual.html#Chapter3 */
-            const sizeOrError = Module._compress(dst, dstSize, src, buf.byteLength, level);
-            checkError(sizeOrError);
-            return fromHeap(dst, uint(sizeOrError));
-        } finally {
-            h.finalize();
-        }
-    },
-    decompress: (buf) => {
-        const h = new Helper();
-        try {
-            const src = h.toHeap(buf);
-            const dstSize = uint(Module._ZSTD_decompressBound(src, buf.byteLength));
-            if (dstSize === ZSTD_CONTENTSIZE_ERROR) {
-                throw new Error('Invalid compressed data');
-            }
-            if (dstSize > MAX_SIZE) {
-                throw new Error(`Content size is too large: ${dstSize}`);
-            }
-            const dst = h.malloc(dstSize);
-            /* @See https://facebook.github.io/zstd/zstd_manual.html#Chapter3 */
-            const sizeOrError = Module._decompress(dst, dstSize, src, buf.byteLength);
-            checkError(sizeOrError);
-            return fromHeap(dst, uint(sizeOrError));
-        } finally {
-            h.finalize();
-        }
-    },
-    Compressor: WebCompressor,
-    Decompressor: WebDecompressor,
-    TransformStream:
-        typeof TransformStream == 'function'
-            ? TransformStream
-            : ((await import('node:stream/web')).TransformStream as typeof TransformStream),
-});
 
 let _ZSTD_VERSION: string;
 export const ZSTD_VERSION = (): string => {
@@ -192,8 +148,40 @@ export const ZSTD_VERSION = (): string => {
     return (_ZSTD_VERSION = `${ZSTD_MAJOR}.${ZSTD_MINOR}.${ZSTD_PATCH}`);
 };
 
-export const TYPE = 'wasm';
+/** compress */
+export function compress(buf: Uint8Array, level: number): Uint8Array {
+    const h = new Helper();
+    try {
+        const dstSize = uint(Module._ZSTD_compressBound(buf.byteLength));
+        const src = h.toHeap(buf);
+        const dst = h.malloc(dstSize);
+        /* @See https://facebook.github.io/zstd/zstd_manual.html#Chapter3 */
+        const sizeOrError = Module._compress(dst, dstSize, src, buf.byteLength, level);
+        checkError(sizeOrError);
+        return fromHeap(dst, uint(sizeOrError));
+    } finally {
+        h.finalize();
+    }
+}
 
-export const _WasmModule = Module;
-
-export default null;
+/** decompress */
+export function decompress(buf: Uint8Array): Uint8Array {
+    const h = new Helper();
+    try {
+        const src = h.toHeap(buf);
+        const dstSize = uint(Module._ZSTD_decompressBound(src, buf.byteLength));
+        if (dstSize === ZSTD_CONTENTSIZE_ERROR) {
+            throw new Error('Invalid compressed data');
+        }
+        if (dstSize > MAX_SIZE) {
+            throw new Error(`Content size is too large: ${dstSize}`);
+        }
+        const dst = h.malloc(dstSize);
+        /* @See https://facebook.github.io/zstd/zstd_manual.html#Chapter3 */
+        const sizeOrError = Module._decompress(dst, dstSize, src, buf.byteLength);
+        checkError(sizeOrError);
+        return fromHeap(dst, uint(sizeOrError));
+    } finally {
+        h.finalize();
+    }
+}

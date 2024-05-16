@@ -24,16 +24,22 @@
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "browser": "dist/wasm.js",
+  "browser": "dist/wasm/index.js",
   "exports": {
     ".": {
-      "browser": "./dist/wasm.js",
+      "browser": "./dist/wasm/index.js",
       "default": "./dist/index.js"
     },
-    "./wasm": "./dist/wasm.js",
+    "./wasm": "./dist/wasm/index.js",
     "./napi": "./dist/napi.js",
     "./config": "./dist/config.js",
     "./package.json": "./package.json"
+  },
+  "imports": {
+    "#worker-polyfill": {
+      "browser": "./dist/wasm/polyfill/browser.js",
+      "default": "./dist/wasm/polyfill/node.js"
+    }
   },
   "scripts": {
     "install": "node-gyp-build",
@@ -46,7 +52,7 @@
     "build:gyp-cross": "prebuildify-cross --napi --target 20.12.2 --strip",
     "build:wasm": "pwsh lib/build-wasm.ps1",
     "watch": "pnpm clean && tsc --watch",
-    "test": "NODE_OPTIONS=\"${NODE_OPTIONS:-} --experimental-vm-modules\" jest",
+    "test": "NODE_OPTIONS=\"${NODE_OPTIONS:-} --experimental-vm-modules\" node --expose-gc node_modules/jest/bin/jest.js",
     "benchmark": "node ./benchmark/index.js",
     "prepare": "husky || echo Failed to initialize husky",
     "format": "prettier --cache --cache-strategy content --ignore-path .gitignore --write .",
@@ -64,14 +70,14 @@
     "@cloudpss/tsconfig": "^2.1.0",
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.12.10",
+    "@types/node": "^20.12.12",
     "husky": "^9.0.11",
     "jest": "^29.7.0",
     "node-gyp": "^10.1.0",
     "prebuildify": "^6.0.1",
     "prebuildify-cross": "^5.1.0",
     "pretty-bytes": "^6.1.1",
-    "rimraf": "^5.0.5",
+    "rimraf": "^5.0.7",
     "ts-jest": "^29.1.2",
     "typescript": "^5.4.5"
   },
