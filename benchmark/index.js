@@ -71,8 +71,8 @@ async function main() {
         }
         console.log(`\u001B[1;33mFile: ${file.name} \tRaw: ${pb(file.content.length)}\u001B[0m`);
         for (const level of [-10, -5, -1, 1, 2, 3, 4, 5, 6, 9, 15, 19, 22]) {
-            const [compressed, napiCompressTime] = time(() => napi.compress(file.content, level));
-            const [decompressed, napiDecompressTime] = time(() => napi.decompress(compressed));
+            const [compressed, napiCompressTime] = time(() => napi.compressSync(file.content, level));
+            const [decompressed, napiDecompressTime] = time(() => napi.decompressSync(compressed));
             const [, napiSCompressTime] = await atime(async () => {
                 const stream = new napi.Compressor(level);
                 return await pipeline(Readable.from(file.content), stream, async (chunks) => {
@@ -93,8 +93,8 @@ async function main() {
                     return Buffer.concat(chunks2);
                 });
             });
-            const [, wasmCompressTime] = time(() => wasm.compress(file.content, level));
-            const [, wasmDecompressTime] = time(() => wasm.decompress(compressed));
+            const [, wasmCompressTime] = time(() => wasm.compressSync(file.content, level));
+            const [, wasmDecompressTime] = time(() => wasm.decompressSync(compressed));
             console.assert(
                 Buffer.compare(decompressed, file.content) === 0,
                 'Decompressed data does not match original',

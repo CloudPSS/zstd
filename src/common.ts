@@ -34,41 +34,61 @@ export function checkLevel(level: number | undefined): number {
 /** warp module */
 export function createModule<TBinary extends Uint8Array>(options: {
     coercion: (input: BinaryData) => TBinary;
-    compress: (data: TBinary, level: number) => TBinary;
-    decompress: (data: TBinary) => TBinary;
+    compressSync: (data: TBinary, level: number) => TBinary;
+    compress: (data: TBinary, level: number) => Promise<TBinary>;
+    decompressSync: (data: TBinary) => TBinary;
+    decompress: (data: TBinary) => Promise<TBinary>;
     Compressor: new (level: number) => Transformer<BinaryData, TBinary>;
     Decompressor: new () => Transformer<BinaryData, TBinary>;
     TransformStream: typeof globalThis.TransformStream;
 }): {
     /** ZStandard compress */
-    compress: (data: BinaryData, level?: number) => Uint8Array;
+    compressSync: (data: BinaryData, level?: number) => Uint8Array;
+    /** ZStandard compress */
+    compress: (data: BinaryData, level?: number) => Promise<Uint8Array>;
     /** ZStandard decompress */
-    decompress: (data: BinaryData) => Uint8Array;
+    decompressSync: (data: BinaryData) => Uint8Array;
+    /** ZStandard decompress */
+    decompress: (data: BinaryData) => Promise<Uint8Array>;
     /** create ZStandard stream compressor */
     compressor: (level?: number) => TransformStream<BinaryData, Uint8Array>;
     /** create ZStandard stream decompressor */
     decompressor: () => TransformStream<BinaryData, Uint8Array>;
 } {
-    const { coercion, compress, decompress, Compressor, Decompressor, TransformStream } = options;
+    const { coercion, compressSync, compress, decompressSync, decompress, Compressor, Decompressor, TransformStream } =
+        options;
     return {
-        compress: (data: BinaryData, level: number | undefined) => {
+        compressSync: (data, level) => {
             level = checkLevel(level);
             checkInput(data);
             const input = coercion(data);
-            const output = compress(input, level);
+            const output = compressSync(input, level);
             return output;
         },
-        decompress: (data: BinaryData) => {
+        compress: async (data, level) => {
+            level = checkLevel(level);
             checkInput(data);
             const input = coercion(data);
-            const output = decompress(input);
+            const output = await compress(input, level);
             return output;
         },
-        compressor: ((level: number | undefined) => {
+        decompressSync: (data) => {
+            checkInput(data);
+            const input = coercion(data);
+            const output = decompressSync(input);
+            return output;
+        },
+        decompress: async (data) => {
+            checkInput(data);
+            const input = coercion(data);
+            const output = await decompress(input);
+            return output;
+        },
+        compressor: (level) => {
             level = checkLevel(level);
             const transformer = new TransformStream<BinaryData, TBinary>(new Compressor(level));
             return transformer;
-        }) as (level?: number, nodeStream?: boolean) => TransformStream<BinaryData, Uint8Array>,
+        },
         decompressor: () => {
             const transformer = new TransformStream<BinaryData, TBinary>(new Decompressor());
             return transformer;

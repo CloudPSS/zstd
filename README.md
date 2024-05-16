@@ -34,11 +34,11 @@ To explicitly use the wasm or the n-api version, import `@cloudpss/zstd/wasm` an
 > [!NOTE]
 > If you are using this library in a browser, the `Buffer` classes is replaced with `Uint8Array` classes.
 
-#### `compress(input: BinaryData, level?: number): Buffer`
+#### `compress(input: BinaryData, level?: number): Promise<Buffer>` `compressSync(input: BinaryData, level?: number): Buffer`
 
 Compresses the input buffer with the given compression level (default: 4).
 
-#### `decompress(input: BinaryData): Buffer`
+#### `decompress(input: BinaryData): Promise<Buffer>` `decompressSync(input: BinaryData): Buffer`
 
 Decompresses the input buffer.
 

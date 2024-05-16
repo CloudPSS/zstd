@@ -56,11 +56,11 @@ describe.each(MODULE)('%s stream compress api', (name, module, bin) => {
         const readable = asReadable(randomBuffer);
         const data = await buffer(readable.pipeThrough(module.compressor(3)) as RS<Uint8Array>);
         expect(data).toBeInstanceOf(bin);
-        expect(asBuffer(module.decompress(data))).toEqual(randomBuffer);
+        expect(asBuffer(module.decompressSync(data))).toEqual(randomBuffer);
     });
 
     it('should decompress', async () => {
-        const compressed = module.compress(randomBuffer);
+        const compressed = module.compressSync(randomBuffer);
         const readable = asReadable(compressed);
         const data = await buffer(readable.pipeThrough(module.decompressor()) as RS<Uint8Array>);
         expect(data).toBeInstanceOf(bin);
@@ -111,7 +111,7 @@ describe('napi node stream compress api', () => {
         const readable = Readable.from([randomBuffer]);
         const data = await buffer(readable.pipe(new napi.Compressor(3)));
         expect(data).toBeInstanceOf(Buffer);
-        expect(napi.decompress(data)).toEqual(randomBuffer);
+        expect(napi.decompressSync(data)).toEqual(randomBuffer);
     });
 
     it('should decompress', async () => {
