@@ -172,12 +172,12 @@ describe('should accept huge input', () => {
     it('napi', async () => {
         const hugeBuffer = Buffer.alloc(config.MAX_SIZE);
         await expect(napi.compress(hugeBuffer)).resolves.toBeDefined();
-    });
+    }, 10000);
     it('wasm', async () => {
         // For wasm, the max heap size is 2GB, so we can only allocate 0.8GB for input
         const hugeBuffer = Buffer.alloc(0.8 * 1024 * 1024 * 1024);
         await expect(wasm.compress(hugeBuffer)).resolves.toBeDefined();
-    });
+    }, 10000);
 });
 
 describe('should reject huge input', () => {

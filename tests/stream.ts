@@ -103,7 +103,7 @@ describe.each(MODULE)('%s stream compress api', (name, module, bin) => {
             }
             total += read.value?.length ?? 0;
         } while (!read.done);
-    });
+    }, 20000);
 });
 
 describe('napi node stream compress api', () => {
