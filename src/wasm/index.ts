@@ -15,12 +15,14 @@ function initWorker(): Promise<Worker> {
             typeof Worker == 'function'
                 ? new Worker(new URL('./worker.js', import.meta.url), {
                       type: 'module',
-                      name: '@cloudpss/zstd/worker',
+                      name: `@cloudpss/zstd/worker`,
                   })
                 : (new WorkerPolyfill(new URL('./worker.js', import.meta.url), {
                       type: 'module',
-                      name: '@cloudpss/zstd/worker',
+                      name: `@cloudpss/zstd/worker`,
                   }) as Worker);
+        BUSY_WORKERS.add(worker);
+
         const onMessage = (ev: MessageEvent): void => {
             if ((ev.data as WorkerReady) !== 'ready') return;
             cleanup();
@@ -38,6 +40,7 @@ function initWorker(): Promise<Worker> {
         const onError = (ev: ErrorEvent): void => {
             cleanup();
             reject(new Error(ev.message, { cause: ev.error }));
+            BUSY_WORKERS.delete(worker);
         };
         const cleanup = (): void => {
             worker.removeEventListener('message', onMessage);
@@ -58,7 +61,6 @@ function handlePendingBorrow(): void {
         }
         while (PENDING_BORROW.length > 0 && BUSY_WORKERS.size < MAX_WORKERS) {
             const worker = await initWorker();
-            BUSY_WORKERS.add(worker);
             PENDING_BORROW.shift()!(worker);
         }
     });
@@ -80,7 +82,6 @@ async function borrowWorker(): Promise<Worker> {
     }
     if (BUSY_WORKERS.size < MAX_WORKERS) {
         const worker = await initWorker();
-        BUSY_WORKERS.add(worker);
         return worker;
     }
     return await new Promise((resolve) => {
@@ -134,6 +135,11 @@ export function terminate(): void {
     }
     IDLE_WORKERS.length = 0;
     BUSY_WORKERS.clear();
+}
+
+/** get current worker status */
+export function workers(): { idle: number; busy: number } {
+    return { idle: IDLE_WORKERS.length, busy: BUSY_WORKERS.size };
 }
 
 export const { compressSync, compress, decompressSync, decompress, compressor, decompressor } = createModule({

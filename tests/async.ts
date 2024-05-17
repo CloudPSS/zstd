@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { availableParallelism } from 'node:os';
 import * as napi from '@cloudpss/zstd/napi';
 import * as wasm from '@cloudpss/zstd/wasm';
 import * as root from '@cloudpss/zstd';
@@ -68,6 +69,20 @@ test('napi & wasm async compress should got same result', async () => {
     await expect(napi.compress(randomBuffer)).resolves.toEqual(asBuffer(wasm.compressSync(randomBuffer)));
     await expect(napi.compress(emptyBuffer)).resolves.toEqual(asBuffer(wasm.compressSync(emptyBuffer)));
     await expect(napi.compress(emptyFloat64Array)).resolves.toEqual(asBuffer(wasm.compressSync(emptyFloat64Array)));
+});
+
+test('napi async api should run in parallel', async () => {
+    const parallel = Array.from({ length: 16384 }).map(() => napi.compress(new Uint8Array(1024)));
+    await expect(Promise.all(parallel)).resolves.toHaveLength(16384);
+});
+
+test('wasm async api should run in parallel', async () => {
+    wasm.terminate();
+    const parallel = Array.from({ length: 16384 }).map(() => wasm.compress(new Uint8Array(1024)));
+    await expect(Promise.all(parallel)).resolves.toHaveLength(16384);
+    expect(wasm.workers()).toEqual({ idle: availableParallelism() - 1, busy: 0 });
+    wasm.terminate();
+    expect(wasm.workers()).toEqual({ idle: 0, busy: 0 });
 });
 
 test.each(COMPRESS)('%s async compress should not transfer input', async (key, compress) => {
