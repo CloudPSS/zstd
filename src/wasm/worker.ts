@@ -5,6 +5,8 @@ import { onMessage, postMessage } from '#worker-polyfill';
 export type WorkerRequest = [number, 'compress', [Uint8Array, number]] | [number, 'decompress', [Uint8Array]];
 /** Worker response */
 export type WorkerResponse = [number, Uint8Array] | [number, null, Error];
+/** Worker ready */
+export type WorkerReady = 'ready';
 
 onMessage((data) => {
     const [seq, method, args] = data as WorkerRequest;
@@ -29,3 +31,5 @@ onMessage((data) => {
         postMessage([seq, null, err]);
     }
 });
+
+postMessage('ready' satisfies WorkerReady);

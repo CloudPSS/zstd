@@ -79,7 +79,8 @@
     "pretty-bytes": "^6.1.1",
     "rimraf": "^5.0.7",
     "ts-jest": "^29.1.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
   },
   "dependencies": {
     "node-addon-api": "^8.0.0",
