@@ -2,7 +2,7 @@ import os from 'node:os';
 import { Worker as NodeWorker, type TransferListItem, parentPort } from 'node:worker_threads';
 
 /** Worker polyfill */
-class Worker extends EventTarget implements AbstractWorker {
+export class Worker extends EventTarget implements AbstractWorker {
     constructor(scriptURL: string | URL, options?: WorkerOptions) {
         super();
         this._worker = new NodeWorker(scriptURL, options);
@@ -50,14 +50,6 @@ class Worker extends EventTarget implements AbstractWorker {
     }
 }
 
-/** create worker */
-export function createWorker(): globalThis.Worker {
-    return new Worker(new URL('../worker.js', import.meta.url), {
-        type: 'module',
-        name: '@cloudpss/zstd/worker',
-    }) as globalThis.Worker;
-}
-
 /** add message callback */
 export function onMessage(callback: (value: unknown) => unknown): void {
     parentPort!.on('message', callback);
@@ -65,7 +57,7 @@ export function onMessage(callback: (value: unknown) => unknown): void {
 
 /** post message */
 export function postMessage(value: unknown, transfer?: Transferable[]): void {
-    parentPort!.postMessage(value, (transfer ?? []) as TransferListItem[]);
+    parentPort!.postMessage(value, transfer as TransferListItem[] | undefined);
 }
 
 export const MAX_WORKERS =
