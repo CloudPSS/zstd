@@ -1,6 +1,6 @@
 import { createModule } from '../common.js';
 import * as common from './common.js';
-import { createWorker, MAX_WORKERS } from '#worker-polyfill';
+import { Worker as WorkerPolyfill, MAX_WORKERS } from '#worker-polyfill';
 import type { WorkerReady, WorkerRequest, WorkerResponse } from './worker.js';
 
 const IDLE_WORKERS: Worker[] = [];
@@ -11,7 +11,16 @@ let SEQ = 0;
 /** create and initialize worker */
 function initWorker(): Promise<Worker> {
     return new Promise((resolve, reject) => {
-        const worker = createWorker();
+        const worker =
+            typeof Worker == 'function'
+                ? new Worker(new URL('./worker.js', import.meta.url), {
+                      type: 'module',
+                      name: '@cloudpss/zstd/worker',
+                  })
+                : (new WorkerPolyfill(new URL('./worker.js', import.meta.url), {
+                      type: 'module',
+                      name: '@cloudpss/zstd/worker',
+                  }) as Worker);
         const onMessage = (ev: MessageEvent): void => {
             if ((ev.data as WorkerReady) !== 'ready') return;
             cleanup();
