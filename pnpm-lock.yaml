@@ -1342,9 +1342,9 @@ packages:
       { integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA== }
     engines: { node: '>=10' }
 
-  caniuse-lite@1.0.30001618:
+  caniuse-lite@1.0.30001620:
     resolution:
-      { integrity: sha512-p407+D1tIkDvsEAPS22lJxLQQaG8OTBEqo0KhzfABGk0TU4juBNDSfH0hyAp/HRyx+M8L17z/ltyhxh27FTfQg== }
+      { integrity: sha512-WJvYsOjd1/BYUY6SNGUosK9DUidBPDTnOARHp3fSmFO1ekdxaY6nKRttEVrfMmYi80ctS0kz1wiWmm14fVc3ew== }
 
   chalk@2.4.2:
     resolution:
@@ -1709,9 +1709,9 @@ packages:
     resolution:
       { integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA== }
 
-  electron-to-chromium@1.4.768:
+  electron-to-chromium@1.4.772:
     resolution:
-      { integrity: sha512-z2U3QcvNuxdkk33YV7R1bVMNq7fL23vq3WfO5BHcqrm4TnDGReouBfYKLEFh5umoK1XACjEwp8mmnhXk2EJigw== }
+      { integrity: sha512-jFfEbxR/abTTJA3ci+2ok1NTuOBBtB4jH+UT6PUmRN+DY3WSD4FFRsgoVQ+QNIJ0T7wrXwzsWCI2WKC46b++2A== }
 
   elliptic@6.5.5:
     resolution:
@@ -1798,9 +1798,9 @@ packages:
     peerDependencies:
       eslint: '>=7.0.0'
 
-  eslint-plugin-jsdoc@48.2.4:
+  eslint-plugin-jsdoc@48.2.5:
     resolution:
-      { integrity: sha512-3ebvVgCJFy06gpmuS2ynz13uh9iFSzZ1C1dDkgcSAqVVg82zlORKMk2fvjq708pAO6bwfs5YLttknFEbaoDiGw== }
+      { integrity: sha512-ZeTfKV474W1N9niWfawpwsXGu+ZoMXu4417eBROX31d7ZuOk8zyG66SO77DpJ2+A9Wa2scw/jRqBPnnQo7VbcQ== }
     engines: { node: '>=18' }
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
@@ -4469,7 +4469,7 @@ snapshots:
       '@cloudpss/prettier-config': 2.1.0
       eslint: 8.57.0
       eslint-config-prettier: 9.1.0(eslint@8.57.0)
-      eslint-plugin-jsdoc: 48.2.4(eslint@8.57.0)
+      eslint-plugin-jsdoc: 48.2.5(eslint@8.57.0)
       eslint-plugin-prettier: 5.1.3(@types/eslint@8.56.10)(eslint-config-prettier@9.1.0(eslint@8.57.0))(eslint@8.57.0)(prettier@3.2.5)
       eslint-plugin-unicorn: 51.0.1(eslint@8.57.0)
       prettier: 3.2.5
@@ -5477,8 +5477,8 @@ snapshots:
 
   browserslist@4.23.0:
     dependencies:
-      caniuse-lite: 1.0.30001618
-      electron-to-chromium: 1.4.768
+      caniuse-lite: 1.0.30001620
+      electron-to-chromium: 1.4.772
       node-releases: 2.0.14
       update-browserslist-db: 1.0.16(browserslist@4.23.0)
 
@@ -5546,7 +5546,7 @@ snapshots:
 
   camelcase@6.3.0: {}
 
-  caniuse-lite@1.0.30001618: {}
+  caniuse-lite@1.0.30001620: {}
 
   chalk@2.4.2:
     dependencies:
@@ -5856,7 +5856,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  electron-to-chromium@1.4.768: {}
+  electron-to-chromium@1.4.772: {}
 
   elliptic@6.5.5:
     dependencies:
@@ -5937,7 +5937,7 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-plugin-jsdoc@48.2.4(eslint@8.57.0):
+  eslint-plugin-jsdoc@48.2.5(eslint@8.57.0):
     dependencies:
       '@es-joy/jsdoccomment': 0.43.0
       are-docs-informative: 0.0.2
