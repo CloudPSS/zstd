@@ -19,8 +19,8 @@ npm install @cloudpss/zstd
 ```js
 import { compress, decompress } from '@cloudpss/zstd';
 
-const compressed = compress(Buffer.from('Hello World!'));
-const decompressed = decompress(compressed);
+const compressed = await compress(Buffer.from('Hello World!'));
+const decompressed = await decompress(compressed);
 
 console.log(decompressed.toString()); // Hello World!
 ```

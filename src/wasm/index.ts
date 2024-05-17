@@ -1,7 +1,7 @@
 import { createModule } from '../common.js';
 import * as common from './common.js';
 import { createWorker, MAX_WORKERS } from '#worker-polyfill';
-import type { WorkerRequest, WorkerResponse } from './worker.js';
+import type { WorkerReady, WorkerRequest, WorkerResponse } from './worker.js';
 
 const IDLE_WORKERS: Worker[] = [];
 const BUSY_WORKERS = new Set<Worker>();
@@ -9,30 +9,46 @@ const PENDING_BORROW: Array<(value: Worker) => void> = [];
 let SEQ = 0;
 
 /** create and initialize worker */
-function initWorker(): Worker {
-    const worker = createWorker();
-    worker.addEventListener('error', (ev) => {
-        // eslint-disable-next-line no-console
-        console.error('@cloudpss/zstd worker error', ev);
+function initWorker(): Promise<Worker> {
+    return new Promise((resolve, reject) => {
+        const worker = createWorker();
+        const onMessage = (ev: MessageEvent): void => {
+            if ((ev.data as WorkerReady) !== 'ready') return;
+            cleanup();
+            worker.addEventListener('error', (ev) => {
+                // eslint-disable-next-line no-console
+                console.error('@cloudpss/zstd worker error', ev);
 
-        worker.terminate();
-        BUSY_WORKERS.delete(worker);
-        IDLE_WORKERS.splice(IDLE_WORKERS.indexOf(worker), 1);
-        handlePendingBorrow();
+                worker.terminate();
+                BUSY_WORKERS.delete(worker);
+                IDLE_WORKERS.splice(IDLE_WORKERS.indexOf(worker), 1);
+                handlePendingBorrow();
+            });
+            resolve(worker);
+        };
+        const onError = (ev: ErrorEvent): void => {
+            cleanup();
+            reject(new Error(ev.message, { cause: ev.error }));
+        };
+        const cleanup = (): void => {
+            worker.removeEventListener('message', onMessage);
+            worker.removeEventListener('error', onError);
+        };
+        worker.addEventListener('message', onMessage);
+        worker.addEventListener('error', onError);
     });
-    return worker;
 }
 
 /** handle pending borrow */
 function handlePendingBorrow(): void {
-    void Promise.resolve().then(() => {
+    void Promise.resolve().then(async () => {
         while (PENDING_BORROW.length > 0 && IDLE_WORKERS.length > 0) {
             const worker = IDLE_WORKERS.pop()!;
             BUSY_WORKERS.add(worker);
             PENDING_BORROW.shift()!(worker);
         }
         while (PENDING_BORROW.length > 0 && BUSY_WORKERS.size < MAX_WORKERS) {
-            const worker = initWorker();
+            const worker = await initWorker();
             BUSY_WORKERS.add(worker);
             PENDING_BORROW.shift()!(worker);
         }
@@ -47,18 +63,18 @@ function returnWorker(worker: Worker): void {
 }
 
 /** get or wait for an idle worker */
-function borrowWorker(): Promise<Worker> {
+async function borrowWorker(): Promise<Worker> {
     if (IDLE_WORKERS.length > 0) {
         const worker = IDLE_WORKERS.pop()!;
         BUSY_WORKERS.add(worker);
-        return Promise.resolve(worker);
+        return worker;
     }
     if (BUSY_WORKERS.size < MAX_WORKERS) {
-        const worker = initWorker();
+        const worker = await initWorker();
         BUSY_WORKERS.add(worker);
-        return Promise.resolve(worker);
+        return worker;
     }
-    return new Promise((resolve) => {
+    return await new Promise((resolve) => {
         PENDING_BORROW.push(resolve);
     });
 }
