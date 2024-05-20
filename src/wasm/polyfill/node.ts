@@ -16,12 +16,13 @@ export class Worker extends EventTarget implements AbstractWorker {
         this._worker.on('messageerror', (data: unknown) => {
             const ev = new MessageEvent('messageerror', { data });
             this.dispatchEvent(ev);
-            if (this.onmessage) {
-                this.onmessage(ev);
+            if (this.onmessageerror) {
+                this.onmessageerror(ev);
             }
         });
         this._worker.on('error', (error) => {
-            const ev = new ErrorEvent('error', { error });
+            const ev = new Event('error', {}) as ErrorEvent;
+            Object.defineProperty(ev, 'error', { value: error, configurable: true });
             this.dispatchEvent(ev);
             if (this.onerror) {
                 this.onerror(ev);
@@ -31,7 +32,7 @@ export class Worker extends EventTarget implements AbstractWorker {
     onmessage: ((this: Worker, ev: MessageEvent) => unknown) | null = null;
     onmessageerror: ((this: Worker, ev: MessageEvent) => unknown) | null = null;
     onerror: ((this: AbstractWorker, ev: ErrorEvent) => unknown) | null = null;
-    private readonly _worker: NodeWorker;
+    protected readonly _worker: NodeWorker;
     /** @inheritdoc */
     postMessage(data: unknown, transfer?: Transferable[] | StructuredSerializeOptions): void {
         let t: Transferable[] = [];
