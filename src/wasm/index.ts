@@ -1,6 +1,6 @@
 import { createModule } from '../common.js';
 import * as common from './common.js';
-import { Worker as WorkerPolyfill, MAX_WORKERS } from '#worker-polyfill';
+import { Worker as WorkerPolyfill, MAX_WORKERS, TransformStream } from '#worker-polyfill';
 import type { WorkerReady, WorkerRequest, WorkerResponse } from './worker.js';
 
 const IDLE_WORKERS: Worker[] = [];
@@ -17,10 +17,10 @@ function initWorker(): Promise<Worker> {
                       type: 'module',
                       name: `@cloudpss/zstd/worker`,
                   })
-                : (new WorkerPolyfill(new URL('./worker.js', import.meta.url), {
+                : new WorkerPolyfill(new URL('./worker.js', import.meta.url), {
                       type: 'module',
                       name: `@cloudpss/zstd/worker`,
-                  }) as Worker);
+                  });
         BUSY_WORKERS.add(worker);
 
         const onMessage = (ev: MessageEvent): void => {
@@ -150,10 +150,7 @@ export const { compressSync, compress, decompressSync, decompress, compressor, d
     decompress: (data) => call('decompress', [data]),
     Compressor: common.WebCompressor,
     Decompressor: common.WebDecompressor,
-    TransformStream:
-        typeof TransformStream == 'function'
-            ? TransformStream
-            : ((await import('node:stream/web')).TransformStream as typeof TransformStream),
+    TransformStream,
 });
 
 export const ZSTD_VERSION = common.ZSTD_VERSION;
