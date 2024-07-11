@@ -86,5 +86,11 @@
   "dependencies": {
     "node-addon-api": "^8.1.0",
     "node-gyp-build": "^4.8.1"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@vweevers/docker-pull@1.1.1": "patches/@vweevers__docker-pull@1.1.1.patch",
+      "docker-run@3.1.0": "patches/docker-run@3.1.0.patch"
+    }
   }
 }
