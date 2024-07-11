@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+/// <reference lib="webworker" />
 import * as nodePolyfill from '../dist/wasm/polyfill/node.js';
 import * as browserPolyfill from '../dist/wasm/polyfill/browser.js';
 import { jest } from '@jest/globals';
@@ -17,9 +18,9 @@ test.each(MODULES)('%s has correct exports', (name, module) => {
 });
 
 describe('browser polyfill', () => {
-    let self: WorkerGlobalScope & { postMessage: jest.Mock };
+    let self: DedicatedWorkerGlobalScope;
     beforeAll(() => {
-        self = new EventTarget() as WorkerGlobalScope & { postMessage: jest.Mock };
+        self = new EventTarget() as DedicatedWorkerGlobalScope;
         jest.spyOn(self, 'addEventListener');
         self.postMessage = jest.fn();
         Reflect.defineProperty(globalThis, 'self', { value: self, configurable: true });
