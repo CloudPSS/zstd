@@ -439,6 +439,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports)
   EXPORT_FUNCTION(compress_async);
   EXPORT_FUNCTION(decompress);
   EXPORT_FUNCTION(decompress_async);
+
   EXPORT_VALUE(version, Napi::String::New(env, ZSTD_versionString()));
   EXPORT_VALUE(minLevel, ZSTD_minCLevel());
   EXPORT_VALUE(maxLevel, ZSTD_maxCLevel());
