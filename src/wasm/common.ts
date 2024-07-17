@@ -82,8 +82,8 @@ export class WebDecompressor implements Transformer<BinaryData, Uint8Array> {
 
 /** Convert to uint */
 function uint(value: number): number {
-    if (value < 0) return value + 2 ** 32;
-    return value;
+    if (value < 0) return Number(value) + 2 ** 32;
+    return Number(value);
 }
 
 /** Copy data from heap */

@@ -54,7 +54,7 @@
     "build:wasm": "pwsh lib/build-wasm.ps1",
     "watch": "pnpm clean && tsc --watch",
     "test": "NODE_OPTIONS=\"${NODE_OPTIONS:-} --experimental-vm-modules\" node --expose-gc node_modules/jest/bin/jest.js",
-    "benchmark": "node ./benchmark/index.js",
+    "benchmark": "node --enable-source-maps ./benchmark/index.js",
     "prepare": "husky || echo Failed to initialize husky",
     "format": "prettier --cache --cache-strategy content --ignore-path .gitignore --write .",
     "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ --cache-strategy content --ext .js,.ts ."

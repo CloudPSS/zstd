@@ -11,7 +11,7 @@ export function checkInput(input: unknown): asserts input is BinaryData {
     }
 
     if (
-        (typeof ArrayBuffer == 'function' && input instanceof ArrayBuffer) ||
+        input instanceof ArrayBuffer ||
         (typeof SharedArrayBuffer == 'function' && input instanceof SharedArrayBuffer)
     ) {
         if (input.byteLength > MAX_SIZE) throw new Error(`Input data is too large`);

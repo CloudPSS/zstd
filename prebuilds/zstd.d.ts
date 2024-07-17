@@ -11,7 +11,7 @@ export type Module = {
     _ZSTD_isError(code: number): number;
     _ZSTD_getErrorName(code: number): Ptr;
     _ZSTD_compressBound(size: number): number;
-    _ZSTD_decompressBound(src: number, size: number): number;
+    _ZSTD_decompressBound(src: Ptr, size: number): number;
 
     _compress(outPtr: Ptr, outSize: number, inPtr: Ptr, inSize: number, level: number): number;
     _decompress(outPtr: Ptr, outSize: number, inPtr: Ptr, inSize: number): number;

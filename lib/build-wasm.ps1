@@ -17,8 +17,11 @@ docker run --rm -v ${PWD}:/src emscripten/emsdk `
   -sMALLOC=emmalloc `
   -sEXPORTED_FUNCTIONS="[$($ExportedFunctions | ForEach-Object { "_$_" } | Join-String -Separator ',' -SingleQuote )]" `
   -sFILESYSTEM=0 `
-  -sALLOW_MEMORY_GROWTH=1 `
+  -sMINIMAL_RUNTIME=2 `
+  -sEXPORT_KEEPALIVE=1 `
   -sSINGLE_FILE=1 `
+  -sWASM_BIGINT=1 `
+  -sALLOW_MEMORY_GROWTH=1 `
   -sINCOMING_MODULE_JS_API="[]" `
   -sEXPORTED_RUNTIME_METHODS="['UTF8ToString', 'HEAPU8']" `
   -sENVIRONMENT="web" `
