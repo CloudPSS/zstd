@@ -54,18 +54,36 @@ async function atime(callback) {
     return [result, end - start];
 }
 
+/** Warmup */
+async function warmup() {
+    for (const len of [0, 1, 10, 100, 1000, 10000, 100_000, 1_000_000]) {
+        const data = new Uint8Array(len);
+        const cdata = await napi.compress(data);
+        await napi.decompress(cdata);
+        napi.compressSync(data);
+        napi.decompressSync(cdata);
+        await wasm.compress(data);
+        await wasm.decompress(cdata);
+        wasm.compressSync(data);
+        wasm.decompressSync(cdata);
+    }
+}
+
 /** Run tests */
 async function main() {
     let noFile = true;
     for await (const file of files()) {
         if (noFile) {
             noFile = false;
+            await warmup();
             console.log(
                 '\u001B[2;32mLevel',
                 'Compressed'.padEnd(18),
                 'NAPI Comp/Decomp'.padEnd(21),
+                'NAPI Worker'.padEnd(21),
                 'NAPI Stream'.padEnd(21),
                 'WASM Comp/Decomp'.padEnd(21),
+                'WASM Worker'.padEnd(21),
                 '\u001B[0m',
             );
         }
@@ -73,6 +91,8 @@ async function main() {
         for (const level of [-10, -5, -1, 1, 2, 3, 4, 5, 6, 9, 15, 19, 22]) {
             const [compressed, napiCompressTime] = time(() => napi.compressSync(file.content, level));
             const [decompressed, napiDecompressTime] = time(() => napi.decompressSync(compressed));
+            const [, napiWorkerCompressTime] = await atime(() => napi.compress(file.content, level));
+            const [, napiWorkerDecompressTime] = await atime(() => napi.decompress(compressed));
             const [, napiSCompressTime] = await atime(async () => {
                 const stream = new napi.Compressor(level);
                 return await pipeline(Readable.from(file.content), stream, async (chunks) => {
@@ -95,6 +115,8 @@ async function main() {
             });
             const [, wasmCompressTime] = time(() => wasm.compressSync(file.content, level));
             const [, wasmDecompressTime] = time(() => wasm.decompressSync(compressed));
+            const [, wasmWorkerCompressTime] = await atime(() => wasm.compress(file.content, level));
+            const [, wasmWorkerDecompressTime] = await atime(() => wasm.decompress(compressed));
             console.assert(
                 Buffer.compare(decompressed, file.content) === 0,
                 'Decompressed data does not match original',
@@ -104,13 +126,18 @@ async function main() {
                 `${(file.content.length / compressed.length).toFixed(1)}(${pb(compressed.length)})`.padStart(18),
                 t(napiCompressTime),
                 t(napiDecompressTime),
+                t(napiWorkerCompressTime),
+                t(napiWorkerDecompressTime),
                 t(napiSCompressTime),
                 t(napiSDecompressTime),
                 t(wasmCompressTime),
                 t(wasmDecompressTime),
+                t(wasmWorkerCompressTime),
+                t(wasmWorkerDecompressTime),
             );
         }
     }
+    wasm.terminate();
     if (noFile) {
         console.error(`No test files, please put some files in ${path.relative(process.cwd(), root)}`);
         process.exit(1);
