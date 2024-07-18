@@ -18,7 +18,7 @@ docker run --rm -v ${PWD}:/src emscripten/emsdk `
   -sMALLOC=emmalloc `
   -sEXPORTED_FUNCTIONS="[$($ExportedFunctions | ForEach-Object { "_$_" } | Join-String -Separator ',' -SingleQuote )]" `
   -sFILESYSTEM=0 `
-  -sMINIMAL_RUNTIME=2 `
+  -sMINIMAL_RUNTIME=1 `
   -sEXPORT_KEEPALIVE=1 `
   -sSINGLE_FILE=1 `
   -sWASM_BIGINT=1 `
