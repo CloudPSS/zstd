@@ -9,6 +9,7 @@ Push-Location "$PSScriptRoot/.."
 # To load this module in nodejs, -sASSERTIONS=0 is required, since the asset will reject the nodejs environment
 
 $ExportedFunctions = 'ZSTD_versionNumber', 'ZSTD_isError', 'ZSTD_getErrorName', 'ZSTD_compressBound', 'ZSTD_decompressBound', 'compress', 'CompressorCreate', 'CompressorData', 'CompressorEnd', 'DecompressorCreate', 'DecompressorData', 'DecompressorEnd', 'decompress', 'malloc', 'free', 'usedmem'
+$ExportedRuntimeMethods = 'UTF8ToString', 'HEAPU8'
 
 docker run --rm -v ${PWD}:/src emscripten/emsdk `
   emcc ./lib/wasm.cc -o ./prebuilds/zstd.js `
@@ -23,7 +24,7 @@ docker run --rm -v ${PWD}:/src emscripten/emsdk `
   -sWASM_BIGINT=1 `
   -sALLOW_MEMORY_GROWTH=1 `
   -sINCOMING_MODULE_JS_API="[]" `
-  -sEXPORTED_RUNTIME_METHODS="['UTF8ToString', 'HEAPU8']" `
+  -sEXPORTED_RUNTIME_METHODS="[$($ExportedRuntimeMethods | Join-String -Separator ',' -SingleQuote )]" `
   -sENVIRONMENT="web" `
   -sASSERTIONS=0 `
   -sMODULARIZE `
