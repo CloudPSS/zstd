@@ -2,7 +2,8 @@
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { Readable } from 'node:stream';
+import { Readable, Transform } from 'node:stream';
+import { TransformStream } from 'node:stream/web';
 import { pipeline } from 'node:stream/promises';
 import prettyBytes from 'pretty-bytes';
 
@@ -84,6 +85,7 @@ async function main() {
                 'NAPI Stream'.padEnd(21),
                 'WASM Comp/Decomp'.padEnd(21),
                 'WASM Worker'.padEnd(21),
+                'WASM Stream'.padEnd(21),
                 '\u001B[0m',
             );
         }
@@ -117,6 +119,26 @@ async function main() {
             const [, wasmDecompressTime] = time(() => wasm.decompressSync(compressed));
             const [, wasmWorkerCompressTime] = await atime(() => wasm.compress(file.content, level));
             const [, wasmWorkerDecompressTime] = await atime(() => wasm.decompress(compressed));
+            const [, wasmSCompressTime] = await atime(async () => {
+                const stream = new TransformStream(new wasm.WebCompressor(level));
+                return await pipeline(Readable.from(file.content), Transform.fromWeb(stream), async (chunks) => {
+                    const chunks2 = [];
+                    for await (const chunk of chunks) {
+                        chunks2.push(chunk);
+                    }
+                    return Buffer.concat(chunks2);
+                });
+            });
+            const [, wasmSDecompressTime] = await atime(async () => {
+                const stream = new TransformStream(new wasm.WebDecompressor());
+                return await pipeline(Readable.from(compressed), Transform.fromWeb(stream), async (chunks) => {
+                    const chunks2 = [];
+                    for await (const chunk of chunks) {
+                        chunks2.push(chunk);
+                    }
+                    return Buffer.concat(chunks2);
+                });
+            });
             console.assert(
                 Buffer.compare(decompressed, file.content) === 0,
                 'Decompressed data does not match original',
@@ -134,6 +156,8 @@ async function main() {
                 t(wasmDecompressTime),
                 t(wasmWorkerCompressTime),
                 t(wasmWorkerDecompressTime),
+                t(wasmSCompressTime),
+                t(wasmSDecompressTime),
             );
         }
     }

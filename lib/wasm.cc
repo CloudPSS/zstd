@@ -168,5 +168,5 @@ extern "C" size_t DecompressorEnd(ZSTD_DStream *ctx)
   {
     onDecompressorData(ctx, out.dst, out.pos);
   }
-  return 0;
+  return ZSTD_freeDStream(ctx);
 }

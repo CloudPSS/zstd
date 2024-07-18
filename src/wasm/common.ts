@@ -1,99 +1,38 @@
-import wasmModule, { type Ptr, type ZSTD_CStream, type ZSTD_DStream } from '../../prebuilds/zstd.js';
-import { checkInput } from '../common.js';
+import wasmModule, { type Ptr } from '../../prebuilds/zstd.js';
 import { MAX_SIZE } from '../config.js';
 
 export const Module = await wasmModule({
     onCompressorData(ctx, dst, dstSize) {
-        const compressor = COMPRESSORS.get(ctx);
-        if (!compressor) throw new Error('Invalid compressor context');
-        compressor.enqueue(fromHeap(dst, dstSize));
+        _onCompressorData?.(ctx, dst, dstSize);
     },
     onDecompressorData(ctx, dst, dstSize) {
-        const decompressor = DECOMPRESSORS.get(ctx);
-        if (!decompressor) throw new Error('Invalid decompressor context');
-        decompressor.enqueue(fromHeap(dst, dstSize));
+        _onDecompressorData?.(ctx, dst, dstSize);
     },
 });
 
-const COMPRESSORS = new Map<ZSTD_CStream, TransformStreamDefaultController<Uint8Array>>();
-const DECOMPRESSORS = new Map<ZSTD_DStream, TransformStreamDefaultController<Uint8Array>>();
+let _onCompressorData: Parameters<typeof wasmModule>[0]['onCompressorData'];
+let _onDecompressorData: Parameters<typeof wasmModule>[0]['onDecompressorData'];
 
-/** Stream compressor */
-export class WebCompressor implements Transformer<BinaryData, Uint8Array> {
-    constructor(readonly level: number) {}
-
-    private ctx: ZSTD_CStream | null = null;
-    /** @inheritdoc */
-    start(controller: TransformStreamDefaultController<Uint8Array>): void {
-        this.ctx = checkError(Module._CompressorCreate(this.level));
-        COMPRESSORS.set(this.ctx, controller);
-    }
-
-    /** @inheritdoc */
-    transform(chunk: BinaryData): void {
-        const helper = new Helper();
-        try {
-            checkInput(chunk);
-            const src = coercion(chunk);
-            const srcSize = src.byteLength;
-            const srcPtr = helper.toHeap(src);
-            checkError(Module._CompressorData(this.ctx!, srcPtr, srcSize));
-        } finally {
-            helper.finalize();
-        }
-    }
-
-    /** @inheritdoc */
-    flush(): void {
-        checkError(Module._CompressorEnd(this.ctx!));
-        this.ctx = null;
-    }
-}
-
-/** Stream decompressor */
-export class WebDecompressor implements Transformer<BinaryData, Uint8Array> {
-    private ctx: ZSTD_DStream | null = null;
-    /** @inheritdoc */
-    start(controller: TransformStreamDefaultController<Uint8Array>): void {
-        this.ctx = checkError(Module._DecompressorCreate());
-        DECOMPRESSORS.set(this.ctx, controller);
-    }
-
-    /** @inheritdoc */
-    transform(chunk: BinaryData): void {
-        const helper = new Helper();
-        try {
-            checkInput(chunk);
-            const src = coercion(chunk);
-            const srcSize = src.byteLength;
-            const srcPtr = helper.toHeap(src);
-            checkError(Module._DecompressorData(this.ctx!, srcPtr, srcSize));
-        } finally {
-            helper.finalize();
-        }
-    }
-
-    /** @inheritdoc */
-    flush(): void {
-        checkError(Module._DecompressorEnd(this.ctx!));
-        this.ctx = null;
-    }
+/** Set callbacks for wasm module */
+export function setWasmCallbacks(callbacks: Parameters<typeof wasmModule>[0]): void {
+    _onCompressorData = callbacks.onCompressorData;
+    _onDecompressorData = callbacks.onDecompressorData;
 }
 
 /** Convert to uint */
-function uint(value: number): number {
+export function uint(value: number): number {
     if (value < 0) return Number(value) + 2 ** 32;
     return Number(value);
 }
 
 /** Copy data from heap */
-function fromHeap(ptr: Ptr, size: number): Uint8Array {
+export function fromHeap(ptr: Ptr, size: number): Uint8Array {
     // Copy buffer
     return new Uint8Array(Module.HEAPU8.buffer, ptr, size).slice();
 }
 
 /** Helper class */
-class Helper {
+export class Helper {
     /** Warp malloc to throw error */
     malloc(size: number): Ptr {
         const ptr = Module._malloc(size);
@@ -120,7 +59,7 @@ class Helper {
 }
 
 /** check zstd error */
-function checkError<T extends number>(code: T): T {
+export function checkError<T extends number>(code: T): T {
     if (Module._ZSTD_isError(code)) {
         throw new Error(Module.UTF8ToString(Module._ZSTD_getErrorName(code)));
     }
