@@ -134,8 +134,7 @@ jobs:
 
       - name: Prebuildify
         run: |
-          pnpm build:gyp --arch x64
-          pnpm build:gyp --arch arm64
+          pnpm build:gyp --arch x64+arm64
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v4
