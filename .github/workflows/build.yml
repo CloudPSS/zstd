@@ -132,15 +132,10 @@ jobs:
         with:
           name: build-common
 
-      - name: Set up node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          architecture: x64
-
       - name: Prebuildify
         run: |
-          pnpm build:gyp --arch x64+arm64
+          pnpm build:gyp --arch x64
+          pnpm build:gyp --arch arm64
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v4

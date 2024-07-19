@@ -55,8 +55,8 @@ class CompressWorker : public Napi::AsyncWorker
 {
 public:
   CompressWorker(Napi::Function &callback, Napi::Buffer<char> &inBuffer, int level)
-      : Napi::AsyncWorker(callback), level(level),
-        inBufferPtr(inBuffer.Data()), inBufferSize(inBuffer.Length()), inBufferRef((Napi::Persistent(inBuffer.As<Napi::Object>()))),
+      : Napi::AsyncWorker(callback), level(level), inBufferSize(inBuffer.Length()),
+        inBufferPtr(inBuffer.Data()), inBufferRef((Napi::Persistent(inBuffer.As<Napi::Object>()))),
         outBufferSize(ZSTD_compressBound(inBufferSize)), outBuffer(std::make_unique<char[]>(outBufferSize)),
         codeOrSize(0)
   {
@@ -157,7 +157,7 @@ class DecompressWorker : public Napi::AsyncWorker
 public:
   DecompressWorker(Napi::Function &callback, Napi::Buffer<char> &inBuffer, size_t outSize)
       : Napi::AsyncWorker(callback),
-        inBufferPtr(inBuffer.Data()), inBufferSize(inBuffer.Length()), inBufferRef((Napi::Persistent(inBuffer.As<Napi::Object>()))),
+        inBufferSize(inBuffer.Length()), inBufferPtr(inBuffer.Data()), inBufferRef((Napi::Persistent(inBuffer.As<Napi::Object>()))),
         outBufferSize(outSize), outBuffer(std::make_unique<char[]>(outBufferSize)),
         codeOrSize(0)
   {
