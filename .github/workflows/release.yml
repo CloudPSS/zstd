@@ -12,6 +12,8 @@ jobs:
   publish:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -25,6 +27,6 @@ jobs:
         uses: ./.github/actions/install
 
       - name: Publish
-        run: npm publish --access=public --tag=${{ contains(github.ref, 'alpha') && 'alpha' || contains(github.ref, 'beta') && 'beta' || 'latest' }}
+        run: npm publish --provenance --access=public --tag=${{ contains(github.ref, 'alpha') && 'alpha' || contains(github.ref, 'beta') && 'beta' || 'latest' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
