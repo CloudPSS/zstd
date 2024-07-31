@@ -18,9 +18,10 @@ jobs:
           args: --ignore-scripts
 
       - name: Build
-        run: |
-          pnpm build
-          pnpm build:deps
+        run: pnpm build
+
+      - name: Build deps
+        run: pnpm build:deps
 
       - name: Upload common artifacts
         uses: actions/upload-artifact@v4
@@ -73,10 +74,10 @@ jobs:
         with:
           name: build-common
 
-      - name: Prebuildify
-        run: |
-          pnpm build:gyp --arch arm64
-          pnpm build:gyp --arch x64
+      - name: Prebuildify arm64
+        run: pnpm build:gyp --arch arm64
+      - name: Prebuildify x64
+        run: pnpm build:gyp --arch x64
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v4
@@ -101,13 +102,15 @@ jobs:
         with:
           name: build-common
 
-      - name: Prebuildify
-        run: |
-          # https://github.com/prebuild/docker-images?tab=readme-ov-file#images
-          pnpm build:gyp-cross                  -i centos7-devtoolset7
-          pnpm build:gyp-cross                  -i alpine
-          pnpm build:gyp-cross --tag-libc glibc -i linux-arm64-lts
-          pnpm build:gyp-cross --tag-libc musl  -i linux-arm64-musl
+      # https://github.com/prebuild/docker-images?tab=readme-ov-file#images
+      - name: Prebuildify x64 glibc
+        run: pnpm build:gyp-cross                  -i centos7-devtoolset7
+      - name: Prebuildify x64 musl
+        run: pnpm build:gyp-cross                  -i alpine
+      - name: Prebuildify arm64 glibc
+        run: pnpm build:gyp-cross --tag-libc glibc -i linux-arm64-lts
+      - name: Prebuildify arm64 musl
+        run: pnpm build:gyp-cross --tag-libc musl  -i linux-arm64-musl
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v4
@@ -132,10 +135,10 @@ jobs:
         with:
           name: build-common
 
-      - name: Prebuildify
-        run: |
-          pnpm build:gyp --arch x64
-          pnpm build:gyp --arch arm64
+      - name: Prebuildify arm64
+        run: pnpm build:gyp --arch arm64
+      - name: Prebuildify x64
+        run: pnpm build:gyp --arch x64
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v4

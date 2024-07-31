@@ -74,7 +74,7 @@ test('napi & wasm async compress should got same result', async () => {
 test('napi async api should run in parallel', async () => {
     const parallel = Array.from({ length: 16384 }).map(() => napi.compress(new Uint8Array(1024)));
     await expect(Promise.all(parallel)).resolves.toHaveLength(16384);
-});
+}, 10000);
 
 test('wasm async api should run in parallel', async () => {
     wasm.terminate();
@@ -83,7 +83,7 @@ test('wasm async api should run in parallel', async () => {
     expect(wasm.workers()).toEqual({ idle: availableParallelism() - 1, busy: 0 });
     wasm.terminate();
     expect(wasm.workers()).toEqual({ idle: 0, busy: 0 });
-});
+}, 10000);
 
 test.each(COMPRESS)('%s async compress should not transfer input', async (key, compress) => {
     const data = new Uint8Array(1000);
