@@ -6,10 +6,6 @@ inputs:
     description: "Override the default node version, or override what is specified in your project's volta config"
     required: false
     default: lts/*
-  pnpm-version:
-    description: 'Override the default pnpm version, which defaults to the latest 8.x'
-    required: false
-    default: '9'
   args:
     description: 'Directly pass args to pnpm'
     required: false
@@ -22,6 +18,6 @@ runs:
       with:
         node-version-file: ''
         node-version: ${{ inputs.node-version }}
-        pnpm-version: ${{ inputs.pnpm-version }}
+        pnpm-version: ''
         node-registry-url: 'https://registry.npmjs.org/'
         args: ${{ inputs.args }}
