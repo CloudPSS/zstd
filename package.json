@@ -5,10 +5,7 @@
   "author": "OpportunityLiu <opportunity@live.in>",
   "license": "MIT",
   "packageManager": "pnpm@9.6.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cloudpss/zstd.git"
-  },
+  "repository": "github:cloudpss/zstd",
   "keywords": [
     "zstd",
     "zstandard",
