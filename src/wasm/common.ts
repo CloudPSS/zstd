@@ -66,13 +66,6 @@ export function checkError<T extends number>(code: T): T {
     return code;
 }
 
-/** to Uint8Array */
-export function coercion(data: BinaryData): Uint8Array {
-    if (data instanceof Uint8Array) return data;
-    if (ArrayBuffer.isView(data)) return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-    return new Uint8Array(data, 0, data.byteLength);
-}
-
 const ZSTD_CONTENTSIZE_ERROR = 2 ** 32 - 2;
 //const ZSTD_CONTENTSIZE_UNKNOWN = 2 ** 32 - 1;
 

@@ -4,8 +4,8 @@ import { checkError, compress, decompress, fromHeap, Helper, Module, setWasmCall
 
 /** Worker request */
 export type WorkerRequest =
-    | [number, 'compress', [Uint8Array, level: number]]
-    | [number, 'decompress', [Uint8Array]]
+    | [number, 'compress', [Uint8Array | Blob, level: number]]
+    | [number, 'decompress', [Uint8Array | Blob]]
     | [number, 'Decompressor', [null]]
     | [number, 'Compressor', [null, level: number]]
     | [number, 'transform', [Uint8Array]]
@@ -35,18 +35,20 @@ setWasmCallbacks({
     onDecompressorData: (ctx, dst, dstSize) => onChunkData('Decompressor', ctx, dst, dstSize),
 });
 
-onMessage((data) => {
+onMessage(async (data) => {
     const [seq, method, args] = data as WorkerRequest;
     try {
         switch (method) {
             case 'compress': {
-                const [src, level] = args;
+                const [data, level] = args;
+                const src = ArrayBuffer.isView(data) ? data : new Uint8Array(await data.arrayBuffer());
                 const dst = compress(src, level);
                 postMessage([seq, dst], [dst.buffer]);
                 break;
             }
             case 'decompress': {
-                const [src] = args;
+                const [data] = args;
+                const src = ArrayBuffer.isView(data) ? data : new Uint8Array(await data.arrayBuffer());
                 const dst = decompress(src);
                 postMessage([seq, dst], [dst.buffer]);
                 break;

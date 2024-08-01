@@ -1,4 +1,5 @@
-import { checkInput, createModule } from '../common.js';
+import { coercionInput } from '../utils.js';
+import { createModule } from '../common.js';
 import * as common from './common.js';
 import { Worker as WorkerPolyfill, MAX_WORKERS, TransformStream } from '#worker-polyfill';
 import type { WorkerReady, WorkerRequest, WorkerResponse } from './worker.js';
@@ -101,9 +102,9 @@ async function callWorker(worker: Worker, method: WorkerRequest[1], args: Worker
     const seq = SEQ++;
     const request = [seq, method, args] as WorkerRequest;
     // make a transferable copy
-    if (args[0]) args[0] = Uint8Array.from(args[0]);
+    if (ArrayBuffer.isView(args[0])) args[0] = Uint8Array.from(args[0]);
     return new Promise((resolve, reject) => {
-        worker.postMessage(request, args[0] ? [args[0].buffer] : []);
+        worker.postMessage(request, ArrayBuffer.isView(args[0]) ? [args[0].buffer] : []);
 
         const onMessage = (ev: MessageEvent): void => {
             const [resSeq, data, error] = ev.data as WorkerResponse;
@@ -170,7 +171,7 @@ abstract class TransformProxy implements Transformer<BinaryData, Uint8Array> {
         if (seq != null) return;
         if (error) {
             this.controller.error(error);
-            this.end(true);
+            this.end(error);
         } else {
             this.controller.enqueue(data!);
         }
@@ -178,21 +179,22 @@ abstract class TransformProxy implements Transformer<BinaryData, Uint8Array> {
 
     /** end transform */
     protected end(error: unknown): void {
-        if (!this.ctx) return;
-        this.ctx.removeEventListener('message', this.onMessage);
+        if (this.ctx) {
+            this.ctx.removeEventListener('message', this.onMessage);
+        }
         if (error != null) {
             this.controller.error(error);
-            destroyWorker(this.ctx);
+            this.ctx && destroyWorker(this.ctx);
         } else {
-            returnWorker(this.ctx);
+            this.ctx && returnWorker(this.ctx);
         }
         this.ctx = null;
     }
     /** @inheritdoc */
     async start(controller: TransformStreamDefaultController<Uint8Array>): Promise<void> {
         this.controller = controller;
-        this.ctx = await borrowWorker();
         try {
+            this.ctx = await borrowWorker();
             this.ctx.addEventListener('message', this.onMessage);
             await callWorker(this.ctx, this.method, this.args);
         } catch (ex) {
@@ -203,8 +205,7 @@ abstract class TransformProxy implements Transformer<BinaryData, Uint8Array> {
     /** @inheritdoc */
     async transform(chunk: BinaryData): Promise<void> {
         try {
-            checkInput(chunk);
-            const src = common.coercion(chunk);
+            const src = coercionInput(chunk, false);
             await callWorker(this.ctx!, 'transform', [src]);
         } catch (ex) {
             this.end(ex);
@@ -236,7 +237,6 @@ export class WebDecompressor extends TransformProxy {
 }
 
 export const { compressSync, compress, decompressSync, decompress, compressor, decompressor } = createModule({
-    coercion: common.coercion,
     compressSync: common.compress,
     decompressSync: common.decompress,
     compress: (data, level) => call('compress', [data, level]),

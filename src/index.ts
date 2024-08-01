@@ -16,27 +16,11 @@ try {
             'ZSTD',
         );
     }
-    const { compress, decompress, compressSync, decompressSync, ...rest } = await import('./wasm/index.js');
+    const wasm = await import('./wasm/index.js');
     lib = {
-        compressSync: (data: BinaryData, level?: number): Buffer => {
-            const result = compressSync(data, level);
-            return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
-        },
-        decompressSync: (data: BinaryData): Buffer => {
-            const result = decompressSync(data);
-            return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
-        },
-        compress: async (data: BinaryData, level?: number): Promise<Buffer> => {
-            const result = await compress(data, level);
-            return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
-        },
-        decompress: async (data: BinaryData): Promise<Buffer> => {
-            const result = await decompress(data);
-            return Buffer.from(result.buffer, result.byteOffset, result.byteLength);
-        },
         Compressor: undefined as unknown as (typeof import('./napi.js'))['Compressor'],
         Decompressor: undefined as unknown as (typeof import('./napi.js'))['Decompressor'],
-        ...rest,
+        ...wasm,
     };
 }
 
