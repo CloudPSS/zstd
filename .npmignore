@@ -1,10 +1,12 @@
 /.*
 /build/
-*.ps1
 /lib/zstd/
-/*.tgz
 /tests/
 /benchmark/
 /coverage/
+/patches/
 tsconfig.json
 *.config.js
+*.ps1
+/*.html
+/*.tgz
