@@ -16,13 +16,15 @@ npm install @cloudpss/zstd
 
 ## Usage
 
+### Basic
+
 ```js
 import { compress, decompress } from '@cloudpss/zstd';
 
-const compressed = await compress(Buffer.from('Hello World!'));
+const compressed = await compress(new TextEncoder().encode('Hello World!'));
 const decompressed = await decompress(compressed);
 
-console.log(decompressed.toString()); // Hello World!
+console.log(new TextDecoder().decode(decompressed)); // Hello World!
 ```
 
 To explicitly use the wasm or the n-api version, import `@cloudpss/zstd/wasm` and `@cloudpss/zstd/napi` respectively.
@@ -31,17 +33,13 @@ To explicitly use the wasm or the n-api version, import `@cloudpss/zstd/wasm` an
 
 ### Module `@cloudpss/zstd` / `@cloudpss/zstd/wasm` / `@cloudpss/zstd/napi`
 
-> [!NOTE]
->
-> If you are using this library in a browser, the `Buffer` classes is replaced with `Uint8Array` classes.
+#### `compress(input: BinaryData | Blob, level?: number): Promise<Uint8Array>`<br> `compressSync(input: BinaryData, level?: number): Uint8Array`
 
-#### `compress(input: BinaryData, level?: number): Promise<Buffer>`<br> `compressSync(input: BinaryData, level?: number): Buffer`
+Compresses the input data with the given compression level (default: 4).
 
-Compresses the input buffer with the given compression level (default: 4).
+#### `decompress(input: BinaryData | Blob): Promise<Uint8Array>`<br> `decompressSync(input: BinaryData): Uint8Array`
 
-#### `decompress(input: BinaryData): Promise<Buffer>`<br> `decompressSync(input: BinaryData): Buffer`
-
-Decompresses the input buffer.
+Decompresses the input data.
 
 #### `TYPE: 'napi' | 'wasm'`
 
