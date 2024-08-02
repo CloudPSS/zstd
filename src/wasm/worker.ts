@@ -30,6 +30,12 @@ function onChunkData(state: 'Decompressor' | 'Compressor', ctx: number, dst: Ptr
     postMessage([null, chunk], [chunk.buffer]);
 }
 
+/** stream mode clean up */
+function cleanUp(): void {
+    ptr = undefined;
+    mode = undefined;
+}
+
 setWasmCallbacks({
     onCompressorData: (ctx, dst, dstSize) => onChunkData('Compressor', ctx, dst, dstSize),
     onDecompressorData: (ctx, dst, dstSize) => onChunkData('Decompressor', ctx, dst, dstSize),
@@ -87,6 +93,9 @@ onMessage(async (data) => {
                         checkError(Module._DecompressorData(ptr as ZSTD_DStream, srcPtr, srcSize));
                     }
                     postMessage([seq, null]);
+                } catch (ex) {
+                    cleanUp();
+                    throw ex;
                 } finally {
                     helper.finalize();
                 }
@@ -96,14 +105,16 @@ onMessage(async (data) => {
                 if (ptr == null || mode == null) {
                     throw new Error('Invalid context');
                 }
-                if (mode === 'Compressor') {
-                    checkError(Module._CompressorEnd(ptr as ZSTD_CStream));
-                } else {
-                    checkError(Module._DecompressorEnd(ptr as ZSTD_DStream));
+                try {
+                    if (mode === 'Compressor') {
+                        checkError(Module._CompressorEnd(ptr as ZSTD_CStream));
+                    } else {
+                        checkError(Module._DecompressorEnd(ptr as ZSTD_DStream));
+                    }
+                    postMessage([seq, null]);
+                } finally {
+                    cleanUp();
                 }
-                ptr = undefined;
-                mode = undefined;
-                postMessage([seq, null]);
                 break;
             }
             default:
