@@ -1,22 +1,10 @@
 import { randomBytes } from 'node:crypto';
 import { availableParallelism } from 'node:os';
+import { randomBuffer, zeroBuffer, zeroDataView, zeroFloat64Array } from './.utils.js';
 import * as napi from '@cloudpss/zstd/napi';
 import * as wasm from '@cloudpss/zstd/wasm';
 import * as root from '@cloudpss/zstd';
 import * as config from '@cloudpss/zstd/config';
-
-const randomBuffer = randomBytes(1000);
-
-const emptyBuffer = Buffer.alloc(1000);
-const emptyFloat64Array = new Float64Array(1000 / 8);
-const emptyDataView = new DataView(emptyFloat64Array.buffer);
-
-/**
- * 转换 buffer
- */
-function asBuffer(data: ArrayBufferView): Buffer {
-    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
-}
 
 const ALL = [
     ['napi compress', napi.compress],
@@ -44,31 +32,28 @@ afterAll(() => {
     wasm.terminate();
 });
 
-test('napi async api should return buffer', async () => {
-    await expect(napi.compress(randomBuffer)).resolves.toBeInstanceOf(Buffer);
-    await expect(napi.compress(emptyBuffer)).resolves.toBeInstanceOf(Buffer);
-    await expect(napi.decompress(napi.compressSync(randomBuffer))).resolves.toBeInstanceOf(Buffer);
-    await expect(napi.decompress(napi.compressSync(emptyBuffer))).resolves.toBeInstanceOf(Buffer);
-});
-
-test('wasm async api should return uint8array', async () => {
-    await expect(wasm.compress(randomBuffer)).resolves.toBeInstanceOf(Uint8Array);
-    await expect(wasm.compress(emptyBuffer)).resolves.toBeInstanceOf(Uint8Array);
-    await expect(wasm.decompress(wasm.compressSync(randomBuffer))).resolves.toBeInstanceOf(Uint8Array);
-    await expect(wasm.decompress(wasm.compressSync(emptyBuffer))).resolves.toBeInstanceOf(Uint8Array);
-});
-
-test('wasm async api should not return buffer', async () => {
-    await expect(wasm.compress(randomBuffer)).resolves.not.toBeInstanceOf(Buffer);
-    await expect(wasm.compress(emptyBuffer)).resolves.not.toBeInstanceOf(Buffer);
-    await expect(wasm.decompress(wasm.compressSync(randomBuffer))).resolves.not.toBeInstanceOf(Buffer);
-    await expect(wasm.decompress(wasm.compressSync(emptyBuffer))).resolves.not.toBeInstanceOf(Buffer);
+describe.each([
+    ['napi', napi],
+    ['wasm', wasm],
+])(`%s async api`, (key, api) => {
+    it('should return uint8array', async () => {
+        await expect(api.compress(randomBuffer)).resolves.toBeInstanceOf(Uint8Array);
+        await expect(api.compress(zeroBuffer)).resolves.toBeInstanceOf(Uint8Array);
+        await expect(api.decompress(await api.compress(randomBuffer))).resolves.toBeInstanceOf(Uint8Array);
+        await expect(api.decompress(await api.compress(zeroBuffer))).resolves.toBeInstanceOf(Uint8Array);
+    });
+    it('should not return buffer', async () => {
+        await expect(api.compress(randomBuffer)).resolves.not.toBeInstanceOf(Buffer);
+        await expect(api.compress(zeroBuffer)).resolves.not.toBeInstanceOf(Buffer);
+        await expect(api.decompress(await api.compress(randomBuffer))).resolves.not.toBeInstanceOf(Buffer);
+        await expect(api.decompress(await api.compress(zeroBuffer))).resolves.not.toBeInstanceOf(Buffer);
+    });
 });
 
 test('napi & wasm async compress should got same result', async () => {
-    await expect(napi.compress(randomBuffer)).resolves.toEqual(asBuffer(wasm.compressSync(randomBuffer)));
-    await expect(napi.compress(emptyBuffer)).resolves.toEqual(asBuffer(wasm.compressSync(emptyBuffer)));
-    await expect(napi.compress(emptyFloat64Array)).resolves.toEqual(asBuffer(wasm.compressSync(emptyFloat64Array)));
+    await expect(napi.compress(randomBuffer)).resolves.toEqual(wasm.compressSync(randomBuffer));
+    await expect(napi.compress(zeroBuffer)).resolves.toEqual(wasm.compressSync(zeroBuffer));
+    await expect(napi.compress(zeroFloat64Array)).resolves.toEqual(wasm.compressSync(zeroFloat64Array));
 });
 
 test('napi async api should run in parallel', async () => {
@@ -100,19 +85,19 @@ test.each(DECOMPRESS)('%s async compress should not transfer input', async (key,
 
 describe.each(ROUNDTRIP)('%s async roundtrip should got same result', (key, roundtrip) => {
     it('random buffer', async () => {
-        expect(asBuffer(await roundtrip(randomBuffer))).toEqual(randomBuffer);
+        expect(await roundtrip(randomBuffer)).toEqual(randomBuffer);
     });
     it('empty buffer', async () => {
-        expect(asBuffer(await roundtrip(emptyBuffer))).toEqual(emptyBuffer);
+        expect(await roundtrip(zeroBuffer)).toEqual(zeroBuffer);
     });
     it('float64array', async () => {
-        expect(asBuffer(await roundtrip(emptyFloat64Array))).toEqual(emptyBuffer);
+        expect(await roundtrip(zeroFloat64Array)).toEqual(zeroBuffer);
     });
     it('dataview', async () => {
-        expect(asBuffer(await roundtrip(emptyDataView))).toEqual(emptyBuffer);
+        expect(await roundtrip(zeroDataView)).toEqual(zeroBuffer);
     });
     it('arraybuffer', async () => {
-        expect(asBuffer(await roundtrip(emptyBuffer.buffer))).toEqual(emptyBuffer);
+        expect(await roundtrip(zeroBuffer.buffer)).toEqual(zeroBuffer);
     });
 });
 
@@ -148,18 +133,18 @@ describe('should reject bad level', () => {
     for (const [key, compress] of COMPRESS) {
         it(key, async () => {
             // @ts-expect-error ts(2345)
-            await expect(() => compress(emptyBuffer, '1')).rejects.toThrow();
+            await expect(() => compress(zeroBuffer, '1')).rejects.toThrow();
             // @ts-expect-error ts(2345)
-            await expect(() => compress(emptyBuffer, {})).rejects.toThrow();
+            await expect(() => compress(zeroBuffer, {})).rejects.toThrow();
             // @ts-expect-error ts(2345)
-            await expect(() => compress(emptyBuffer, [])).rejects.toThrow();
+            await expect(() => compress(zeroBuffer, [])).rejects.toThrow();
             // @ts-expect-error ts(2345)
             // eslint-disable-next-line unicorn/new-for-builtins
-            await expect(() => compress(emptyBuffer, new Number(1))).rejects.toThrow();
+            await expect(() => compress(zeroBuffer, new Number(1))).rejects.toThrow();
             // @ts-expect-error ts(2345)
-            await expect(() => compress(emptyBuffer, true)).rejects.toThrow();
+            await expect(() => compress(zeroBuffer, true)).rejects.toThrow();
             // @ts-expect-error ts(2345)
-            await expect(() => compress(emptyBuffer, { valueOf: () => 1 })).rejects.toThrow();
+            await expect(() => compress(zeroBuffer, { valueOf: () => 1 })).rejects.toThrow();
         });
     }
 });
@@ -168,17 +153,17 @@ describe('should accept allowed level', () => {
     for (const [key, compress] of COMPRESS) {
         it(key, async () => {
             // @ts-expect-error ts(2345)
-            await expect(compress(emptyBuffer, null)).resolves.not.toThrow();
-            await expect(compress(emptyBuffer, undefined)).resolves.not.toThrow();
-            await expect(compress(emptyBuffer, 1.2)).resolves.not.toThrow();
-            await expect(compress(emptyBuffer, Number.NaN)).resolves.not.toThrow();
-            await expect(compress(emptyBuffer, Number.MAX_VALUE)).resolves.not.toThrow();
-            await expect(compress(emptyBuffer, -Number.MAX_VALUE)).resolves.not.toThrow();
-            await expect(compress(emptyBuffer, -Number.MIN_VALUE)).resolves.not.toThrow();
-            await expect(compress(emptyBuffer, -Infinity)).resolves.not.toThrow();
-            await expect(compress(emptyBuffer, Infinity)).resolves.not.toThrow();
-            await expect(compress(emptyBuffer, Number.MAX_SAFE_INTEGER)).resolves.not.toThrow();
-            await expect(compress(emptyBuffer, Number.MIN_SAFE_INTEGER)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, null)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, undefined)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, 1.2)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, Number.NaN)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, Number.MAX_VALUE)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, -Number.MAX_VALUE)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, -Number.MIN_VALUE)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, -Infinity)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, Infinity)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, Number.MAX_SAFE_INTEGER)).resolves.not.toThrow();
+            await expect(compress(zeroBuffer, Number.MIN_SAFE_INTEGER)).resolves.not.toThrow();
         });
     }
 });
@@ -223,7 +208,7 @@ describe('should reject huge input', () => {
 describe('should reject bad compressed data', () => {
     for (const [key, decompress] of DECOMPRESS) {
         it(key, async () => {
-            await expect(() => decompress(emptyBuffer)).rejects.toThrow('Invalid compressed data');
+            await expect(() => decompress(zeroBuffer)).rejects.toThrow('Invalid compressed data');
         });
     }
 });

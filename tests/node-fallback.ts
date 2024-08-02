@@ -12,13 +12,13 @@ it('should fallback to wasm', async () => {
     expect(root.TYPE).toBe('wasm');
 });
 
-it('should returns buffer', async () => {
+it('should returns uint8array', async () => {
     const root = await import('@cloudpss/zstd');
     expect(root.TYPE).toBe('wasm');
 
-    expect(root.compressSync(Buffer.alloc(10))).toBeInstanceOf(Buffer);
-    expect(root.decompressSync(root.compressSync(Buffer.alloc(10)))).toBeInstanceOf(Buffer);
+    expect(root.compressSync(Buffer.alloc(10))).not.toBeInstanceOf(Buffer);
+    expect(root.decompressSync(root.compressSync(Buffer.alloc(10)))).not.toBeInstanceOf(Buffer);
 
-    await expect(root.compress(Buffer.alloc(10))).resolves.toBeInstanceOf(Buffer);
-    await expect(root.decompress(await root.compress(Buffer.alloc(10)))).resolves.toBeInstanceOf(Buffer);
+    await expect(root.compress(Buffer.alloc(10))).resolves.not.toBeInstanceOf(Buffer);
+    await expect(root.decompress(await root.compress(Buffer.alloc(10)))).resolves.not.toBeInstanceOf(Buffer);
 });

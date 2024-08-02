@@ -12,37 +12,37 @@ declare class _Compressor {
     /** constructor */
     constructor(level: number);
     /** compress */
-    data(data: Uint8Array, callback: (data: Uint8Array) => void): void;
+    data(data: Uint8Array, callback: (data: Buffer) => void): void;
     /** end */
-    end(callback: (data: Uint8Array) => void): void;
+    end(callback: (data: Buffer) => void): void;
 }
 /** Decompressor class */
 declare class _Decompressor {
     /** constructor */
     constructor();
     /** decompress */
-    data(data: Uint8Array, callback: (data: Uint8Array) => void): void;
+    data(data: Uint8Array, callback: (data: Buffer) => void): void;
     /** end */
-    end(callback: (data: Uint8Array) => void): void;
+    end(callback: (data: Buffer) => void): void;
 }
 
 /** node bindings */
 interface Binding {
     /** compress */
-    compress(data: Uint8Array, level: number): Uint8Array;
+    compress(data: Uint8Array, level: number): Buffer;
     /** compress_async */
     compress_async(
         data: Uint8Array,
         level: number,
-        callback: (error: string | null, data: Uint8Array | null) => void,
+        callback: (error: string | null, data: Buffer | null) => void,
     ): void;
     /** decompress */
-    decompress(data: Uint8Array, maxSize: number): Uint8Array;
+    decompress(data: Uint8Array, maxSize: number): Buffer;
     /** decompress_async */
     decompress_async(
         data: Uint8Array,
         maxSize: number,
-        callback: (error: string | null, data: Uint8Array | null) => void,
+        callback: (error: string | null, data: Buffer | null) => void,
     ): void;
     /** Get zstd version */
     version: string;
@@ -151,7 +151,7 @@ abstract class WebCompressTransformer implements Transformer<BinaryData, Uint8Ar
     /** @inheritdoc */
     transform(chunk: BinaryData, controller: TransformStreamDefaultController<Uint8Array>): void {
         try {
-            this._binding!.data(coercionInput(chunk, false), (data) => controller.enqueue(data));
+            this._binding!.data(coercionInput(chunk, false), (data) => controller.enqueue(asUint8Array(data)));
         } catch (ex) {
             controller.error(ex);
             this._binding = null;
@@ -161,7 +161,7 @@ abstract class WebCompressTransformer implements Transformer<BinaryData, Uint8Ar
     /** @inheritdoc */
     flush(controller: TransformStreamDefaultController<Uint8Array>): void {
         try {
-            this._binding!.end((data) => controller.enqueue(data));
+            this._binding!.end((data) => controller.enqueue(asUint8Array(data)));
         } catch (ex) {
             controller.error(ex);
         } finally {
@@ -188,16 +188,20 @@ class WebDecompressor extends WebCompressTransformer {
         this._binding = new bindings.Decompressor();
     }
 }
+/** Convert to Uint8Array */
+function asUint8Array(buf: Buffer): Uint8Array {
+    return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+}
 
 export const { compressSync, compress, decompressSync, decompress, compressor, decompressor } = createModule({
-    compressSync: (data, level) => bindings.compress(data, level),
-    decompressSync: (data) => bindings.decompress(data, MAX_SIZE),
+    compressSync: (data, level) => asUint8Array(bindings.compress(data, level)),
+    decompressSync: (data) => asUint8Array(bindings.decompress(data, MAX_SIZE)),
     compress: async (data, level) => {
         const bin = ArrayBuffer.isView(data) ? data : new Uint8Array(await data.arrayBuffer());
         return new Promise((resolve, reject) => {
             bindings.compress_async(bin, level, (error, data) => {
                 if (error) reject(new Error(error));
-                else resolve(data!);
+                else resolve(asUint8Array(data!));
             });
         });
     },
@@ -206,7 +210,7 @@ export const { compressSync, compress, decompressSync, decompress, compressor, d
         return new Promise((resolve, reject) => {
             bindings.decompress_async(bin, MAX_SIZE, (error, data) => {
                 if (error) reject(new Error(error));
-                else resolve(data!);
+                else resolve(asUint8Array(data!));
             });
         });
     },

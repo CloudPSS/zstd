@@ -1,21 +1,9 @@
 import { randomBytes } from 'node:crypto';
+import { randomBuffer, zeroBuffer, zeroDataView, zeroFloat64Array } from './.utils.js';
 import * as napi from '@cloudpss/zstd/napi';
 import * as wasm from '@cloudpss/zstd/wasm';
 import * as root from '@cloudpss/zstd';
 import * as config from '@cloudpss/zstd/config';
-
-const randomBuffer = randomBytes(1000);
-
-const emptyBuffer = Buffer.alloc(1000);
-const emptyFloat64Array = new Float64Array(1000 / 8);
-const emptyDataView = new DataView(emptyFloat64Array.buffer);
-
-/**
- * 转换 buffer
- */
-function asBuffer(data: ArrayBufferView): Buffer {
-    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
-}
 
 const ALL = [
     ['napi compress', napi.compressSync],
@@ -39,48 +27,45 @@ const ROUNDTRIP = [
     ['wasm', (data: BinaryData, level?: number) => wasm.decompressSync(wasm.compressSync(data, level))],
 ] as const;
 
-test('napi api should return buffer', () => {
-    expect(napi.compressSync(randomBuffer)).toBeInstanceOf(Buffer);
-    expect(napi.compressSync(emptyBuffer)).toBeInstanceOf(Buffer);
-    expect(napi.decompressSync(napi.compressSync(randomBuffer))).toBeInstanceOf(Buffer);
-    expect(napi.decompressSync(napi.compressSync(emptyBuffer))).toBeInstanceOf(Buffer);
-});
-
-test('wasm api should return uint8array', () => {
-    expect(wasm.compressSync(randomBuffer)).toBeInstanceOf(Uint8Array);
-    expect(wasm.compressSync(emptyBuffer)).toBeInstanceOf(Uint8Array);
-    expect(wasm.decompressSync(wasm.compressSync(randomBuffer))).toBeInstanceOf(Uint8Array);
-    expect(wasm.decompressSync(wasm.compressSync(emptyBuffer))).toBeInstanceOf(Uint8Array);
-});
-
-test('wasm api should not return buffer', () => {
-    expect(wasm.compressSync(randomBuffer)).not.toBeInstanceOf(Buffer);
-    expect(wasm.compressSync(emptyBuffer)).not.toBeInstanceOf(Buffer);
-    expect(wasm.decompressSync(wasm.compressSync(randomBuffer))).not.toBeInstanceOf(Buffer);
-    expect(wasm.decompressSync(wasm.compressSync(emptyBuffer))).not.toBeInstanceOf(Buffer);
+describe.each([
+    ['napi', napi],
+    ['wasm', wasm],
+])(`%s api`, (key, api) => {
+    it('should return uint8array', () => {
+        expect(api.compressSync(randomBuffer)).toBeInstanceOf(Uint8Array);
+        expect(api.compressSync(zeroBuffer)).toBeInstanceOf(Uint8Array);
+        expect(api.decompressSync(api.compressSync(randomBuffer))).toBeInstanceOf(Uint8Array);
+        expect(api.decompressSync(api.compressSync(zeroBuffer))).toBeInstanceOf(Uint8Array);
+    });
+    it('should not return buffer', () => {
+        expect(api.compressSync(randomBuffer)).not.toBeInstanceOf(Buffer);
+        expect(api.compressSync(zeroBuffer)).not.toBeInstanceOf(Buffer);
+        expect(api.decompressSync(api.compressSync(randomBuffer))).not.toBeInstanceOf(Buffer);
+        expect(api.decompressSync(api.compressSync(zeroBuffer))).not.toBeInstanceOf(Buffer);
+    });
 });
 
 test('napi & wasm compress should got same result', () => {
-    expect(napi.compressSync(randomBuffer)).toEqual(asBuffer(wasm.compressSync(randomBuffer)));
-    expect(napi.compressSync(emptyBuffer)).toEqual(asBuffer(wasm.compressSync(emptyBuffer)));
-    expect(napi.compressSync(emptyFloat64Array)).toEqual(asBuffer(wasm.compressSync(emptyFloat64Array)));
+    expect(napi.compressSync(randomBuffer)).toEqual(wasm.compressSync(randomBuffer));
+    expect(napi.compressSync(zeroBuffer)).toEqual(wasm.compressSync(zeroBuffer));
+    expect(napi.compressSync(zeroFloat64Array)).toEqual(wasm.compressSync(zeroFloat64Array));
 });
 
 describe.each(ROUNDTRIP)('%s roundtrip should got same result', (key, roundtrip) => {
     it('random buffer', () => {
-        expect(asBuffer(roundtrip(randomBuffer))).toEqual(randomBuffer);
+        expect(roundtrip(randomBuffer)).toEqual(randomBuffer);
     });
     it('empty buffer', () => {
-        expect(asBuffer(roundtrip(emptyBuffer))).toEqual(emptyBuffer);
+        expect(roundtrip(zeroBuffer)).toEqual(zeroBuffer);
     });
     it('float64array', () => {
-        expect(asBuffer(roundtrip(emptyFloat64Array))).toEqual(emptyBuffer);
+        expect(roundtrip(zeroFloat64Array)).toEqual(zeroBuffer);
     });
     it('dataview', () => {
-        expect(asBuffer(roundtrip(emptyDataView))).toEqual(emptyBuffer);
+        expect(roundtrip(zeroDataView)).toEqual(zeroBuffer);
     });
     it('arraybuffer', () => {
-        expect(asBuffer(roundtrip(emptyBuffer.buffer))).toEqual(emptyBuffer);
+        expect(roundtrip(zeroBuffer.buffer)).toEqual(zeroBuffer);
     });
 });
 
@@ -116,18 +101,18 @@ describe('should reject bad level', () => {
     for (const [key, compressSync] of COMPRESS) {
         it(key, () => {
             // @ts-expect-error ts(2345)
-            expect(() => compressSync(emptyBuffer, '1')).toThrow();
+            expect(() => compressSync(zeroBuffer, '1')).toThrow();
             // @ts-expect-error ts(2345)
-            expect(() => compressSync(emptyBuffer, {})).toThrow();
+            expect(() => compressSync(zeroBuffer, {})).toThrow();
             // @ts-expect-error ts(2345)
-            expect(() => compressSync(emptyBuffer, [])).toThrow();
+            expect(() => compressSync(zeroBuffer, [])).toThrow();
             // @ts-expect-error ts(2345)
             // eslint-disable-next-line unicorn/new-for-builtins
-            expect(() => compressSync(emptyBuffer, new Number(1))).toThrow();
+            expect(() => compressSync(zeroBuffer, new Number(1))).toThrow();
             // @ts-expect-error ts(2345)
-            expect(() => compressSync(emptyBuffer, true)).toThrow();
+            expect(() => compressSync(zeroBuffer, true)).toThrow();
             // @ts-expect-error ts(2345)
-            expect(() => compressSync(emptyBuffer, { valueOf: () => 1 })).toThrow();
+            expect(() => compressSync(zeroBuffer, { valueOf: () => 1 })).toThrow();
         });
     }
 });
@@ -136,17 +121,17 @@ describe('should accept allowed level', () => {
     for (const [key, compressSync] of COMPRESS) {
         it(key, () => {
             // @ts-expect-error ts(2345)
-            expect(() => compressSync(emptyBuffer, null)).not.toThrow();
-            expect(() => compressSync(emptyBuffer, undefined)).not.toThrow();
-            expect(() => compressSync(emptyBuffer, 1.2)).not.toThrow();
-            expect(() => compressSync(emptyBuffer, Number.NaN)).not.toThrow();
-            expect(() => compressSync(emptyBuffer, Number.MAX_VALUE)).not.toThrow();
-            expect(() => compressSync(emptyBuffer, -Number.MAX_VALUE)).not.toThrow();
-            expect(() => compressSync(emptyBuffer, -Number.MIN_VALUE)).not.toThrow();
-            expect(() => compressSync(emptyBuffer, -Infinity)).not.toThrow();
-            expect(() => compressSync(emptyBuffer, Infinity)).not.toThrow();
-            expect(() => compressSync(emptyBuffer, Number.MAX_SAFE_INTEGER)).not.toThrow();
-            expect(() => compressSync(emptyBuffer, Number.MIN_SAFE_INTEGER)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, null)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, undefined)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, 1.2)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, Number.NaN)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, Number.MAX_VALUE)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, -Number.MAX_VALUE)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, -Number.MIN_VALUE)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, -Infinity)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, Infinity)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, Number.MAX_SAFE_INTEGER)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, Number.MIN_SAFE_INTEGER)).not.toThrow();
         });
     }
 });
@@ -189,7 +174,7 @@ describe('should reject huge input', () => {
 describe('should reject bad compressed data', () => {
     for (const [key, decompressSync] of DECOMPRESS) {
         it(key, () => {
-            expect(() => decompressSync(emptyBuffer)).toThrow('Invalid compressed data');
+            expect(() => decompressSync(zeroBuffer)).toThrow('Invalid compressed data');
         });
     }
 });
