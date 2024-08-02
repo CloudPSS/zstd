@@ -61,7 +61,6 @@ export function postMessage(value: unknown, transfer?: Transferable[]): void {
     parentPort!.postMessage(value, transfer as TransferListItem[] | undefined);
 }
 
-export const MAX_WORKERS =
-    Math.max(typeof os.availableParallelism == 'function' ? os.availableParallelism() : os.cpus().length, 2) - 1;
+export const MAX_WORKERS = Math.max(os.availableParallelism?.() ?? os.cpus().length, 2) - 1;
 
 export { TransformStream } from 'node:stream/web';

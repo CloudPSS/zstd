@@ -16,4 +16,4 @@ export function postMessage(value: unknown, transfer?: Transferable[]): void {
 
 export const TransformStream = globalThis.TransformStream;
 
-export const MAX_WORKERS = (globalThis.navigator?.hardwareConcurrency ?? 4) - 1;
+export const MAX_WORKERS = Math.max(globalThis.navigator?.hardwareConcurrency ?? 4, 2) - 1;
