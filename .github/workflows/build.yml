@@ -177,6 +177,7 @@ jobs:
   test:
     needs: pack
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
         node: ['lts/-1', 'lts/*', 'latest']
