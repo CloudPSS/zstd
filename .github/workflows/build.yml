@@ -194,6 +194,7 @@ jobs:
         uses: ./.github/actions/install
         with:
           node-version: ${{ matrix.node }}
+          args: --ignore-scripts
 
       - name: Run test with prebuilds
         run: pnpm test
