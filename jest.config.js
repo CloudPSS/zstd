@@ -21,13 +21,13 @@ export default /** @type {import('ts-jest').JestConfigWithTsJest} */ ({
     collectCoverage: true,
 
     // An array of glob patterns indicating a set of files for which coverage information should be collected
-    // collectCoverageFrom: ['src/**/*.{js,ts}', 'dist/**/*.js'],
+    collectCoverageFrom: ['src/**/*.{js,ts}', 'dist/**/*.js'],
 
     // The directory where Jest should output its coverage files
     coverageDirectory: 'coverage',
 
     // An array of regexp pattern strings used to skip coverage collection
-    coveragePathIgnorePatterns: ['/node_modules/', '<rootDir>/prebuilds/'],
+    // coveragePathIgnorePatterns: ['/node_modules/', '<rootDir>/prebuilds/', '<rootDir>/tests/'],
 
     // Indicates which provider should be used to instrument code for coverage
     coverageProvider: 'v8',

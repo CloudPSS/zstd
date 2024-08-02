@@ -6,6 +6,11 @@ jest.mock('node-gyp-build', () => {
     });
 });
 
+afterAll(async () => {
+    const wasm = await import('@cloudpss/zstd/wasm');
+    wasm.terminate();
+});
+
 it('should fallback to wasm', async () => {
     const root = await import('@cloudpss/zstd');
     expect(jest.requireMock('node-gyp-build')).toHaveBeenCalledWith(expect.any(String));
