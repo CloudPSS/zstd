@@ -143,7 +143,7 @@ export default /** @type {import('ts-jest').JestConfigWithTsJest} */ ({
     // snapshotSerializers: [],
 
     // The test environment that will be used for testing
-    // testEnvironment: "jest-environment-node",
+    testEnvironment: 'node',
 
     // Options that will be passed to the testEnvironment
     // testEnvironmentOptions: {},
@@ -165,6 +165,8 @@ export default /** @type {import('ts-jest').JestConfigWithTsJest} */ ({
 
     // This option allows use of a custom test runner
     // testRunner: "jest-circus/runner",
+
+    extensionsToTreatAsEsm: ['.ts'],
 
     // A map from regular expressions to paths to transformers
     transform: {
