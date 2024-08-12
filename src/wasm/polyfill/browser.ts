@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-export const Worker = globalThis.Worker;
+export const { Worker, TransformStream } = globalThis;
 
 /** add message callback */
 export function onMessage(callback: (value: unknown) => unknown): void {
@@ -13,7 +13,5 @@ export function onMessage(callback: (value: unknown) => unknown): void {
 export function postMessage(value: unknown, transfer?: Transferable[]): void {
     self.postMessage(value, transfer!);
 }
-
-export const TransformStream = globalThis.TransformStream;
 
 export const MAX_WORKERS = Math.max(globalThis.navigator?.hardwareConcurrency ?? 4, 2) - 1;

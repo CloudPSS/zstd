@@ -10,7 +10,7 @@ const PENDING_BORROW: Array<(value: Worker) => void> = [];
 let SEQ = 0;
 
 /** create and initialize worker */
-function initWorker(): Promise<Worker> {
+async function initWorker(): Promise<Worker> {
     return new Promise((resolve, reject) => {
         const worker =
             typeof Worker == 'function'
@@ -179,14 +179,15 @@ abstract class TransformProxy implements Transformer<BinaryData, Uint8Array> {
 
     /** end transform */
     protected end(error: unknown): void {
-        if (this.ctx) {
-            this.ctx.removeEventListener('message', this.onMessage);
+        const { ctx } = this;
+        if (ctx) {
+            ctx.removeEventListener('message', this.onMessage);
         }
         if (error != null) {
             this.controller.error(error);
-            this.ctx && destroyWorker(this.ctx);
+            if (ctx) destroyWorker(ctx);
         } else {
-            this.ctx && returnWorker(this.ctx);
+            if (ctx) returnWorker(ctx);
         }
         this.ctx = null;
     }
@@ -239,14 +240,14 @@ export class WebDecompressor extends TransformProxy {
 export const { compressSync, compress, decompressSync, decompress, compressor, decompressor } = createModule({
     compressSync: common.compress,
     decompressSync: common.decompress,
-    compress: (data, level) => call('compress', [data, level]),
-    decompress: (data) => call('decompress', [data]),
+    compress: async (data, level) => await call('compress', [data, level]),
+    decompress: async (data) => await call('decompress', [data]),
     Compressor: WebCompressor,
     Decompressor: WebDecompressor,
     TransformStream,
 });
 
-export const ZSTD_VERSION = common.ZSTD_VERSION;
+export const { ZSTD_VERSION } = common;
 
 export const TYPE = 'wasm';
 
