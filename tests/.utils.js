@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+/// <reference path="../" />
 
 export const randomBuffer = asUint8Array(randomBytes(1000));
 
