@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -17,6 +16,7 @@ const pb = (/** @type {number} */ size) => prettyBytes(size, { binary: true }).p
 const root = path.resolve(fileURLToPath(import.meta.url), '../files/');
 /**
  * List test files.
+ * @yields {{name: string, path: string, content: Buffer}}
  */
 async function* files() {
     for await (const file of await fs.opendir(root)) {
