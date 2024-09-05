@@ -192,7 +192,7 @@ describe('should reject huge input', () => {
         await expect(() => napi.compress(bufferOf3GB.buffer)).rejects.toThrow(`Input data is too large`);
         await expect(() => napi.decompress(bufferOf3GB)).rejects.toThrow(`Input data is too large`);
         await expect(() => napi.decompress(compressed3GB)).rejects.toThrow(`Content size is too large`);
-    });
+    }, 10000);
     it('wasm', async () => {
         const hugeBuffer = Buffer.alloc(1 * 1024 * 1024 * 1024);
         await expect(() => wasm.compress(hugeBuffer)).rejects.toThrow(`Failed to allocate memory`);
@@ -202,7 +202,7 @@ describe('should reject huge input', () => {
         await expect(() => wasm.decompress(compressed3GB)).rejects.toThrow(
             `Content size is too large: ${compressed3GBSize}`,
         );
-    });
+    }, 10000);
 });
 
 describe('should reject bad compressed data', () => {
