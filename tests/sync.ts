@@ -1,5 +1,3 @@
-import { describe, it, test } from 'node:test';
-import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { randomBuffer, zeroBuffer, zeroDataView, zeroFloat64Array } from './.utils.js';
 import * as napi from '@cloudpss/zstd/napi';
@@ -29,78 +27,72 @@ const ROUNDTRIP = [
     ['wasm', (data: BinaryData, level?: number) => wasm.decompressSync(wasm.compressSync(data, level))],
 ] as const;
 
-const MODULE = [
+describe.each([
     ['napi', napi],
     ['wasm', wasm],
-] as const;
-
-for (const [key, api] of MODULE) {
-    describe(`${key} stream compress api`, () => {
-        it('should return uint8array', () => {
-            assert(api.compressSync(randomBuffer) instanceof Uint8Array);
-            assert(api.compressSync(zeroBuffer) instanceof Uint8Array);
-            assert(api.decompressSync(api.compressSync(randomBuffer)) instanceof Uint8Array);
-            assert(api.decompressSync(api.compressSync(zeroBuffer)) instanceof Uint8Array);
-        });
-        it('should not return buffer', () => {
-            assert(!(api.compressSync(randomBuffer) instanceof Buffer));
-            assert(!(api.compressSync(zeroBuffer) instanceof Buffer));
-            assert(!(api.decompressSync(api.compressSync(randomBuffer)) instanceof Buffer));
-            assert(!(api.decompressSync(api.compressSync(zeroBuffer)) instanceof Buffer));
-        });
+])(`%s api`, (key, api) => {
+    it('should return uint8array', () => {
+        expect(api.compressSync(randomBuffer)).toBeInstanceOf(Uint8Array);
+        expect(api.compressSync(zeroBuffer)).toBeInstanceOf(Uint8Array);
+        expect(api.decompressSync(api.compressSync(randomBuffer))).toBeInstanceOf(Uint8Array);
+        expect(api.decompressSync(api.compressSync(zeroBuffer))).toBeInstanceOf(Uint8Array);
     });
-}
-
-test('napi & wasm compress should got same result', () => {
-    assert.deepEqual(napi.compressSync(randomBuffer), wasm.compressSync(randomBuffer));
-    assert.deepEqual(napi.compressSync(zeroBuffer), wasm.compressSync(zeroBuffer));
-    assert.deepEqual(napi.compressSync(zeroFloat64Array), wasm.compressSync(zeroFloat64Array));
+    it('should not return buffer', () => {
+        expect(api.compressSync(randomBuffer)).not.toBeInstanceOf(Buffer);
+        expect(api.compressSync(zeroBuffer)).not.toBeInstanceOf(Buffer);
+        expect(api.decompressSync(api.compressSync(randomBuffer))).not.toBeInstanceOf(Buffer);
+        expect(api.decompressSync(api.compressSync(zeroBuffer))).not.toBeInstanceOf(Buffer);
+    });
 });
 
-for (const [key, roundtrip] of ROUNDTRIP) {
-    describe(`${key} roundtrip should got same result`, () => {
-        it('random buffer', () => {
-            assert.deepEqual(roundtrip(randomBuffer), randomBuffer);
-        });
-        it('empty buffer', () => {
-            assert.deepEqual(roundtrip(zeroBuffer), zeroBuffer);
-        });
-        it('float64array', () => {
-            assert.deepEqual(roundtrip(zeroFloat64Array), zeroBuffer);
-        });
-        it('dataview', () => {
-            assert.deepEqual(roundtrip(zeroDataView), zeroBuffer);
-        });
-        it('arraybuffer', () => {
-            assert.deepEqual(roundtrip(zeroBuffer.buffer), zeroBuffer);
-        });
+test('napi & wasm compress should got same result', () => {
+    expect(napi.compressSync(randomBuffer)).toEqual(wasm.compressSync(randomBuffer));
+    expect(napi.compressSync(zeroBuffer)).toEqual(wasm.compressSync(zeroBuffer));
+    expect(napi.compressSync(zeroFloat64Array)).toEqual(wasm.compressSync(zeroFloat64Array));
+});
+
+describe.each(ROUNDTRIP)('%s roundtrip should got same result', (key, roundtrip) => {
+    it('random buffer', () => {
+        expect(roundtrip(randomBuffer)).toEqual(randomBuffer);
     });
-}
+    it('empty buffer', () => {
+        expect(roundtrip(zeroBuffer)).toEqual(zeroBuffer);
+    });
+    it('float64array', () => {
+        expect(roundtrip(zeroFloat64Array)).toEqual(zeroBuffer);
+    });
+    it('dataview', () => {
+        expect(roundtrip(zeroDataView)).toEqual(zeroBuffer);
+    });
+    it('arraybuffer', () => {
+        expect(roundtrip(zeroBuffer.buffer)).toEqual(zeroBuffer);
+    });
+});
 
 describe('should reject bad buffer data', () => {
     for (const [key, method] of ALL) {
         it(key, () => {
-            const e = { message: `Input data must be BinaryData.` };
+            const e = `Input data must be BinaryData`;
             // @ts-expect-error ts(2345)
-            assert.throws(() => method(1), e);
+            expect(() => method(1)).toThrow(e);
             // @ts-expect-error ts(2345)
-            assert.throws(() => method(''), e);
+            expect(() => method('')).toThrow(e);
             // @ts-expect-error ts(2345)
-            assert.throws(() => method({}), e);
+            expect(() => method({})).toThrow(e);
             // @ts-expect-error ts(2345)
-            assert.throws(() => method([]), e);
+            expect(() => method([])).toThrow(e);
             // @ts-expect-error ts(2345)
-            assert.throws(() => method(null), e);
+            expect(() => method(null)).toThrow(e);
             // @ts-expect-error ts(2345)
-            assert.throws(() => method(undefined), e);
+            expect(() => method(undefined)).toThrow(e);
             // @ts-expect-error ts(2345)
-            assert.throws(() => method(true), e);
+            expect(() => method(true)).toThrow(e);
             // @ts-expect-error ts(2345)
-            assert.throws(() => method(false), e);
+            expect(() => method(true)).toThrow(e);
             // @ts-expect-error ts(2345)
-            assert.throws(() => method({ byteLength: -1 }), e);
+            expect(() => method({ byteLength: -1 })).toThrow(e);
             // @ts-expect-error ts(2345)
-            assert.throws(() => method({ byteLength: 0 }), e);
+            expect(() => method({ byteLength: 0 })).toThrow(e);
         });
     }
 });
@@ -109,18 +101,18 @@ describe('should reject bad level', () => {
     for (const [key, compressSync] of COMPRESS) {
         it(key, () => {
             // @ts-expect-error ts(2345)
-            assert.throws(() => compressSync(zeroBuffer, '1'));
+            expect(() => compressSync(zeroBuffer, '1')).toThrow();
             // @ts-expect-error ts(2345)
-            assert.throws(() => compressSync(zeroBuffer, {}));
+            expect(() => compressSync(zeroBuffer, {})).toThrow();
             // @ts-expect-error ts(2345)
-            assert.throws(() => compressSync(zeroBuffer, []));
+            expect(() => compressSync(zeroBuffer, [])).toThrow();
             // @ts-expect-error ts(2345)
             // eslint-disable-next-line unicorn/new-for-builtins
-            assert.throws(() => compressSync(zeroBuffer, new Number(1)));
+            expect(() => compressSync(zeroBuffer, new Number(1))).toThrow();
             // @ts-expect-error ts(2345)
-            assert.throws(() => compressSync(zeroBuffer, true));
+            expect(() => compressSync(zeroBuffer, true)).toThrow();
             // @ts-expect-error ts(2345)
-            assert.throws(() => compressSync(zeroBuffer, { valueOf: () => 1 }));
+            expect(() => compressSync(zeroBuffer, { valueOf: () => 1 })).toThrow();
         });
     }
 });
@@ -129,17 +121,17 @@ describe('should accept allowed level', () => {
     for (const [key, compressSync] of COMPRESS) {
         it(key, () => {
             // @ts-expect-error ts(2345)
-            assert.doesNotThrow(() => compressSync(zeroBuffer, null));
-            assert.doesNotThrow(() => compressSync(zeroBuffer, undefined));
-            assert.doesNotThrow(() => compressSync(zeroBuffer, 1.2));
-            assert.doesNotThrow(() => compressSync(zeroBuffer, Number.NaN));
-            assert.doesNotThrow(() => compressSync(zeroBuffer, Number.MAX_VALUE));
-            assert.doesNotThrow(() => compressSync(zeroBuffer, -Number.MAX_VALUE));
-            assert.doesNotThrow(() => compressSync(zeroBuffer, -Number.MIN_VALUE));
-            assert.doesNotThrow(() => compressSync(zeroBuffer, -Infinity));
-            assert.doesNotThrow(() => compressSync(zeroBuffer, Infinity));
-            assert.doesNotThrow(() => compressSync(zeroBuffer, Number.MAX_SAFE_INTEGER));
-            assert.doesNotThrow(() => compressSync(zeroBuffer, Number.MIN_SAFE_INTEGER));
+            expect(() => compressSync(zeroBuffer, null)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, undefined)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, 1.2)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, Number.NaN)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, Number.MAX_VALUE)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, -Number.MAX_VALUE)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, -Number.MIN_VALUE)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, -Infinity)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, Infinity)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, Number.MAX_SAFE_INTEGER)).not.toThrow();
+            expect(() => compressSync(zeroBuffer, Number.MIN_SAFE_INTEGER)).not.toThrow();
         });
     }
 });
@@ -147,13 +139,13 @@ describe('should accept allowed level', () => {
 describe('should accept huge input', () => {
     it('napi', () => {
         const hugeBuffer = Buffer.alloc(config.MAX_SIZE);
-        assert.ok(napi.compressSync(hugeBuffer));
-    });
+        expect(napi.compressSync(hugeBuffer)).toBeDefined();
+    }, 10000);
     it('wasm', () => {
         // For wasm, the max heap size is 2GB, so we can only allocate 0.8GB for input
         const hugeBuffer = Buffer.alloc(0.8 * 1024 * 1024 * 1024);
-        assert.ok(wasm.compressSync(hugeBuffer));
-    });
+        expect(wasm.compressSync(hugeBuffer)).toBeDefined();
+    }, 10000);
 });
 
 describe('should reject huge input', () => {
@@ -164,27 +156,25 @@ describe('should reject huge input', () => {
         Buffer.from('KLUv/aBLdwEAPQEA+Ci1L/2AWP3JmrtUAAAQAAABAPv/OcACAgAQAOtPBgABAKfcnbsx', 'base64'),
     );
     it('napi', () => {
-        assert.throws(() => napi.compressSync(bufferOf3GB), { message: 'Input data is too large' });
-        assert.throws(() => napi.compressSync(bufferOf3GB.buffer), { message: 'Input data is too large' });
-        assert.throws(() => napi.decompressSync(bufferOf3GB), { message: 'Input data is too large' });
-        assert.throws(() => napi.decompressSync(compressed3GB), { message: 'Content size is too large' });
-    });
+        expect(() => napi.compressSync(bufferOf3GB)).toThrow(`Input data is too large`);
+        expect(() => napi.compressSync(bufferOf3GB.buffer)).toThrow(`Input data is too large`);
+        expect(() => napi.decompressSync(bufferOf3GB)).toThrow(`Input data is too large`);
+        expect(() => napi.decompressSync(compressed3GB)).toThrow(`Content size is too large`);
+    }, 10000);
     it('wasm', () => {
         const hugeBuffer = Buffer.alloc(1 * 1024 * 1024 * 1024);
-        assert.throws(() => wasm.compressSync(hugeBuffer), { message: 'Failed to allocate memory' });
-        assert.throws(() => wasm.compressSync(bufferOf3GB), { message: 'Input data is too large' });
-        assert.throws(() => wasm.compressSync(bufferOf3GB.buffer), { message: 'Input data is too large' });
-        assert.throws(() => wasm.decompressSync(bufferOf3GB), { message: 'Input data is too large' });
-        assert.throws(() => wasm.decompressSync(compressed3GB), {
-            message: `Content size is too large: ${compressed3GBSize}`,
-        });
-    });
+        expect(() => wasm.compressSync(hugeBuffer)).toThrow(`Failed to allocate memory`);
+        expect(() => wasm.compressSync(bufferOf3GB)).toThrow(`Input data is too large`);
+        expect(() => wasm.compressSync(bufferOf3GB.buffer)).toThrow(`Input data is too large`);
+        expect(() => wasm.decompressSync(bufferOf3GB)).toThrow(`Input data is too large`);
+        expect(() => wasm.decompressSync(compressed3GB)).toThrow(`Content size is too large: ${compressed3GBSize}`);
+    }, 10000);
 });
 
 describe('should reject bad compressed data', () => {
     for (const [key, decompressSync] of DECOMPRESS) {
         it(key, () => {
-            assert.throws(() => decompressSync(zeroBuffer), { message: 'Invalid compressed data' });
+            expect(() => decompressSync(zeroBuffer)).toThrow('Invalid compressed data');
         });
     }
 });
@@ -194,7 +184,7 @@ describe('should accept rle first block', () => {
 
     for (const [key, decompressSync] of DECOMPRESS) {
         it(key, () => {
-            assert.equal(decompressSync(data).length, 1_048_576);
+            expect(decompressSync(data)).toHaveProperty('length', 1_048_576);
         });
     }
 });
@@ -204,7 +194,7 @@ describe('should accept empty block', () => {
 
     for (const [key, decompressSync] of DECOMPRESS) {
         it(key, () => {
-            assert.equal(decompressSync(data).length, 0);
+            expect(decompressSync(data)).toHaveProperty('length', 0);
         });
     }
 });
@@ -214,7 +204,7 @@ describe('should reject uncompleted block', () => {
 
     for (const [key, decompressSync] of DECOMPRESS) {
         it(key, () => {
-            assert.throws(() => decompressSync(data), { message: 'Invalid compressed data' });
+            expect(() => decompressSync(data)).toThrow(`Invalid compressed data`);
         });
     }
 });

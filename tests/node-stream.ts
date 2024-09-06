@@ -1,5 +1,3 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
@@ -12,14 +10,14 @@ describe('napi node stream compress api', () => {
     it('should compress', async () => {
         const readable = Readable.from([randomBuffer]);
         const data = await buffer(readable.pipe(new napi.Compressor(3)));
-        assert.ok(data instanceof Buffer);
-        assert.deepEqual(napi.decompressSync(data), randomBuffer);
+        expect(data).toBeInstanceOf(Buffer);
+        expect(napi.decompressSync(data)).toEqual(randomBuffer);
     });
 
     it('should decompress', async () => {
         const readable = Readable.from([napi.compress(randomBuffer)]);
         const data = await buffer(readable.pipe(new napi.Decompressor()));
-        assert.ok(data instanceof Buffer);
-        assert.deepEqual(asUint8Array(data), randomBuffer);
+        expect(data).toBeInstanceOf(Buffer);
+        expect(asUint8Array(data)).toEqual(randomBuffer);
     });
 });

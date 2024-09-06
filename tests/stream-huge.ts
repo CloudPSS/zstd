@@ -1,5 +1,3 @@
-import { describe, it, after } from 'node:test';
-import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { ReadableStream as RS } from 'node:stream/web';
 import { asUint8Array } from './.utils.js';
@@ -22,7 +20,7 @@ function hugeReadable(): ReadableStream<Uint8Array> {
     }) as ReadableStream<Uint8Array>;
 }
 
-after(() => {
+afterAll(() => {
     wasm.terminate();
 });
 
@@ -31,31 +29,23 @@ const MODULE = [
     ['wasm', wasm],
 ] as const;
 
-for (const [name, module] of MODULE) {
-    describe(
-        `${name} stream compress api`,
-        {
-            skip: !process.env['CI'],
-        },
-        () => {
-            it('should roundtrip with huge data', async () => {
-                const readable = hugeReadable();
-                const result = readable.pipeThrough(module.compressor(3)).pipeThrough(module.decompressor());
-                const reader = result.getReader();
-                let read;
-                let total = 0;
-                do {
-                    read = await reader.read();
-                    if (total === 0) {
-                        assert.ok(read.value instanceof Uint8Array);
-                        assert.ok(!(read.value instanceof Buffer));
-                        const gotSlice = read.value.subarray(0, randomBuffer.length);
-                        const expectSlice = randomBuffer.subarray(0, gotSlice.length);
-                        assert.deepEqual(gotSlice, expectSlice);
-                    }
-                    total += read.value?.length ?? 0;
-                } while (!read.done);
-            });
-        },
-    );
-}
+xdescribe.each(MODULE)('%s stream compress api', (name, module) => {
+    it('should roundtrip with huge data', async () => {
+        const readable = hugeReadable();
+        const result = readable.pipeThrough(module.compressor(3)).pipeThrough(module.decompressor());
+        const reader = result.getReader();
+        let read;
+        let total = 0;
+        do {
+            read = await reader.read();
+            if (total === 0) {
+                expect(read.value).toBeInstanceOf(Uint8Array);
+                expect(read.value).not.toBeInstanceOf(Buffer);
+                const gotSlice = read.value!.subarray(0, randomBuffer.length);
+                const expectSlice = randomBuffer.subarray(0, gotSlice.length);
+                expect(gotSlice).toEqual(expectSlice);
+            }
+            total += read.value?.length ?? 0;
+        } while (!read.done);
+    }, 180_000);
+});

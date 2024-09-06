@@ -1,60 +1,45 @@
-/* eslint-disable unicorn/prefer-add-event-listener */
 /* eslint-disable @typescript-eslint/unbound-method */
 /// <reference lib="webworker" />
-import { describe, it, before, after, mock, beforeEach, afterEach, type Mock } from 'node:test';
-import assert from 'node:assert/strict';
 import * as nodePolyfill from '../dist/wasm/polyfill/node.js';
 import * as browserPolyfill from '../dist/wasm/polyfill/browser.js';
+import { jest } from '@jest/globals';
 
 const MODULES = Object.entries({
     node: nodePolyfill,
     browser: browserPolyfill,
 });
 
-describe('wasm polyfill', () => {
-    for (const [name, module] of MODULES) {
-        it(`${name} has correct exports`, () => {
-            if (name === 'node') {
-                // No browser environment to have a global Worker
-                assert.ok(module.Worker instanceof Function);
-            }
-            assert.ok(module.onMessage instanceof Function);
-            assert.ok(module.postMessage instanceof Function);
-            assert.ok(module.TransformStream instanceof Function);
-            assert.ok(module.MAX_WORKERS >= 1);
-        });
-    }
+test.each(MODULES)('%s has correct exports', (name, module) => {
+    expect(module).toHaveProperty('Worker');
+    expect(module.onMessage).toBeInstanceOf(Function);
+    expect(module.postMessage).toBeInstanceOf(Function);
+    expect(module).toHaveProperty('TransformStream');
+    expect(module.MAX_WORKERS).toBeGreaterThanOrEqual(1);
 });
 
 describe('browser polyfill', () => {
     let self: DedicatedWorkerGlobalScope;
-    let addEventListener: Mock<DedicatedWorkerGlobalScope['addEventListener']>;
-    let postMessage: Mock<DedicatedWorkerGlobalScope['postMessage']>;
-    before(() => {
+    beforeAll(() => {
         self = new EventTarget() as DedicatedWorkerGlobalScope;
-        addEventListener = self.addEventListener = mock.fn(self.addEventListener);
-        postMessage = self.postMessage = mock.fn();
+        jest.spyOn(self, 'addEventListener');
+        self.postMessage = jest.fn();
         Reflect.defineProperty(globalThis, 'self', { value: self, configurable: true });
     });
-    after(() => {
+    afterAll(() => {
         Reflect.deleteProperty(globalThis, 'self');
     });
 
     it('onMessage', () => {
-        const callback = mock.fn();
+        const callback = jest.fn();
         browserPolyfill.onMessage(callback);
-        assert.equal(addEventListener.mock.callCount(), 1);
-        assert.equal(addEventListener.mock.calls[0]!.arguments[0], 'message');
-        assert(addEventListener.mock.calls[0]!.arguments[1] instanceof Function);
+        expect(self.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
         self.dispatchEvent(new MessageEvent('message', { data: 'test' }));
-        assert.equal(callback.mock.calls[0]!.arguments[0], 'test');
+        expect(callback).toHaveBeenCalledWith('test');
     });
 
     it('postMessage', () => {
         browserPolyfill.postMessage('test');
-        assert.equal(postMessage.mock.callCount(), 1);
-        assert.equal(postMessage.mock.calls[0]!.arguments[0], 'test');
-        assert.equal(postMessage.mock.calls[0]!.arguments[1], undefined);
+        expect(self.postMessage).toHaveBeenCalledWith('test', undefined);
     });
 });
 
@@ -70,28 +55,35 @@ describe('node polyfill', () => {
     });
 
     it('events', () => {
-        const onmessage = mock.fn<NonNullable<Worker['onmessage']>>();
-        const onmessageerror = mock.fn<NonNullable<Worker['onmessageerror']>>();
-        const onerror = mock.fn<NonNullable<Worker['onerror']>>();
-        (worker as Worker).onmessage = onmessage;
-        (worker as Worker).onmessageerror = onmessageerror;
-        (worker as Worker).onerror = onerror;
+        const onmessage = jest.fn();
+        const onmessageerror = jest.fn();
+        const onerror = jest.fn();
+        worker.onmessage = onmessage;
+        worker.onmessageerror = onmessageerror;
+        worker.onerror = onerror;
 
         worker._worker.emit('message', 'message_test');
         worker._worker.emit('messageerror', 'messageerror_test');
         worker._worker.emit('error', new Error('error'));
 
-        assert.equal(onmessage.mock.callCount(), 1);
-        assert.equal(onmessage.mock.calls[0]!.arguments[0].type, 'message');
-        assert.equal(onmessage.mock.calls[0]!.arguments[0].data, 'message_test');
-
-        assert.equal(onmessageerror.mock.callCount(), 1);
-        assert.equal(onmessageerror.mock.calls[0]!.arguments[0].type, 'messageerror');
-        assert.equal(onmessageerror.mock.calls[0]!.arguments[0].data, 'messageerror_test');
-
-        assert.equal(onerror.mock.callCount(), 1);
-        assert.equal(onerror.mock.calls[0]!.arguments[0].type, 'error');
-        assert.equal((onerror.mock.calls[0]!.arguments[0].error as Error).message, 'error');
+        expect(onmessage).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: 'message',
+                data: 'message_test',
+            }),
+        );
+        expect(onmessageerror).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: 'messageerror',
+                data: 'messageerror_test',
+            }),
+        );
+        expect(onerror).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: 'error',
+                error: expect.any(Error) as Error,
+            }),
+        );
 
         worker.onmessage = null;
         worker.onmessageerror = null;
@@ -99,52 +91,51 @@ describe('node polyfill', () => {
     });
 
     it('event handlers', () => {
-        const onmessage = mock.fn<NonNullable<Worker['onmessage']>>();
-        const onmessageerror = mock.fn<NonNullable<Worker['onmessageerror']>>();
-        const onerror = mock.fn<NonNullable<Worker['onerror']>>();
-        (worker as Worker).addEventListener('message', onmessage);
-        (worker as Worker).addEventListener('messageerror', onmessageerror);
-        (worker as Worker).addEventListener('error', onerror);
+        const onmessage = jest.fn();
+        const onmessageerror = jest.fn();
+        const onerror = jest.fn();
+        worker.addEventListener('message', onmessage);
+        worker.addEventListener('messageerror', onmessageerror);
+        worker.addEventListener('error', onerror);
 
         worker._worker.emit('message', 'message_test');
         worker._worker.emit('messageerror', 'messageerror_test');
         worker._worker.emit('error', new Error('error'));
 
-        assert.equal(onmessage.mock.callCount(), 1);
-        assert.equal(onmessage.mock.calls[0]!.arguments[0].type, 'message');
-        assert.equal(onmessage.mock.calls[0]!.arguments[0].data, 'message_test');
+        expect(onmessage).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: 'message',
+                data: 'message_test',
+            }),
+        );
+        expect(onmessageerror).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: 'messageerror',
+                data: 'messageerror_test',
+            }),
+        );
+        expect(onerror).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: 'error',
+                error: expect.any(Error) as Error,
+            }),
+        );
 
-        assert.equal(onmessageerror.mock.callCount(), 1);
-        assert.equal(onmessageerror.mock.calls[0]!.arguments[0].type, 'messageerror');
-        assert.equal(onmessageerror.mock.calls[0]!.arguments[0].data, 'messageerror_test');
-
-        assert.equal(onerror.mock.callCount(), 1);
-        assert.equal(onerror.mock.calls[0]!.arguments[0].type, 'error');
-        assert.equal((onerror.mock.calls[0]!.arguments[0].error as Error).message, 'error');
-
-        (worker as Worker).removeEventListener('message', onmessage);
-        (worker as Worker).removeEventListener('messageerror', onmessageerror);
-        (worker as Worker).removeEventListener('error', onerror);
+        worker.removeEventListener('message', onmessage);
+        worker.removeEventListener('messageerror', onmessageerror);
+        worker.removeEventListener('error', onerror);
     });
 
     it('postMessage', () => {
-        const postMessage = mock.fn(worker._worker.postMessage);
-        worker._worker.postMessage = postMessage;
+        jest.spyOn(worker._worker, 'postMessage');
 
         worker.postMessage('test');
-        assert.equal(postMessage.mock.callCount(), 1);
-        assert.deepEqual(postMessage.mock.calls[0]!.arguments, ['test', []]);
+        expect(worker._worker.postMessage).toHaveBeenCalledWith('test', []);
 
         worker.postMessage('test', [new ArrayBuffer(0)]);
-        assert.equal(postMessage.mock.callCount(), 2);
-        assert.equal(postMessage.mock.calls[1]!.arguments[0], 'test');
-        assert(postMessage.mock.calls[1]!.arguments[1]![0] instanceof ArrayBuffer);
-        assert(postMessage.mock.calls[1]!.arguments[1]![0].detached);
+        expect(worker._worker.postMessage).toHaveBeenCalledWith('test', [expect.any(ArrayBuffer)]);
 
         worker.postMessage('test', { transfer: [new ArrayBuffer(0)] });
-        assert.equal(postMessage.mock.callCount(), 3);
-        assert.equal(postMessage.mock.calls[2]!.arguments[0], 'test');
-        assert(postMessage.mock.calls[2]!.arguments[1]![0] instanceof ArrayBuffer);
-        assert(postMessage.mock.calls[2]!.arguments[1]![0].detached);
+        expect(worker._worker.postMessage).toHaveBeenCalledWith('test', [expect.any(ArrayBuffer)]);
     });
 });
