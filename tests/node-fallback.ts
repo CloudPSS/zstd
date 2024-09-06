@@ -1,29 +1,32 @@
-import { jest } from '@jest/globals';
+import { it, after, mock } from 'node:test';
+import assert from 'node:assert/strict';
 
-jest.mock('node-gyp-build', () => {
-    return jest.fn((): never => {
-        throw new Error(`MOCK(Can't load bindings)`);
-    });
+const nodeGypBuild = mock.fn((path: string): never => {
+    throw new Error(`MOCK(Can't load bindings)`);
+});
+mock.module('node-gyp-build', {
+    defaultExport: nodeGypBuild,
 });
 
-afterAll(async () => {
+after(async () => {
     const wasm = await import('@cloudpss/zstd/wasm');
     wasm.terminate();
 });
 
 it('should fallback to wasm', async () => {
     const root = await import('@cloudpss/zstd');
-    expect(jest.requireMock('node-gyp-build')).toHaveBeenCalledWith(expect.any(String));
-    expect(root.TYPE).toBe('wasm');
+    assert(nodeGypBuild.mock.callCount() === 1);
+    assert(typeof nodeGypBuild.mock.calls[0]!.arguments[0] == 'string');
+    assert.equal(root.TYPE, 'wasm');
 });
 
 it('should returns uint8array', async () => {
     const root = await import('@cloudpss/zstd');
-    expect(root.TYPE).toBe('wasm');
+    assert.equal(root.TYPE, 'wasm');
 
-    expect(root.compressSync(Buffer.alloc(10))).not.toBeInstanceOf(Buffer);
-    expect(root.decompressSync(root.compressSync(Buffer.alloc(10)))).not.toBeInstanceOf(Buffer);
+    assert(!(root.compressSync(Buffer.alloc(10)) instanceof Buffer));
+    assert(!(root.decompressSync(root.compressSync(Buffer.alloc(10))) instanceof Buffer));
 
-    await expect(root.compress(Buffer.alloc(10))).resolves.not.toBeInstanceOf(Buffer);
-    await expect(root.decompress(await root.compress(Buffer.alloc(10)))).resolves.not.toBeInstanceOf(Buffer);
+    assert(!((await root.compress(Buffer.alloc(10))) instanceof Buffer));
+    assert(!((await root.decompress(await root.compress(Buffer.alloc(10)))) instanceof Buffer));
 });

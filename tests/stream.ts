@@ -1,3 +1,5 @@
+import { describe, it, after } from 'node:test';
+import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { ReadableStream as RS } from 'node:stream/web';
 import { buffer } from 'node:stream/consumers';
@@ -25,7 +27,7 @@ function asReadable(data: Uint8Array): ReadableStream<Uint8Array> {
     }) as ReadableStream<Uint8Array>;
 }
 
-afterAll(() => {
+after(() => {
     wasm.terminate();
 });
 
@@ -34,39 +36,43 @@ const MODULE = [
     ['wasm', wasm],
 ] as const;
 
-describe.each(MODULE)('%s stream compress api', (name, module) => {
-    it('should compress', async () => {
-        const readable = asReadable(randomBuffer);
-        const data = await buffer(readable.pipeThrough(module.compressor(3)) as RS<Uint8Array>);
-        expect(data).toBeInstanceOf(Buffer);
-        expect(module.decompressSync(data)).toEqual(randomBuffer);
-    });
+for (const [name, module] of MODULE) {
+    describe(`${name} stream compress api`, () => {
+        it('should compress', async () => {
+            const readable = asReadable(randomBuffer);
+            const data = await buffer(readable.pipeThrough(module.compressor(3)) as RS<Uint8Array>);
+            assert.ok(data instanceof Buffer);
+            assert.deepEqual(module.decompressSync(data), randomBuffer);
+        });
 
-    it('should decompress', async () => {
-        const compressed = module.compressSync(randomBuffer);
-        const readable = asReadable(compressed);
-        const data = await buffer(readable.pipeThrough(module.decompressor()) as RS<Uint8Array>);
-        expect(data).toBeInstanceOf(Buffer);
-        expect(asUint8Array(data)).toEqual(randomBuffer);
-    });
+        it('should decompress', async () => {
+            const compressed = module.compressSync(randomBuffer);
+            const readable = asReadable(compressed);
+            const data = await buffer(readable.pipeThrough(module.decompressor()) as RS<Uint8Array>);
+            assert.ok(data instanceof Buffer);
+            assert.deepEqual(asUint8Array(data), randomBuffer);
+        });
 
-    it('should allow empty raw data', async () => {
-        const readable = asReadable(emptyRaw);
-        const result = readable.pipeThrough(module.compressor());
-        const data = await buffer(result as RS<Uint8Array>);
-        expect(asUint8Array(data)).toEqual(emptyCompressed);
-    });
+        it('should allow empty raw data', async () => {
+            const readable = asReadable(emptyRaw);
+            const result = readable.pipeThrough(module.compressor());
+            const data = await buffer(result as RS<Uint8Array>);
+            assert.deepEqual(asUint8Array(data), emptyCompressed);
+        });
 
-    it('should allow empty compression data', async () => {
-        const readable = asReadable(emptyRaw);
-        const result = readable.pipeThrough(module.decompressor());
-        const data = await buffer(result as RS<Uint8Array>);
-        expect(data).toEqual(Buffer.alloc(0));
-    });
+        it('should allow empty compression data', async () => {
+            const readable = asReadable(emptyRaw);
+            const result = readable.pipeThrough(module.decompressor());
+            const data = await buffer(result as RS<Uint8Array>);
+            assert.deepEqual(data, Buffer.alloc(0));
+        });
 
-    it('should reject bad compression data', async () => {
-        const readable = asReadable(new Uint8Array(10));
-        const result = readable.pipeThrough(module.decompressor());
-        await expect(buffer(result as RS<Uint8Array>)).rejects.toThrow('Unknown frame descriptor');
+        it('should reject bad compression data', async () => {
+            const readable = asReadable(new Uint8Array(10));
+            const result = readable.pipeThrough(module.decompressor());
+            await assert.rejects(async () => await buffer(result as RS<Uint8Array>), {
+                message: 'Unknown frame descriptor',
+            });
+        });
     });
-});
+}
