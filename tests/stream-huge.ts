@@ -29,7 +29,7 @@ const MODULE = [
     ['wasm', wasm],
 ] as const;
 
-xdescribe.each(MODULE)('%s stream compress api', (name, module) => {
+(process.env['CI'] ? describe : xdescribe).each(MODULE)('%s stream compress api', (name, module) => {
     it('should roundtrip with huge data', async () => {
         const readable = hugeReadable();
         const result = readable.pipeThrough(module.compressor(3)).pipeThrough(module.decompressor());
@@ -47,5 +47,5 @@ xdescribe.each(MODULE)('%s stream compress api', (name, module) => {
             }
             total += read.value?.length ?? 0;
         } while (!read.done);
-    }, 180_000);
+    }, 300_000);
 });
