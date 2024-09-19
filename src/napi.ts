@@ -81,7 +81,7 @@ abstract class CompressTransform extends Transform {
     /** Create napi binding object */
     protected abstract binding(): _Compressor | _Decompressor;
     /** @inheritdoc */
-    override _construct(callback: (error?: Error | null | undefined) => void): void {
+    override _construct(callback: (error?: Error | null) => void): void {
         try {
             this._binding = this.binding();
             callback();
