@@ -4,6 +4,8 @@ import * as common from './common.js';
 import { Worker as WorkerPolyfill, MAX_WORKERS, TransformStream } from '#worker-polyfill';
 import type { WorkerReady, WorkerRequest, WorkerResponse } from './worker.js';
 
+await common.ModuleReady;
+
 const IDLE_WORKERS: Worker[] = [];
 const BUSY_WORKERS = new Set<Worker>();
 const PENDING_BORROW: Array<(value: Worker) => void> = [];

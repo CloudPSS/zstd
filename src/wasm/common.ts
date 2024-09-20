@@ -1,14 +1,17 @@
-import wasmModule, { type Ptr } from '../../prebuilds/zstd.js';
+import wasmModule, { type Ptr, type Module as WasmModule } from '../../prebuilds/zstd.js';
 import { MAX_SIZE } from '../config.js';
 
-export const Module = await wasmModule({
-    onCompressorData(ctx, dst, dstSize) {
-        _onCompressorData?.(ctx, dst, dstSize);
-    },
-    onDecompressorData(ctx, dst, dstSize) {
-        _onDecompressorData?.(ctx, dst, dstSize);
-    },
-});
+export const ModuleReady = (async () => {
+    Module = await wasmModule({
+        onCompressorData(ctx, dst, dstSize) {
+            _onCompressorData?.(ctx, dst, dstSize);
+        },
+        onDecompressorData(ctx, dst, dstSize) {
+            _onDecompressorData?.(ctx, dst, dstSize);
+        },
+    });
+})();
+export let Module: WasmModule;
 
 let _onCompressorData: Parameters<typeof wasmModule>[0]['onCompressorData'];
 let _onDecompressorData: Parameters<typeof wasmModule>[0]['onDecompressorData'];

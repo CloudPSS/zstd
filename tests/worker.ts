@@ -9,8 +9,17 @@ jest.unstable_mockModule('#worker-polyfill', () => ({
 let messageCallback: (data: unknown) => void;
 const { onMessage, postMessage } = await import('#worker-polyfill');
 
+let workerLoaded = false;
+async function loadWorker() {
+    if (!workerLoaded) {
+        await import('../dist/wasm/worker.js');
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        workerLoaded = true;
+    }
+}
+
 test('wasm worker init', async () => {
-    await import('../dist/wasm/worker.js');
+    await loadWorker();
     expect(postMessage).toHaveBeenCalledTimes(1);
     expect(postMessage).toHaveBeenCalledWith('ready');
     expect(onMessage).toHaveBeenCalledTimes(1);
@@ -19,28 +28,28 @@ test('wasm worker init', async () => {
 });
 
 test('compress', async () => {
-    await import('../dist/wasm/worker.js');
+    await loadWorker();
     messageCallback([1, 'compress', [new Uint8Array([1, 2, 3]), 6]]);
     expect(postMessage).toHaveBeenCalledTimes(1);
     expect(postMessage).toHaveBeenCalledWith([1, expect.any(Uint8Array)], [expect.any(ArrayBuffer)]);
 });
 
 test('decompress', async () => {
-    await import('../dist/wasm/worker.js');
+    await loadWorker();
     messageCallback([2, 'decompress', [emptyCompressed]]);
     expect(postMessage).toHaveBeenCalledTimes(1);
     expect(postMessage).toHaveBeenCalledWith([2, emptyRaw], [expect.any(ArrayBuffer)]);
 });
 
 test('decompress error', async () => {
-    await import('../dist/wasm/worker.js');
+    await loadWorker();
     messageCallback([2, 'decompress', [new Uint8Array([1, 2, 3])]]);
     expect(postMessage).toHaveBeenCalledTimes(1);
     expect(postMessage).toHaveBeenCalledWith([2, null, expect.any(Error)]);
 });
 
 test('stream compress', async () => {
-    await import('../dist/wasm/worker.js');
+    await loadWorker();
     messageCallback([3, 'Compressor', [null, 6]]);
     messageCallback([4, 'transform', [new Uint8Array([1, 2, 3])]]);
     messageCallback([5, 'flush', [null]]);
@@ -52,7 +61,7 @@ test('stream compress', async () => {
 });
 
 test('stream decompress', async () => {
-    await import('../dist/wasm/worker.js');
+    await loadWorker();
     messageCallback([3, 'Decompressor', [null]]);
     messageCallback([4, 'transform', [emptyCompressed]]);
     messageCallback([5, 'flush', [null]]);
@@ -63,7 +72,7 @@ test('stream decompress', async () => {
 });
 
 test('stream decompress error', async () => {
-    await import('../dist/wasm/worker.js');
+    await loadWorker();
     messageCallback([6, 'Decompressor', [null]]);
     messageCallback([7, 'transform', [new Uint8Array([1, 2, 3])]]);
     messageCallback([8, 'flush', [null]]);
@@ -74,7 +83,7 @@ test('stream decompress error', async () => {
 });
 
 test('invalid context', async () => {
-    await import('../dist/wasm/worker.js');
+    await loadWorker();
     messageCallback([10, 'transform', [new Uint8Array([1, 2, 3])]]);
     messageCallback([11, 'flush', [null]]);
     expect(postMessage).toHaveBeenCalledTimes(2);
@@ -83,7 +92,7 @@ test('invalid context', async () => {
 });
 
 test('invalid context instance', async () => {
-    await import('../dist/wasm/worker.js');
+    await loadWorker();
     messageCallback([20, 'Decompressor', [null]]);
     messageCallback([21, 'Decompressor', [null]]);
     messageCallback([22, 'Compressor', [null]]);
@@ -94,7 +103,7 @@ test('invalid context instance', async () => {
 });
 
 test('invalid method', async () => {
-    await import('../dist/wasm/worker.js');
+    await loadWorker();
     messageCallback([30, 'invalid', []]);
     expect(postMessage).toHaveBeenCalledTimes(1);
     expect(postMessage).toHaveBeenCalledWith([30, null, expect.any(Error)]);

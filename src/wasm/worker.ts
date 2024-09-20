@@ -1,6 +1,6 @@
 import type { Ptr, ZSTD_CStream, ZSTD_DStream } from '../../prebuilds/zstd.js';
 import { onMessage, postMessage } from '#worker-polyfill';
-import { checkError, compress, decompress, fromHeap, Helper, Module, setWasmCallbacks } from './common.js';
+import { checkError, compress, decompress, fromHeap, Helper, Module, ModuleReady, setWasmCallbacks } from './common.js';
 
 /** Worker request */
 export type WorkerRequest =
@@ -125,4 +125,4 @@ onMessage(async (data) => {
     }
 });
 
-postMessage('ready' satisfies WorkerReady);
+void ModuleReady.then(() => postMessage('ready' satisfies WorkerReady));
