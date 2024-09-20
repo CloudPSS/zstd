@@ -1,6 +1,5 @@
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { Transform, type TransformCallback } from 'node:stream';
 import { TransformStream } from 'node:stream/web';
 import { MAX_SIZE } from './config.js';
@@ -69,7 +68,7 @@ interface Binding {
 }
 
 const nodeRequire = createRequire(import.meta.url);
-const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), './../');
+const rootDir = dirname(nodeRequire.resolve('#packageJson'));
 const bindings = (nodeRequire('node-gyp-build') as (root: string) => Binding)(rootDir);
 
 /** NodeJs Transform stream Compressor/Decompressor */
