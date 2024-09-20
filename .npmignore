@@ -6,7 +6,10 @@
 /coverage/
 /patches/
 tsconfig.json
+tsconfig.*.json
 *.config.js
+*.config.cjs
+*.config.mjs
 *.ps1
 /*.html
 /*.tgz
