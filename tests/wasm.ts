@@ -29,10 +29,10 @@ describe('should have no memory leak', () => {
 describe('should work without node buffer', () => {
     beforeAll(() => {
         // @ts-expect-error remove global Buffer
-        global.Buffer = undefined;
+        globalThis.Buffer = undefined;
     });
     afterAll(() => {
-        global.Buffer = Buffer;
+        globalThis.Buffer = Buffer;
     });
     const uncompressed = randomBytes(10_000_000);
     let compressed: Uint8Array;
