@@ -1,5 +1,5 @@
 import { coercionInput } from '../utils.js';
-import { createModule } from '../common.js';
+import { createModule, type BufferSource } from '../common.js';
 import * as common from './common.js';
 import { Worker as WorkerPolyfill, MAX_WORKERS, TransformStream } from '#worker-polyfill';
 import type { WorkerReady, WorkerRequest, WorkerResponse } from './worker.js';

@@ -4,7 +4,7 @@ import { Transform, type TransformCallback } from 'node:stream';
 import { TransformStream } from 'node:stream/web';
 import { MAX_SIZE } from './config.js';
 import { coercionInput, checkLevel } from './utils.js';
-import { createModule } from './common.js';
+import { createModule, type BufferSource } from './common.js';
 
 /** Compressor class */
 declare class _Compressor {

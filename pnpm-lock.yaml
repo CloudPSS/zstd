@@ -45,8 +45,8 @@ importers:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.10.1)
       node-gyp:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 10.1.0
+        version: 10.1.0
       prebuildify:
         specifier: ^6.0.1
         version: 6.0.1
@@ -3058,9 +3058,9 @@ packages:
       { integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ== }
     hasBin: true
 
-  node-gyp@10.3.1:
+  node-gyp@10.1.0:
     resolution:
-      { integrity: sha512-Pp3nFHBThHzVtNY7U6JfPjvT/DTE8+o/4xKsLQtBoU+j2HLsGlhcfzflAoUreaJbNmYnX+LlLi0qjV8kpyO6xQ== }
+      { integrity: sha512-B4J5M1cABxPc5PwfjhbV5hoy2DP9p8lFXASnEN6hugXOa61416tnTZ29x9sSwAd0o99XNIcpvDDy1swAExsVKA== }
     engines: { node: ^16.14.0 || >=18.0.0 }
     hasBin: true
 
@@ -3406,6 +3406,11 @@ packages:
     resolution:
       { integrity: sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ== }
     engines: { node: ^14.15.0 || ^16.10.0 || >=18.0.0 }
+
+  proc-log@3.0.0:
+    resolution:
+      { integrity: sha512-++Vn7NS4Xf9NacaU9Xq3URUuqZETPsf8L4j5/ckhaRYsfPeRyzGw+iDjFhV/Jr3uNmTvvddEJFWh5R1gRgUH8A== }
+    engines: { node: ^14.17.0 || ^16.13.0 || >=18.0.0 }
 
   proc-log@4.2.0:
     resolution:
@@ -7190,7 +7195,7 @@ snapshots:
 
   node-gyp-build@4.8.4: {}
 
-  node-gyp@10.3.1:
+  node-gyp@10.1.0:
     dependencies:
       env-paths: 2.2.1
       exponential-backoff: 3.1.1
@@ -7198,7 +7203,7 @@ snapshots:
       graceful-fs: 4.2.11
       make-fetch-happen: 13.0.1
       nopt: 7.2.1
-      proc-log: 4.2.0
+      proc-log: 3.0.0
       semver: 7.6.3
       tar: 6.2.1
       which: 4.0.0
@@ -7474,6 +7479,8 @@ snapshots:
       '@jest/schemas': 29.6.3
       ansi-styles: 5.2.0
       react-is: 18.3.1
+
+  proc-log@3.0.0: {}
 
   proc-log@4.2.0: {}
 

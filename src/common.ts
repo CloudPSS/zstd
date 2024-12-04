@@ -1,5 +1,8 @@
 import { coercionInput, checkLevel } from './utils.js';
 
+/** Buffer data */
+export type BufferSource = ArrayBufferView | ArrayBuffer;
+
 /** warp module */
 export function createModule(options: {
     compressSync: (data: Uint8Array, level: number) => Uint8Array;
