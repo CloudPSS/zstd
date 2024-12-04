@@ -142,13 +142,13 @@ export class Decompressor extends CompressTransform {
     }
 }
 /** Web Transform stream Compressor/Decompressor */
-abstract class WebCompressTransformer implements Transformer<BinaryData, Uint8Array> {
+abstract class WebCompressTransformer implements Transformer<BufferSource, Uint8Array> {
     protected _binding: _Compressor | _Decompressor | null = null;
     /** @inheritdoc */
     abstract start(): void;
 
     /** @inheritdoc */
-    transform(chunk: BinaryData, controller: TransformStreamDefaultController<Uint8Array>): void {
+    transform(chunk: BufferSource, controller: TransformStreamDefaultController<Uint8Array>): void {
         try {
             this._binding!.data(coercionInput(chunk, false), (data) => controller.enqueue(asUint8Array(data)));
         } catch (ex) {

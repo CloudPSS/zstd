@@ -159,7 +159,7 @@ export function workers(): { idle: number; busy: number } {
 }
 
 /** Proxy to worker */
-abstract class TransformProxy implements Transformer<BinaryData, Uint8Array> {
+abstract class TransformProxy implements Transformer<BufferSource, Uint8Array> {
     constructor(
         protected readonly method: WorkerRequest[1],
         protected readonly args: WorkerRequest[2],
@@ -206,7 +206,7 @@ abstract class TransformProxy implements Transformer<BinaryData, Uint8Array> {
     }
 
     /** @inheritdoc */
-    async transform(chunk: BinaryData): Promise<void> {
+    async transform(chunk: BufferSource): Promise<void> {
         try {
             const src = coercionInput(chunk, false);
             await callWorker(this.ctx!, 'transform', [src]);

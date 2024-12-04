@@ -23,8 +23,8 @@ const DECOMPRESS = [
 ] as const;
 
 const ROUNDTRIP = [
-    ['napi', (data: BinaryData, level?: number) => napi.decompressSync(napi.compressSync(data, level))],
-    ['wasm', (data: BinaryData, level?: number) => wasm.decompressSync(wasm.compressSync(data, level))],
+    ['napi', (data: BufferSource, level?: number) => napi.decompressSync(napi.compressSync(data, level))],
+    ['wasm', (data: BufferSource, level?: number) => wasm.decompressSync(wasm.compressSync(data, level))],
 ] as const;
 
 describe.each([
@@ -72,7 +72,7 @@ describe.each(ROUNDTRIP)('%s roundtrip should got same result', (key, roundtrip)
 describe('should reject bad buffer data', () => {
     for (const [key, method] of ALL) {
         it(key, () => {
-            const e = `Input data must be BinaryData`;
+            const e = `Input data must be BufferSource`;
             // @ts-expect-error ts(2345)
             expect(() => method(1)).toThrow(e);
             // @ts-expect-error ts(2345)

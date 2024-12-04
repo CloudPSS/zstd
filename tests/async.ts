@@ -24,8 +24,8 @@ const DECOMPRESS = [
 ] as const;
 
 const ROUNDTRIP = [
-    ['napi', async (data: BinaryData, level?: number) => await napi.decompress(await napi.compress(data, level))],
-    ['wasm', async (data: BinaryData, level?: number) => await wasm.decompress(await wasm.compress(data, level))],
+    ['napi', async (data: BufferSource, level?: number) => await napi.decompress(await napi.compress(data, level))],
+    ['wasm', async (data: BufferSource, level?: number) => await wasm.decompress(await wasm.compress(data, level))],
 ] as const;
 
 afterAll(() => {
@@ -104,7 +104,7 @@ describe.each(ROUNDTRIP)('%s async roundtrip should got same result', (key, roun
 describe('should reject bad buffer data', () => {
     for (const [key, method] of ALL) {
         it(key, async () => {
-            const e = `Input data must be BinaryData`;
+            const e = `Input data must be BufferSource`;
             // @ts-expect-error ts(2345)
             await expect(() => method(1)).rejects.toThrow(e);
             // @ts-expect-error ts(2345)

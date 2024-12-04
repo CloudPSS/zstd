@@ -38,7 +38,7 @@ export function coercionInput<const B extends boolean>(
         }
     }
 
-    throw new TypeError(`Input data must be BinaryData${allowBlob ? ' or Blob' : ''}.`);
+    throw new TypeError(`Input data must be BufferSource${allowBlob ? ' or Blob' : ''}.`);
 }
 
 /** check and clamp compress level */

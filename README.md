@@ -33,11 +33,11 @@ To explicitly use the wasm or the n-api version, import `@cloudpss/zstd/wasm` an
 
 ### Module `@cloudpss/zstd` / `@cloudpss/zstd/wasm` / `@cloudpss/zstd/napi`
 
-#### `compress(input: BinaryData | Blob, level?: number): Promise<Uint8Array>`<br> `compressSync(input: BinaryData, level?: number): Uint8Array`
+#### `compress(input: BufferSource | Blob, level?: number): Promise<Uint8Array>`<br> `compressSync(input: BufferSource, level?: number): Uint8Array`
 
 Compresses the input data with the given compression level (default: 4).
 
-#### `decompress(input: BinaryData | Blob): Promise<Uint8Array>`<br> `decompressSync(input: BinaryData): Uint8Array`
+#### `decompress(input: BufferSource | Blob): Promise<Uint8Array>`<br> `decompressSync(input: BufferSource): Uint8Array`
 
 Decompresses the input data.
 

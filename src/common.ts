@@ -6,22 +6,22 @@ export function createModule(options: {
     compress: (data: Uint8Array | Blob, level: number) => Promise<Uint8Array>;
     decompressSync: (data: Uint8Array) => Uint8Array;
     decompress: (data: Uint8Array | Blob) => Promise<Uint8Array>;
-    Compressor: new (level: number) => Transformer<BinaryData, Uint8Array>;
-    Decompressor: new () => Transformer<BinaryData, Uint8Array>;
+    Compressor: new (level: number) => Transformer<BufferSource, Uint8Array>;
+    Decompressor: new () => Transformer<BufferSource, Uint8Array>;
     TransformStream: typeof globalThis.TransformStream;
 }): {
     /** ZStandard compress */
-    compressSync: (data: BinaryData, level?: number) => Uint8Array;
+    compressSync: (data: BufferSource, level?: number) => Uint8Array;
     /** ZStandard compress */
-    compress: (data: BinaryData | Blob, level?: number) => Promise<Uint8Array>;
+    compress: (data: BufferSource | Blob, level?: number) => Promise<Uint8Array>;
     /** ZStandard decompress */
-    decompressSync: (data: BinaryData) => Uint8Array;
+    decompressSync: (data: BufferSource) => Uint8Array;
     /** ZStandard decompress */
-    decompress: (data: BinaryData | Blob) => Promise<Uint8Array>;
+    decompress: (data: BufferSource | Blob) => Promise<Uint8Array>;
     /** create ZStandard stream compressor */
-    compressor: (level?: number) => TransformStream<BinaryData, Uint8Array>;
+    compressor: (level?: number) => TransformStream<BufferSource, Uint8Array>;
     /** create ZStandard stream decompressor */
-    decompressor: () => TransformStream<BinaryData, Uint8Array>;
+    decompressor: () => TransformStream<BufferSource, Uint8Array>;
 } {
     const { compressSync, compress, decompressSync, decompress, Compressor, Decompressor, TransformStream } = options;
     return {
@@ -49,11 +49,11 @@ export function createModule(options: {
         },
         compressor: (level) => {
             level = checkLevel(level);
-            const transformer = new TransformStream<BinaryData, Uint8Array>(new Compressor(level));
+            const transformer = new TransformStream<BufferSource, Uint8Array>(new Compressor(level));
             return transformer;
         },
         decompressor: () => {
-            const transformer = new TransformStream<BinaryData, Uint8Array>(new Decompressor());
+            const transformer = new TransformStream<BufferSource, Uint8Array>(new Decompressor());
             return transformer;
         },
     };
