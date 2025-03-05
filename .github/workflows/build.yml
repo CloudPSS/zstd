@@ -191,6 +191,14 @@ jobs:
         with:
           name: build
 
+      - name: Clean up
+        shell: pwsh
+        run: Remove-Item -Path ./lib -Recurse -Force
+
+      - name: List files
+        shell: pwsh
+        run: Get-ChildItem -Path ./ -Recurse
+
       - name: Install
         uses: ./.github/actions/install
         with:
