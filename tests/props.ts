@@ -20,7 +20,12 @@ it('should have correct VERSION', () => {
     expect(napi.ZSTD_VERSION() satisfies string).toMatch(/^\d+\.\d+\.\d+$/);
     expect(wasm.ZSTD_VERSION() satisfies string).toMatch(/^\d+\.\d+\.\d+$/);
     expect(root.ZSTD_VERSION() satisfies string).toMatch(/^\d+\.\d+\.\d+$/);
+});
 
+it('wasm version should be equal to root version', () => {
     expect(wasm.ZSTD_VERSION()).toBe(root.ZSTD_VERSION());
+});
+
+it('napi version should be equal to root version', () => {
     expect(napi.ZSTD_VERSION()).toBe(root.ZSTD_VERSION());
 });
