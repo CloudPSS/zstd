@@ -61,3 +61,16 @@ export function createModule(options: {
         },
     };
 }
+
+export const createZSTD_VERSION = (versionNumber: () => number): (() => string) => {
+    let _ZSTD_VERSION: string;
+    return () => {
+        if (_ZSTD_VERSION) return _ZSTD_VERSION;
+        // MAJOR * 10000 + MINOR * 100 + PATCH to MAJOR.MINOR.PATCH
+        const ZSTD_VERSION_NUMBER = versionNumber();
+        const ZSTD_MAJOR = Math.floor(ZSTD_VERSION_NUMBER / 10000);
+        const ZSTD_MINOR = Math.floor((ZSTD_VERSION_NUMBER % 10000) / 100);
+        const ZSTD_PATCH = ZSTD_VERSION_NUMBER % 100;
+        return (_ZSTD_VERSION = `${ZSTD_MAJOR}.${ZSTD_MINOR}.${ZSTD_PATCH}`);
+    };
+};

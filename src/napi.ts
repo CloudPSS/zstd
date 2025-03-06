@@ -4,7 +4,7 @@ import { Transform, type TransformCallback } from 'node:stream';
 import { TransformStream } from 'node:stream/web';
 import { MAX_SIZE } from './config.js';
 import { coercionInput, checkLevel } from './utils.js';
-import { createModule, type BufferSource } from './common.js';
+import { createModule, createZSTD_VERSION, type BufferSource } from './common.js';
 
 /** Compressor class */
 declare class _Compressor {
@@ -44,7 +44,7 @@ interface Binding {
         callback: (error: string | null, data: Buffer | null) => void,
     ): void;
     /** Get zstd version */
-    version: string;
+    version: number;
     /** min compress level */
     minLevel: number;
     /** max compress level */
@@ -218,7 +218,7 @@ export const { compressSync, compress, decompressSync, decompress, compressor, d
     TransformStream: TransformStream as typeof globalThis.TransformStream,
 });
 
-export const ZSTD_VERSION = (): string => bindings.version;
+export const ZSTD_VERSION = createZSTD_VERSION(() => bindings.version);
 
 export const TYPE = 'napi';
 

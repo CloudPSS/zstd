@@ -1,4 +1,5 @@
 import wasmModule, { type Ptr, type Module as WasmModule } from '../../prebuilds/zstd.js';
+import { createZSTD_VERSION } from '../common.js';
 import { MAX_SIZE } from '../config.js';
 
 export const ModuleReady = (async () => {
@@ -72,16 +73,7 @@ export function checkError<T extends number>(code: T): T {
 const ZSTD_CONTENTSIZE_ERROR = 2 ** 32 - 2;
 //const ZSTD_CONTENTSIZE_UNKNOWN = 2 ** 32 - 1;
 
-let _ZSTD_VERSION: string;
-export const ZSTD_VERSION = (): string => {
-    if (_ZSTD_VERSION) return _ZSTD_VERSION;
-    // MAJOR * 10000 + MINOR * 100 + PATCH to MAJOR.MINOR.PATCH
-    const ZSTD_VERSION_NUMBER = Module._ZSTD_versionNumber();
-    const ZSTD_MAJOR = Math.floor(ZSTD_VERSION_NUMBER / 10000);
-    const ZSTD_MINOR = Math.floor((ZSTD_VERSION_NUMBER % 10000) / 100);
-    const ZSTD_PATCH = ZSTD_VERSION_NUMBER % 100;
-    return (_ZSTD_VERSION = `${ZSTD_MAJOR}.${ZSTD_MINOR}.${ZSTD_PATCH}`);
-};
+export const ZSTD_VERSION = createZSTD_VERSION(() => Module._ZSTD_versionNumber());
 
 /** compress */
 export function compress(buf: Uint8Array, level: number): Uint8Array {
