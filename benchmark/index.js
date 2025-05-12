@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+import zlib from 'node:zlib';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Readable, Transform } from 'node:stream';
@@ -79,6 +80,8 @@ async function main() {
             await warmup();
             console.log(
                 '\u001B[2;32mLevel',
+                'Builtin Compressed'.padEnd(18),
+                'Builtin Comp/Decomp'.padEnd(21),
                 'Compressed'.padEnd(18),
                 'NAPI Comp/Decomp'.padEnd(21),
                 'NAPI Worker'.padEnd(21),
@@ -91,6 +94,15 @@ async function main() {
         }
         console.log(`\u001B[1;33mFile: ${file.name} \tRaw: ${pb(file.content.length)}\u001B[0m`);
         for (const level of [-10, -5, -1, 1, 2, 3, 4, 5, 6, 9, 15, 19, 22]) {
+            const [bCompressed, bCompressTime] = time(() =>
+                zlib.zstdCompressSync(file.content, {
+                    params: {
+                        [zlib.constants.ZSTD_c_compressionLevel]: level,
+                    },
+                }),
+            );
+            const [bDecompressed, bDecompressTime] = time(() => zlib.zstdDecompressSync(bCompressed, {}));
+
             const [compressed, napiCompressTime] = time(() => napi.compressSync(file.content, level));
             const [decompressed, napiDecompressTime] = time(() => napi.decompressSync(compressed));
             const [, napiWorkerCompressTime] = await atime(() => napi.compress(file.content, level));
@@ -107,7 +119,7 @@ async function main() {
             });
             const [, napiSDecompressTime] = await atime(async () => {
                 const stream = new napi.Decompressor();
-                return await pipeline(Readable.from(compressed), stream, async (chunks) => {
+                return await pipeline(Readable.from(Buffer.from(compressed)), stream, async (chunks) => {
                     const chunks2 = [];
                     for await (const chunk of chunks) {
                         chunks2.push(chunk);
@@ -131,20 +143,31 @@ async function main() {
             });
             const [, wasmSDecompressTime] = await atime(async () => {
                 const stream = new TransformStream(new wasm.WebDecompressor());
-                return await pipeline(Readable.from(compressed), Transform.fromWeb(stream), async (chunks) => {
-                    const chunks2 = [];
-                    for await (const chunk of chunks) {
-                        chunks2.push(chunk);
-                    }
-                    return Buffer.concat(chunks2);
-                });
+                return await pipeline(
+                    Readable.from(Buffer.from(compressed)),
+                    Transform.fromWeb(stream),
+                    async (chunks) => {
+                        const chunks2 = [];
+                        for await (const chunk of chunks) {
+                            chunks2.push(chunk);
+                        }
+                        return Buffer.concat(chunks2);
+                    },
+                );
             });
             console.assert(
                 Buffer.compare(decompressed, file.content) === 0,
                 'Decompressed data does not match original',
             );
+            console.assert(
+                Buffer.compare(bDecompressed, file.content) === 0,
+                'Decompressed data does not match original',
+            );
             console.log(
                 level.toString().padStart(4),
+                `${(file.content.length / bCompressed.length).toFixed(1)}(${pb(bCompressed.length)})`.padStart(18),
+                t(bCompressTime),
+                t(bDecompressTime),
                 `${(file.content.length / compressed.length).toFixed(1)}(${pb(compressed.length)})`.padStart(18),
                 t(napiCompressTime),
                 t(napiDecompressTime),
