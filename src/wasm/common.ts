@@ -2,6 +2,7 @@ import wasmModule, { type Ptr, type Module as WasmModule } from '../../prebuilds
 import { createZSTD_VERSION } from '../common.js';
 import { MAX_SIZE } from '../config.js';
 
+export let Module: WasmModule;
 export const ModuleReady = (async () => {
     Module = await wasmModule({
         onCompressorData(ctx, dst, dstSize) {
@@ -12,7 +13,6 @@ export const ModuleReady = (async () => {
         },
     });
 })();
-export let Module: WasmModule;
 
 let _onCompressorData: Parameters<typeof wasmModule>[0]['onCompressorData'];
 let _onDecompressorData: Parameters<typeof wasmModule>[0]['onDecompressorData'];
