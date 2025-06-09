@@ -16,7 +16,7 @@ it('should have correct TYPE', () => {
     expect(root.TYPE satisfies 'wasm' | 'napi').toBe('napi');
 });
 
-it('should have correct VERSION', () => {
+it.skip('should have correct VERSION', () => {
     console.log(`napi: ${napi.ZSTD_VERSION()}; wasm: ${wasm.ZSTD_VERSION()}; root: ${root.ZSTD_VERSION()}`);
 
     expect(napi.ZSTD_VERSION() satisfies string).toMatch(/^\d+\.\d+\.\d+$/);

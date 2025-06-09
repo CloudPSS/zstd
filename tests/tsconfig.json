@@ -6,7 +6,8 @@
     "checkJs": true,
     "rootDir": "..",
     "module": "Node16",
-    "moduleResolution": "Node16"
+    "moduleResolution": "Node16",
+    "isolatedModules": true
   },
   "include": ["./**/*.ts", "./**/*.js", "./.*.js", "./.*.ts"]
 }
