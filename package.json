@@ -65,32 +65,35 @@
     "extends": "@cloudpss"
   },
   "devDependencies": {
-    "@cloudpss/commitlint-config": "^3.0.22",
-    "@cloudpss/eslint-config": "^3.0.22",
-    "@cloudpss/lint-staged-config": "^3.0.22",
-    "@cloudpss/prettier-config": "^3.0.22",
-    "@cloudpss/tsconfig": "^3.0.22",
-    "@jest/globals": "^29.7.0",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^22.15.30",
+    "@cloudpss/commitlint-config": "^3.0.24",
+    "@cloudpss/eslint-config": "^3.0.24",
+    "@cloudpss/lint-staged-config": "^3.0.24",
+    "@cloudpss/prettier-config": "^3.0.24",
+    "@cloudpss/tsconfig": "^3.0.24",
+    "@jest/globals": "^30.0.4",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.12",
     "husky": "^9.1.7",
-    "jest": "^29.7.0",
-    "node-gyp": "10.1.0",
+    "jest": "^30.0.4",
+    "node-gyp": "11.2.0",
     "prebuildify": "^6.0.1",
     "prebuildify-cross": "^5.1.1",
     "pretty-bytes": "^7.0.0",
     "rimraf": "^6.0.1",
-    "ts-jest": "29.3.4",
+    "ts-jest": "29.4.0",
     "typescript": "^5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^7.0.3"
   },
   "dependencies": {
-    "node-addon-api": "^8.3.1",
+    "node-addon-api": "^8.4.0",
     "node-gyp-build": "^4.8.4"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild"
+    ],
+    "ignoredBuiltDependencies": [
+      "unrs-resolver"
     ]
   }
 }

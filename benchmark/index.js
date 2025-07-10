@@ -1,4 +1,3 @@
-import { fileURLToPath } from 'node:url';
 import zlib from 'node:zlib';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -14,7 +13,7 @@ const t = (/** @type {number} */ time) =>
     Number.isFinite(time) ? (time.toFixed(2) + 'ms').padStart(10) : '  --------';
 const pb = (/** @type {number} */ size) => prettyBytes(size, { binary: true }).padStart(8);
 
-const root = path.resolve(fileURLToPath(import.meta.url), '../files/');
+const root = path.resolve(import.meta.filename, '../files/');
 /**
  * List test files.
  * @yields {{name: string, path: string, content: Buffer}}
