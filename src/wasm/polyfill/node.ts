@@ -1,5 +1,5 @@
 import os from 'node:os';
-import { Worker as NodeWorker, type TransferListItem, parentPort } from 'node:worker_threads';
+import { Worker as NodeWorker, type Transferable, parentPort } from 'node:worker_threads';
 
 /** Worker polyfill */
 export class Worker extends EventTarget implements AbstractWorker {
@@ -34,16 +34,16 @@ export class Worker extends EventTarget implements AbstractWorker {
     onerror: ((this: AbstractWorker, ev: ErrorEvent) => unknown) | null = null;
     protected readonly _worker: NodeWorker;
     /** @inheritdoc */
-    postMessage(data: unknown, transfer?: Transferable[] | StructuredSerializeOptions): void {
+    postMessage(data: unknown, transfer?: Transferable[] | { transfer?: Transferable[] }): void {
         let t: Transferable[] = [];
         if (!transfer) {
             //
         } else if (Array.isArray(transfer)) {
             t = transfer;
-        } else if ('transfer' in transfer) {
+        } else if (transfer.transfer) {
             t = transfer.transfer;
         }
-        this._worker.postMessage(data, t as readonly TransferListItem[]);
+        this._worker.postMessage(data, t as readonly Transferable[]);
     }
     /** @inheritdoc */
     terminate(): void {
@@ -58,7 +58,7 @@ export function onMessage(callback: (value: unknown) => unknown): void {
 
 /** post message */
 export function postMessage(value: unknown, transfer?: Transferable[]): void {
-    parentPort!.postMessage(value, transfer as TransferListItem[] | undefined);
+    parentPort!.postMessage(value, transfer);
 }
 
 export const MAX_WORKERS = Math.max(os.availableParallelism?.() ?? os.cpus().length, 2) - 1;

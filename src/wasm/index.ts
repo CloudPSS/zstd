@@ -99,14 +99,19 @@ async function borrowWorker(): Promise<Worker> {
     });
 }
 
+const MAX_COPY_OVERHEAD = 1024 * 16; // 16KB
+
 /** Call to a specific worker */
 async function callWorker(worker: Worker, method: WorkerRequest[1], args: WorkerRequest[2]): Promise<Uint8Array> {
     const seq = SEQ++;
     const request = [seq, method, args] as WorkerRequest;
-    // make a transferable copy
-    if (ArrayBuffer.isView(args[0])) args[0] = Uint8Array.from(args[0]);
+    const transferable: Transferable[] = [];
+    if (ArrayBuffer.isView(args[0]) && args[0].byteLength + MAX_COPY_OVERHEAD < args[0].buffer.byteLength) {
+        args[0] = Uint8Array.from(args[0]);
+        transferable.push(args[0].buffer);
+    }
     return new Promise((resolve, reject) => {
-        worker.postMessage(request, ArrayBuffer.isView(args[0]) ? [args[0].buffer] : []);
+        worker.postMessage(request, transferable);
 
         const onMessage = (ev: MessageEvent): void => {
             const [resSeq, data, error] = ev.data as WorkerResponse;
