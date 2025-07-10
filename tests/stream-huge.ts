@@ -47,5 +47,5 @@ const MODULE = [
             }
             total += read.value?.length ?? 0;
         } while (!read.done);
-    }, 300_000);
+    }, 600_000);
 });
