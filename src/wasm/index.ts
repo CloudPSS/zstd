@@ -102,16 +102,28 @@ async function borrowWorker(): Promise<Worker> {
 const MAX_COPY_OVERHEAD = 1024 * 16; // 16KB
 
 /** Call to a specific worker */
-async function callWorker(worker: Worker, method: WorkerRequest[1], args: WorkerRequest[2]): Promise<Uint8Array> {
+async function callWorker(
+    worker: Worker,
+    method: WorkerRequest[1],
+    args: WorkerRequest[2],
+    transferable?: Transferable[],
+): Promise<Uint8Array> {
     const seq = SEQ++;
     const request = [seq, method, args] as WorkerRequest;
-    const transferable: Transferable[] = [];
-    if (ArrayBuffer.isView(args[0]) && args[0].byteLength + MAX_COPY_OVERHEAD < args[0].buffer.byteLength) {
+    if (
+        transferable == null &&
+        ArrayBuffer.isView(args[0]) &&
+        args[0].byteLength + MAX_COPY_OVERHEAD < args[0].buffer.byteLength
+    ) {
         args[0] = Uint8Array.from(args[0]);
-        transferable.push(args[0].buffer);
+        transferable = [args[0].buffer];
     }
     return new Promise((resolve, reject) => {
-        worker.postMessage(request, transferable);
+        if (transferable?.length) {
+            worker.postMessage(request, { transfer: transferable });
+        } else {
+            worker.postMessage(request);
+        }
 
         const onMessage = (ev: MessageEvent): void => {
             const [resSeq, data, error] = ev.data as WorkerResponse;
@@ -214,7 +226,8 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array> {
     async transform(chunk: BufferSource): Promise<void> {
         try {
             const src = coercionInput(chunk, false);
-            await callWorker(this.ctx!, 'transform', [src]);
+            const transferable = src.byteLength === src.buffer.byteLength ? [src.buffer] : undefined;
+            await callWorker(this.ctx!, 'transform', [src], transferable);
         } catch (ex) {
             this.end(ex);
         }
