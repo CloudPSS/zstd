@@ -12,7 +12,8 @@ const randomBuffer = asUint8Array(randomBytes(5843));
  */
 function asReadable(data: Uint8Array): ReadableStream<Uint8Array> {
     let ptr = 0;
-    return new RS<Uint8Array>({
+    return new RS({
+        type: 'bytes',
         pull(controller) {
             const chunk = data.slice(ptr, ptr + 1024);
             if (chunk.byteLength) {

@@ -6,13 +6,15 @@ import * as napi from '@cloudpss/zstd/napi';
 
 const randomBuffer = asUint8Array(randomBytes(5843));
 
+const COUNT = process.env['CI'] ? 1024 * 1024 : 1024;
 /** 生成数据 */
 function hugeReadable(): ReadableStream<Uint8Array> {
     let count = 0;
-    return new RS<Uint8Array>({
+    return new RS({
+        type: 'bytes',
         pull(controller) {
-            if (count++ < 1024 * 1024) {
-                controller.enqueue(randomBuffer);
+            if (count++ < COUNT) {
+                controller.enqueue(randomBuffer.slice());
             } else {
                 controller.close();
             }
@@ -29,7 +31,7 @@ const MODULE = [
     ['wasm', wasm],
 ] as const;
 
-(process.env['CI'] ? describe : xdescribe).each(MODULE)('%s stream compress api', (name, module) => {
+describe.each(MODULE)('%s stream compress api', (name, module) => {
     it('should roundtrip with huge data', async () => {
         const readable = hugeReadable();
         const result = readable.pipeThrough(module.compressor(3)).pipeThrough(module.decompressor());
