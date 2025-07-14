@@ -36,10 +36,16 @@ export const { compress } = lib;
 /** ZStandard decompress */
 export const { decompress } = lib;
 
-/** NodeJs Transform stream Compressor */
+/** Web stream ZStandard compressor */
+export const { compressor } = lib;
+
+/** Web stream ZStandard decompressor */
+export const { decompressor } = lib;
+
+/** NodeJs Transform stream compressor */
 export const { Compressor } = lib;
 
-/** NodeJs Transform stream Decompressor */
+/** NodeJs Transform stream decompressor */
 export const { Decompressor } = lib;
 
 /** The type of the current module. */

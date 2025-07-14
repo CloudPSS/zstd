@@ -232,13 +232,13 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array> {
 }
 
 /** Stream compressor */
-export class WebCompressor extends TransformProxy {
+class WebCompressor extends TransformProxy {
     constructor(readonly level: number) {
         super('Compressor', [null, level]);
     }
 }
 /** Stream compressor */
-export class WebDecompressor extends TransformProxy {
+class WebDecompressor extends TransformProxy {
     constructor() {
         super('Decompressor', [null]);
     }
