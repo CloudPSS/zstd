@@ -145,7 +145,7 @@ export class Decompressor extends CompressTransform {
 abstract class WebCompressTransformer implements Transformer<BufferSource, Uint8Array> {
     protected _binding: _Compressor | _Decompressor | null = null;
     /** @inheritdoc */
-    abstract start(): void;
+    abstract start(controller: TransformStreamDefaultController<Uint8Array>): void;
 
     /** @inheritdoc */
     transform(chunk: BufferSource, controller: TransformStreamDefaultController<Uint8Array>): void {
@@ -170,20 +170,20 @@ abstract class WebCompressTransformer implements Transformer<BufferSource, Uint8
 }
 
 /** Stream compressor */
-class WebCompressor extends WebCompressTransformer {
+export class WebCompressor extends WebCompressTransformer {
     constructor(readonly level: number) {
         super();
     }
     /** @inheritdoc */
-    start(): void {
+    start(controller: TransformStreamDefaultController<Uint8Array>): void {
         this._binding = new bindings.Compressor(this.level);
     }
 }
 
 /** Stream decompressor */
-class WebDecompressor extends WebCompressTransformer {
+export class WebDecompressor extends WebCompressTransformer {
     /** @inheritdoc */
-    start(): void {
+    start(controller: TransformStreamDefaultController<Uint8Array>): void {
         this._binding = new bindings.Decompressor();
     }
 }

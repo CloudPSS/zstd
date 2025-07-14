@@ -1,3 +1,6 @@
+import type { Simplify, Constructor } from 'type-fest';
+import type { WebCompressor as WC, WebDecompressor as WD } from './napi.js';
+
 let lib: Omit<typeof import('./napi.js'), 'TYPE' | `_${string}`> &
     Pick<typeof import('./napi.js') | typeof import('./wasm/index.js'), 'TYPE'>;
 
@@ -18,9 +21,13 @@ try {
     }
     const wasm = await import('./wasm/index.js');
     lib = {
+        ...wasm,
         Compressor: undefined as unknown as (typeof import('./napi.js'))['Compressor'],
         Decompressor: undefined as unknown as (typeof import('./napi.js'))['Decompressor'],
-        ...wasm,
+        WebCompressor: wasm.WebCompressor satisfies Constructor<Simplify<WC>, [level: number]> as unknown as new (
+            level: number,
+        ) => WC,
+        WebDecompressor: wasm.WebDecompressor satisfies Constructor<Simplify<WD>, []> as unknown as new () => WD,
     };
 }
 
@@ -41,6 +48,12 @@ export const { compressor } = lib;
 
 /** Web stream ZStandard decompressor */
 export const { decompressor } = lib;
+
+/** Web stream ZStandard compress transformer */
+export const { WebCompressor } = lib;
+
+/** Web stream ZStandard decompress transformer */
+export const { WebDecompressor } = lib;
 
 /** NodeJs Transform stream compressor */
 export const { Compressor } = lib;

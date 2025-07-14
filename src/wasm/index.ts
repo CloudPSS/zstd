@@ -223,11 +223,11 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array> {
     }
 
     /** @inheritdoc */
-    async transform(chunk: BufferSource): Promise<void> {
+    transform(chunk: BufferSource): void {
         try {
             const src = coercionInput(chunk, false);
             const transferable = src.byteLength === src.buffer.byteLength ? [src.buffer] : undefined;
-            await callWorker(this.ctx!, 'transform', [src], transferable);
+            void callWorker(this.ctx!, 'transform', [src], transferable).catch((ex) => this.end(ex));
         } catch (ex) {
             this.end(ex);
         }
@@ -245,13 +245,13 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array> {
 }
 
 /** Stream compressor */
-class WebCompressor extends TransformProxy {
+export class WebCompressor extends TransformProxy {
     constructor(readonly level: number) {
         super('Compressor', [null, level]);
     }
 }
 /** Stream compressor */
-class WebDecompressor extends TransformProxy {
+export class WebDecompressor extends TransformProxy {
     constructor() {
         super('Decompressor', [null]);
     }
