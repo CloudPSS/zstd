@@ -1,5 +1,4 @@
-import { DEFAULT_LEVEL } from './config.js';
-import { MAX_SIZE, MIN_LEVEL, MAX_LEVEL } from './config.js';
+import { DEFAULT_LEVEL, MAX_SIZE, MIN_LEVEL, MAX_LEVEL } from './config.js';
 
 /** Check input */
 function isBlob(value: NonNullable<unknown>): value is Blob {

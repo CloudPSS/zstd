@@ -115,8 +115,10 @@ async function callWorker(
         ArrayBuffer.isView(args[0]) &&
         args[0].byteLength + MAX_COPY_OVERHEAD < args[0].buffer.byteLength
     ) {
-        args[0] = Uint8Array.from(args[0]);
-        transferable = [args[0].buffer];
+        // Avoid OOM of chrome when copying large buffers
+        const buffer = args[0].buffer.slice(args[0].byteOffset, args[0].byteOffset + args[0].byteLength);
+        args[0] = new Uint8Array(buffer);
+        transferable = [buffer];
     }
     return new Promise((resolve, reject) => {
         if (transferable?.length) {
@@ -226,8 +228,8 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array> {
     transform(chunk: BufferSource): void {
         try {
             const src = coercionInput(chunk, false);
-            const transferable = src.byteLength === src.buffer.byteLength ? [src.buffer] : undefined;
-            void callWorker(this.ctx!, 'transform', [src], transferable).catch((ex) => this.end(ex));
+            const transferable = src.byteLength === src.buffer.byteLength ? [src.buffer] : [];
+            this.ctx!.postMessage([null, 'push', [src]] satisfies WorkerRequest, transferable);
         } catch (ex) {
             this.end(ex);
         }
@@ -236,7 +238,7 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array> {
     /** @inheritdoc */
     async flush(): Promise<void> {
         try {
-            await callWorker(this.ctx!, 'flush', [null]);
+            await callWorker(this.ctx!, 'end', []);
             this.end(null);
         } catch (ex) {
             this.end(ex);
@@ -247,13 +249,13 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array> {
 /** Stream compressor */
 export class WebCompressor extends TransformProxy {
     constructor(readonly level: number) {
-        super('Compressor', [null, level]);
+        super('Compressor', [level]);
     }
 }
 /** Stream compressor */
 export class WebDecompressor extends TransformProxy {
     constructor() {
-        super('Decompressor', [null]);
+        super('Decompressor', []);
     }
 }
 

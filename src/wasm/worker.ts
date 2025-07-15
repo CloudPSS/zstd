@@ -1,21 +1,25 @@
 import type { Ptr, ZSTD_CStream, ZSTD_DStream } from '../../prebuilds/zstd.js';
 import { onMessage, postMessage } from '#worker-polyfill';
 import { checkError, compress, decompress, fromHeap, Helper, Module, ModuleReady, setWasmCallbacks } from './common.js';
+import { checkLevel } from '../utils.js';
 
 /** Worker request */
 export type WorkerRequest =
-    | [number, 'compress', [Uint8Array | Blob, level: number]]
-    | [number, 'decompress', [Uint8Array | Blob]]
-    | [number, 'Decompressor', [null]]
-    | [number, 'Compressor', [null, level: number]]
-    | [number, 'transform', [Uint8Array]]
-    | [number, 'flush', [null]];
+    | [seq: number, 'compress', [Uint8Array | Blob, level: number]]
+    | [seq: number, 'decompress', [Uint8Array | Blob]]
+    | [seq: number, 'Decompressor', []]
+    | [seq: number, 'Compressor', [level: number]]
+    | [null, 'push', [Uint8Array]]
+    | [seq: number, 'end', []];
+
 /** Worker response */
 export type WorkerResponse =
-    | [number, Uint8Array]
-    | [number, null, Error]
+    | [seq: number, Uint8Array]
+    | [seq: number, null, Error]
+    | [seq: number]
     | [null, chunk: Uint8Array]
     | [null, null, Error];
+
 /** Worker ready */
 export type WorkerReady = 'ready';
 
@@ -24,10 +28,10 @@ let ptr: number | undefined;
 /** Called when chunks generated from wasm */
 function onChunkData(state: 'Decompressor' | 'Compressor', ctx: number, dst: Ptr, dstSize: number): void {
     if (ptr !== ctx || state !== mode) {
-        postMessage([null, null, new Error(`Invalid context for ${state}`)]);
+        postMessage([null, null, new Error(`Invalid context for ${state}`)] satisfies WorkerResponse);
     }
     const chunk = fromHeap(dst, dstSize);
-    postMessage([null, chunk], [chunk.buffer]);
+    postMessage([null, chunk] satisfies WorkerResponse, [chunk.buffer]);
 }
 
 /** stream mode clean up */
@@ -49,24 +53,25 @@ onMessage(async (data) => {
                 const [data, level] = args;
                 const src = ArrayBuffer.isView(data) ? data : new Uint8Array(await data.arrayBuffer());
                 const dst = compress(src, level);
-                postMessage([seq, dst], [dst.buffer]);
+                postMessage([seq, dst] satisfies WorkerResponse, [dst.buffer]);
                 break;
             }
             case 'decompress': {
                 const [data] = args;
                 const src = ArrayBuffer.isView(data) ? data : new Uint8Array(await data.arrayBuffer());
                 const dst = decompress(src);
-                postMessage([seq, dst], [dst.buffer]);
+                postMessage([seq, dst] satisfies WorkerResponse, [dst.buffer]);
                 break;
             }
             case 'Compressor': {
                 if (ptr != null || mode != null) {
                     throw new Error('Invalid context');
                 }
-                const [, level] = args;
+                let [level] = args;
+                level = checkLevel(level);
                 ptr = checkError(Module._CompressorCreate(level));
                 mode = 'Compressor';
-                postMessage([seq, null]);
+                postMessage([seq] satisfies WorkerResponse);
                 break;
             }
             case 'Decompressor': {
@@ -75,10 +80,10 @@ onMessage(async (data) => {
                 }
                 ptr = checkError(Module._DecompressorCreate());
                 mode = 'Decompressor';
-                postMessage([seq, null]);
+                postMessage([seq] satisfies WorkerResponse);
                 break;
             }
-            case 'transform': {
+            case 'push': {
                 if (ptr == null || mode == null) {
                     throw new Error('Invalid context');
                 }
@@ -92,16 +97,15 @@ onMessage(async (data) => {
                     } else {
                         checkError(Module._DecompressorData(ptr as ZSTD_DStream, srcPtr, srcSize));
                     }
-                    postMessage([seq, null]);
                 } catch (ex) {
                     cleanUp();
-                    throw ex;
+                    postMessage([null, null, ex as Error] satisfies WorkerResponse);
                 } finally {
                     helper.finalize();
                 }
                 break;
             }
-            case 'flush': {
+            case 'end': {
                 if (ptr == null || mode == null) {
                     throw new Error('Invalid context');
                 }
@@ -111,7 +115,7 @@ onMessage(async (data) => {
                     } else {
                         checkError(Module._DecompressorEnd(ptr as ZSTD_DStream));
                     }
-                    postMessage([seq, null]);
+                    postMessage([seq] satisfies WorkerResponse);
                 } finally {
                     cleanUp();
                 }

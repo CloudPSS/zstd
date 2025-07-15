@@ -50,42 +50,40 @@ test('decompress error', async () => {
 
 test('stream compress', async () => {
     await loadWorker();
-    messageCallback([3, 'Compressor', [null, 6]]);
-    messageCallback([4, 'transform', [new Uint8Array([1, 2, 3])]]);
-    messageCallback([5, 'flush', [null]]);
-    expect(postMessage).toHaveBeenCalledTimes(4);
-    expect(postMessage).toHaveBeenNthCalledWith(1, [3, null]);
-    expect(postMessage).toHaveBeenNthCalledWith(2, [4, null]);
-    expect(postMessage).toHaveBeenNthCalledWith(3, [null, expect.any(Uint8Array)], [expect.any(ArrayBuffer)]);
-    expect(postMessage).toHaveBeenNthCalledWith(4, [5, null]);
+    messageCallback([3, 'Compressor', [6]]);
+    messageCallback([4, 'push', [new Uint8Array([1, 2, 3])]]);
+    messageCallback([5, 'end', []]);
+    expect(postMessage).toHaveBeenCalledTimes(3);
+    expect(postMessage).toHaveBeenNthCalledWith(1, [3]);
+    expect(postMessage).toHaveBeenNthCalledWith(2, [null, expect.any(Uint8Array)], [expect.any(ArrayBuffer)]);
+    expect(postMessage).toHaveBeenNthCalledWith(3, [5]);
 });
 
 test('stream decompress', async () => {
     await loadWorker();
-    messageCallback([3, 'Decompressor', [null]]);
-    messageCallback([4, 'transform', [emptyCompressed]]);
-    messageCallback([5, 'flush', [null]]);
-    expect(postMessage).toHaveBeenCalledTimes(3);
-    expect(postMessage).toHaveBeenNthCalledWith(1, [3, null]);
-    expect(postMessage).toHaveBeenNthCalledWith(2, [4, null]);
-    expect(postMessage).toHaveBeenNthCalledWith(3, [5, null]);
+    messageCallback([3, 'Decompressor', []]);
+    messageCallback([4, 'push', [emptyCompressed]]);
+    messageCallback([5, 'end', []]);
+    expect(postMessage).toHaveBeenCalledTimes(2);
+    expect(postMessage).toHaveBeenNthCalledWith(1, [3]);
+    expect(postMessage).toHaveBeenNthCalledWith(2, [5]);
 });
 
 test('stream decompress error', async () => {
     await loadWorker();
-    messageCallback([6, 'Decompressor', [null]]);
-    messageCallback([7, 'transform', [new Uint8Array([1, 2, 3])]]);
-    messageCallback([8, 'flush', [null]]);
+    messageCallback([6, 'Decompressor', []]);
+    messageCallback([7, 'push', [new Uint8Array([1, 2, 3])]]);
+    messageCallback([8, 'end', []]);
     expect(postMessage).toHaveBeenCalledTimes(3);
-    expect(postMessage).toHaveBeenNthCalledWith(1, [6, null]);
-    expect(postMessage).toHaveBeenNthCalledWith(2, [7, null, expect.any(Error)]);
+    expect(postMessage).toHaveBeenNthCalledWith(1, [6]);
+    expect(postMessage).toHaveBeenNthCalledWith(2, [null, null, expect.any(Error)]);
     expect(postMessage).toHaveBeenNthCalledWith(3, [8, null, expect.any(Error)]);
 });
 
 test('invalid context', async () => {
     await loadWorker();
-    messageCallback([10, 'transform', [new Uint8Array([1, 2, 3])]]);
-    messageCallback([11, 'flush', [null]]);
+    messageCallback([10, 'push', [new Uint8Array([1, 2, 3])]]);
+    messageCallback([11, 'end', []]);
     expect(postMessage).toHaveBeenCalledTimes(2);
     expect(postMessage).toHaveBeenNthCalledWith(1, [10, null, expect.any(Error)]);
     expect(postMessage).toHaveBeenNthCalledWith(2, [11, null, expect.any(Error)]);
@@ -93,11 +91,11 @@ test('invalid context', async () => {
 
 test('invalid context instance', async () => {
     await loadWorker();
-    messageCallback([20, 'Decompressor', [null]]);
-    messageCallback([21, 'Decompressor', [null]]);
-    messageCallback([22, 'Compressor', [null]]);
+    messageCallback([20, 'Decompressor', []]);
+    messageCallback([21, 'Decompressor', []]);
+    messageCallback([22, 'Compressor', [4]]);
     expect(postMessage).toHaveBeenCalledTimes(3);
-    expect(postMessage).toHaveBeenNthCalledWith(1, [20, null]);
+    expect(postMessage).toHaveBeenNthCalledWith(1, [20]);
     expect(postMessage).toHaveBeenNthCalledWith(2, [21, null, expect.any(Error)]);
     expect(postMessage).toHaveBeenNthCalledWith(3, [22, null, expect.any(Error)]);
 });

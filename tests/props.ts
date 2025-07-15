@@ -17,17 +17,15 @@ it('should have correct TYPE', () => {
 });
 
 it('should have correct VERSION', () => {
-    console.log(`napi: ${napi.ZSTD_VERSION()}; wasm: ${wasm.ZSTD_VERSION()}; root: ${root.ZSTD_VERSION()}`);
-
     expect(napi.ZSTD_VERSION() satisfies string).toMatch(/^\d+\.\d+\.\d+$/);
     expect(wasm.ZSTD_VERSION() satisfies string).toMatch(/^\d+\.\d+\.\d+$/);
     expect(root.ZSTD_VERSION() satisfies string).toMatch(/^\d+\.\d+\.\d+$/);
 });
 
-it.skip('wasm version should be equal to root version', () => {
+it('wasm version should be equal to root version', () => {
     expect(wasm.ZSTD_VERSION()).toBe(root.ZSTD_VERSION());
 });
 
-it.skip('napi version should be equal to root version', () => {
+it('napi version should be equal to root version', () => {
     expect(napi.ZSTD_VERSION()).toBe(root.ZSTD_VERSION());
 });
