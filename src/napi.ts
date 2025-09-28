@@ -11,37 +11,37 @@ declare class _Compressor {
     /** constructor */
     constructor(level: number);
     /** compress */
-    data(data: Uint8Array, callback: (data: Buffer) => void): void;
+    data(data: Uint8Array, callback: (data: Buffer<ArrayBuffer>) => void): void;
     /** end */
-    end(callback: (data: Buffer) => void): void;
+    end(callback: (data: Buffer<ArrayBuffer>) => void): void;
 }
 /** Decompressor class */
 declare class _Decompressor {
     /** constructor */
     constructor();
     /** decompress */
-    data(data: Uint8Array, callback: (data: Buffer) => void): void;
+    data(data: Uint8Array, callback: (data: Buffer<ArrayBuffer>) => void): void;
     /** end */
-    end(callback: (data: Buffer) => void): void;
+    end(callback: (data: Buffer<ArrayBuffer>) => void): void;
 }
 
 /** node bindings */
 interface Binding {
     /** compress */
-    compress(data: Uint8Array, level: number): Buffer;
+    compress(data: Uint8Array, level: number): Buffer<ArrayBuffer>;
     /** compress_async */
     compress_async(
         data: Uint8Array,
         level: number,
-        callback: (error: string | null, data: Buffer | null) => void,
+        callback: (error: string | null, data: Buffer<ArrayBuffer> | null) => void,
     ): void;
     /** decompress */
-    decompress(data: Uint8Array, maxSize: number): Buffer;
+    decompress(data: Uint8Array, maxSize: number): Buffer<ArrayBuffer>;
     /** decompress_async */
     decompress_async(
         data: Uint8Array,
         maxSize: number,
-        callback: (error: string | null, data: Buffer | null) => void,
+        callback: (error: string | null, data: Buffer<ArrayBuffer> | null) => void,
     ): void;
     /** Get zstd version */
     version: number;
@@ -142,13 +142,13 @@ export class Decompressor extends CompressTransform {
     }
 }
 /** Web Transform stream Compressor/Decompressor */
-abstract class WebCompressTransformer implements Transformer<BufferSource, Uint8Array> {
+abstract class WebCompressTransformer implements Transformer<BufferSource, Uint8Array<ArrayBuffer>> {
     protected _binding: _Compressor | _Decompressor | null = null;
     /** @inheritdoc */
-    abstract start(controller: TransformStreamDefaultController<Uint8Array>): void;
+    abstract start(controller: TransformStreamDefaultController<Uint8Array<ArrayBuffer>>): void;
 
     /** @inheritdoc */
-    transform(chunk: BufferSource, controller: TransformStreamDefaultController<Uint8Array>): void {
+    transform(chunk: BufferSource, controller: TransformStreamDefaultController<Uint8Array<ArrayBuffer>>): void {
         try {
             this._binding!.data(coercionInput(chunk, false), (data) => controller.enqueue(asUint8Array(data)));
         } catch (ex) {
@@ -175,7 +175,7 @@ export class WebCompressor extends WebCompressTransformer {
         super();
     }
     /** @inheritdoc */
-    start(controller: TransformStreamDefaultController<Uint8Array>): void {
+    start(controller: TransformStreamDefaultController<Uint8Array<ArrayBuffer>>): void {
         this._binding = new bindings.Compressor(this.level);
     }
 }
@@ -183,12 +183,12 @@ export class WebCompressor extends WebCompressTransformer {
 /** Stream decompressor */
 export class WebDecompressor extends WebCompressTransformer {
     /** @inheritdoc */
-    start(controller: TransformStreamDefaultController<Uint8Array>): void {
+    start(controller: TransformStreamDefaultController<Uint8Array<ArrayBuffer>>): void {
         this._binding = new bindings.Decompressor();
     }
 }
 /** Convert to Uint8Array */
-function asUint8Array(buf: Buffer): Uint8Array {
+function asUint8Array<TArrayBuffer extends ArrayBufferLike>(buf: Buffer<TArrayBuffer>): Uint8Array<TArrayBuffer> {
     return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
 }
 

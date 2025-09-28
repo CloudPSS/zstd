@@ -107,7 +107,7 @@ async function callWorker(
     method: WorkerRequest[1],
     args: WorkerRequest[2],
     transferable?: Transferable[],
-): Promise<Uint8Array> {
+): Promise<Uint8Array<ArrayBuffer>> {
     const seq = SEQ++;
     const request = [seq, method, args] as WorkerRequest;
     if (
@@ -151,7 +151,7 @@ async function callWorker(
 }
 
 /** Call to worker pool */
-async function call(method: WorkerRequest[1], args: WorkerRequest[2]): Promise<Uint8Array> {
+async function call(method: WorkerRequest[1], args: WorkerRequest[2]): Promise<Uint8Array<ArrayBuffer>> {
     const worker = await borrowWorker();
     try {
         return await callWorker(worker, method, args);
@@ -178,13 +178,13 @@ export function workers(): { idle: number; busy: number } {
 }
 
 /** Proxy to worker */
-abstract class TransformProxy implements Transformer<BufferSource, Uint8Array> {
+abstract class TransformProxy implements Transformer<BufferSource, Uint8Array<ArrayBuffer>> {
     constructor(
         protected readonly method: WorkerRequest[1],
         protected readonly args: WorkerRequest[2],
     ) {}
     protected ctx: Worker | null = null;
-    protected controller!: TransformStreamDefaultController<Uint8Array>;
+    protected controller!: TransformStreamDefaultController<Uint8Array<ArrayBuffer>>;
 
     /** receive from worker */
     private readonly onMessage = (ev: MessageEvent<WorkerResponse>): void => {
@@ -213,7 +213,7 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array> {
         this.ctx = null;
     }
     /** @inheritdoc */
-    async start(controller: TransformStreamDefaultController<Uint8Array>): Promise<void> {
+    async start(controller: TransformStreamDefaultController<Uint8Array<ArrayBuffer>>): Promise<void> {
         this.controller = controller;
         try {
             this.ctx = await borrowWorker();

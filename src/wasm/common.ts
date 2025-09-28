@@ -30,7 +30,7 @@ export function uint(value: number): number {
 }
 
 /** Copy data from heap */
-export function fromHeap(ptr: Ptr, size: number): Uint8Array {
+export function fromHeap(ptr: Ptr, size: number): Uint8Array<ArrayBuffer> {
     // Copy buffer
     return new Uint8Array(Module.HEAPU8.buffer, ptr, size).slice();
 }
@@ -76,7 +76,7 @@ const ZSTD_CONTENTSIZE_ERROR = 2 ** 32 - 2;
 export const ZSTD_VERSION = createZSTD_VERSION(() => Module._ZSTD_versionNumber());
 
 /** compress */
-export function compress(buf: Uint8Array, level: number): Uint8Array {
+export function compress(buf: Uint8Array, level: number): Uint8Array<ArrayBuffer> {
     const h = new Helper();
     try {
         const dstSize = uint(Module._ZSTD_compressBound(buf.byteLength));
@@ -92,7 +92,7 @@ export function compress(buf: Uint8Array, level: number): Uint8Array {
 }
 
 /** decompress */
-export function decompress(buf: Uint8Array): Uint8Array {
+export function decompress(buf: Uint8Array): Uint8Array<ArrayBuffer> {
     const h = new Helper();
     try {
         const src = h.toHeap(buf);

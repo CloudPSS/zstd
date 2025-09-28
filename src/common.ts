@@ -5,26 +5,26 @@ export type BufferSource = ArrayBufferView | ArrayBuffer;
 
 /** warp module */
 export function createModule(options: {
-    compressSync: (data: Uint8Array, level: number) => Uint8Array;
-    compress: (data: Uint8Array | Blob, level: number) => Promise<Uint8Array>;
-    decompressSync: (data: Uint8Array) => Uint8Array;
-    decompress: (data: Uint8Array | Blob) => Promise<Uint8Array>;
-    Compressor: new (level: number) => Transformer<BufferSource, Uint8Array>;
-    Decompressor: new () => Transformer<BufferSource, Uint8Array>;
+    compressSync: (data: Uint8Array, level: number) => Uint8Array<ArrayBuffer>;
+    compress: (data: Uint8Array | Blob, level: number) => Promise<Uint8Array<ArrayBuffer>>;
+    decompressSync: (data: Uint8Array) => Uint8Array<ArrayBuffer>;
+    decompress: (data: Uint8Array | Blob) => Promise<Uint8Array<ArrayBuffer>>;
+    Compressor: new (level: number) => Transformer<BufferSource, Uint8Array<ArrayBuffer>>;
+    Decompressor: new () => Transformer<BufferSource, Uint8Array<ArrayBuffer>>;
     TransformStream: typeof globalThis.TransformStream;
 }): {
     /** ZStandard compress */
-    compressSync: (data: BufferSource, level?: number) => Uint8Array;
+    compressSync: (data: BufferSource, level?: number) => Uint8Array<ArrayBuffer>;
     /** ZStandard compress */
-    compress: (data: BufferSource | Blob, level?: number) => Promise<Uint8Array>;
+    compress: (data: BufferSource | Blob, level?: number) => Promise<Uint8Array<ArrayBuffer>>;
     /** ZStandard decompress */
-    decompressSync: (data: BufferSource) => Uint8Array;
+    decompressSync: (data: BufferSource) => Uint8Array<ArrayBuffer>;
     /** ZStandard decompress */
-    decompress: (data: BufferSource | Blob) => Promise<Uint8Array>;
+    decompress: (data: BufferSource | Blob) => Promise<Uint8Array<ArrayBuffer>>;
     /** create ZStandard stream compressor */
-    compressor: (level?: number) => TransformStream<BufferSource, Uint8Array>;
+    compressor: (level?: number) => TransformStream<BufferSource, Uint8Array<ArrayBuffer>>;
     /** create ZStandard stream decompressor */
-    decompressor: () => TransformStream<BufferSource, Uint8Array>;
+    decompressor: () => TransformStream<BufferSource, Uint8Array<ArrayBuffer>>;
 } {
     const { compressSync, compress, decompressSync, decompress, Compressor, Decompressor, TransformStream } = options;
     return {
@@ -52,11 +52,11 @@ export function createModule(options: {
         },
         compressor: (level) => {
             level = checkLevel(level);
-            const transformer = new TransformStream<BufferSource, Uint8Array>(new Compressor(level));
+            const transformer = new TransformStream<BufferSource, Uint8Array<ArrayBuffer>>(new Compressor(level));
             return transformer;
         },
         decompressor: () => {
-            const transformer = new TransformStream<BufferSource, Uint8Array>(new Decompressor());
+            const transformer = new TransformStream<BufferSource, Uint8Array<ArrayBuffer>>(new Decompressor());
             return transformer;
         },
     };

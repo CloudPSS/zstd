@@ -58,8 +58,10 @@ describe('node polyfill', () => {
         const onmessage = jest.fn();
         const onmessageerror = jest.fn();
         const onerror = jest.fn();
+        // eslint-disable-next-line unicorn/prefer-add-event-listener
         worker.onmessage = onmessage;
-        worker.onmessageerror = onmessageerror;
+        worker.addEventListener('messageerror', onmessageerror);
+        // eslint-disable-next-line unicorn/prefer-add-event-listener
         worker.onerror = onerror;
 
         worker._worker.emit('message', 'message_test');
@@ -85,8 +87,11 @@ describe('node polyfill', () => {
             }),
         );
 
+        // eslint-disable-next-line unicorn/prefer-add-event-listener
         worker.onmessage = null;
+        // eslint-disable-next-line unicorn/prefer-add-event-listener
         worker.onmessageerror = null;
+        // eslint-disable-next-line unicorn/prefer-add-event-listener
         worker.onerror = null;
     });
 

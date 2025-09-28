@@ -14,10 +14,10 @@ export type WorkerRequest =
 
 /** Worker response */
 export type WorkerResponse =
-    | [seq: number, Uint8Array]
+    | [seq: number, Uint8Array<ArrayBuffer>]
     | [seq: number, null, Error]
     | [seq: number]
-    | [null, chunk: Uint8Array]
+    | [null, chunk: Uint8Array<ArrayBuffer>]
     | [null, null, Error];
 
 /** Worker ready */
