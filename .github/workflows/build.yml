@@ -75,9 +75,9 @@ jobs:
           name: build-common
 
       - name: Prebuildify arm64
-        run: pnpm build:gyp --arch arm64
+        run: pnpm build:gyp -t $(node -v) --arch arm64
       - name: Prebuildify x64
-        run: pnpm build:gyp --arch x64
+        run: pnpm build:gyp -t $(node -v) --arch x64
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v4
@@ -104,13 +104,13 @@ jobs:
 
       # https://github.com/prebuild/docker-images?tab=readme-ov-file#images
       - name: Prebuildify x64 glibc
-        run: pnpm build:gyp-cross                  -i centos7-devtoolset7
+        run: pnpm build:gyp-cross -t $(node -v)                  -i centos7-devtoolset7
       - name: Prebuildify x64 musl
-        run: pnpm build:gyp-cross                  -i alpine
+        run: pnpm build:gyp-cross -t $(node -v)                  -i alpine
       - name: Prebuildify arm64 glibc
-        run: pnpm build:gyp-cross --tag-libc glibc -i linux-arm64-lts
+        run: pnpm build:gyp-cross -t $(node -v) --tag-libc glibc -i linux-arm64-lts
       - name: Prebuildify arm64 musl
-        run: pnpm build:gyp-cross --tag-libc musl  -i linux-arm64-musl
+        run: pnpm build:gyp-cross -t $(node -v) --tag-libc musl  -i linux-arm64-musl
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v4
@@ -136,9 +136,9 @@ jobs:
           name: build-common
 
       - name: Prebuildify arm64
-        run: pnpm build:gyp --arch arm64
+        run: pnpm build:gyp -t $(node -v) --arch arm64
       - name: Prebuildify x64
-        run: pnpm build:gyp --arch x64
+        run: pnpm build:gyp -t $(node -v) --arch x64
 
       - name: Upload prebuild artifacts
         uses: actions/upload-artifact@v4
