@@ -26,7 +26,8 @@ jobs:
       - name: Install
         uses: ./.github/actions/install
 
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: Publish
-        run: npm publish --provenance --access=public --tag=${{ contains(github.ref, 'alpha') && 'alpha' || contains(github.ref, 'beta') && 'beta' || 'latest' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access=public --tag=${{ contains(github.ref, 'alpha') && 'alpha' || contains(github.ref, 'beta') && 'beta' || 'latest' }}

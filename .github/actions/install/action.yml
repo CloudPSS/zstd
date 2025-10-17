@@ -18,6 +18,5 @@ runs:
       with:
         node-version-file: ''
         node-version: ${{ inputs.node-version }}
-        pnpm-version: ''
         node-registry-url: 'https://registry.npmjs.org/'
         args: ${{ inputs.args }}
