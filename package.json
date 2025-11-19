@@ -4,7 +4,7 @@
   "description": "Zstd n-api addon for node.js & wasm for browsers.",
   "author": "OpportunityLiu <opportunity@live.in>",
   "license": "MIT",
-  "packageManager": "pnpm@10.18.3",
+  "packageManager": "pnpm@10.22.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CloudPSS/zstd.git"
@@ -65,24 +65,24 @@
     "extends": "@cloudpss"
   },
   "devDependencies": {
-    "@cloudpss/commitlint-config": "^3.0.27",
-    "@cloudpss/eslint-config": "^3.0.27",
-    "@cloudpss/lint-staged-config": "^3.0.27",
-    "@cloudpss/prettier-config": "^3.0.27",
-    "@cloudpss/tsconfig": "^3.0.27",
+    "@cloudpss/commitlint-config": "^3.0.30",
+    "@cloudpss/eslint-config": "^3.0.30",
+    "@cloudpss/lint-staged-config": "^3.0.30",
+    "@cloudpss/prettier-config": "^3.0.30",
+    "@cloudpss/tsconfig": "^3.0.30",
     "@jest/globals": "^30.2.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.8.1",
+    "@types/node": "^24.10.1",
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "prebuildify": "^6.0.1",
     "prebuildify-cross": "^5.1.1",
     "pretty-bytes": "^7.1.0",
-    "rimraf": "^6.0.1",
+    "rimraf": "^6.1.0",
     "ts-jest": "29.4.5",
-    "type-fest": "^5.1.0",
+    "type-fest": "^5.2.0",
     "typescript": "^5.9.3",
-    "vite": "^7.1.10"
+    "vite": "^7.2.2"
   },
   "dependencies": {
     "node-addon-api": "^8.5.0",
