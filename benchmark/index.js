@@ -93,6 +93,7 @@ async function main() {
         }
         console.log(`\u001B[1;33mFile: ${file.name} \tRaw: ${pb(file.content.length)}\u001B[0m`);
         for (const level of [-10, -5, -1, 1, 2, 3, 4, 5, 6, 9, 15, 19, 22]) {
+            const content = Buffer.from(file.content);
             const [bCompressed, bCompressTime] = time(() =>
                 zlib.zstdCompressSync(file.content, {
                     params: {
@@ -102,13 +103,13 @@ async function main() {
             );
             const [bDecompressed, bDecompressTime] = time(() => zlib.zstdDecompressSync(bCompressed, {}));
 
-            const [compressed, napiCompressTime] = time(() => napi.compressSync(file.content, level));
+            const [compressed, napiCompressTime] = time(() => napi.compressSync(content, level));
             const [decompressed, napiDecompressTime] = time(() => napi.decompressSync(compressed));
-            const [, napiWorkerCompressTime] = await atime(() => napi.compress(file.content, level));
+            const [, napiWorkerCompressTime] = await atime(() => napi.compress(content, level));
             const [, napiWorkerDecompressTime] = await atime(() => napi.decompress(compressed));
             const [, napiSCompressTime] = await atime(async () => {
                 const stream = new napi.Compressor(level);
-                return await pipeline(Readable.from(file.content), stream, async (chunks) => {
+                return await pipeline(Readable.from(content), stream, async (chunks) => {
                     const chunks2 = [];
                     for await (const chunk of chunks) {
                         chunks2.push(chunk);
@@ -126,13 +127,13 @@ async function main() {
                     return Buffer.concat(chunks2);
                 });
             });
-            const [, wasmCompressTime] = time(() => wasm.compressSync(file.content, level));
+            const [, wasmCompressTime] = time(() => wasm.compressSync(content, level));
             const [, wasmDecompressTime] = time(() => wasm.decompressSync(compressed));
-            const [, wasmWorkerCompressTime] = await atime(() => wasm.compress(file.content, level));
+            const [, wasmWorkerCompressTime] = await atime(() => wasm.compress(content, level));
             const [, wasmWorkerDecompressTime] = await atime(() => wasm.decompress(compressed));
             const [, wasmSCompressTime] = await atime(async () => {
                 const stream = new TransformStream(new wasm.WebCompressor(level));
-                return await pipeline(Readable.from(file.content), Transform.fromWeb(stream), async (chunks) => {
+                return await pipeline(Readable.from(content), Transform.fromWeb(stream), async (chunks) => {
                     const chunks2 = [];
                     for await (const chunk of chunks) {
                         chunks2.push(chunk);
