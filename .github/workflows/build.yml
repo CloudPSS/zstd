@@ -44,7 +44,7 @@ jobs:
           args: --ignore-scripts
 
       - name: Download common artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: build-common
 
@@ -70,7 +70,7 @@ jobs:
           args: --ignore-scripts
 
       - name: Download common artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: build-common
 
@@ -98,7 +98,7 @@ jobs:
           args: --ignore-scripts
 
       - name: Download common artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: build-common
 
@@ -131,7 +131,7 @@ jobs:
           args: --ignore-scripts
 
       - name: Download common artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: build-common
 
@@ -154,12 +154,12 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Download common artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: build-common
 
       - name: Download prebuilt artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: prebuilds-*
           path: prebuilds/
@@ -187,7 +187,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Download artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: build
 
