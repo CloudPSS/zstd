@@ -58,7 +58,7 @@ export function onMessage(callback: (value: unknown) => unknown): void {
 
 /** post message */
 export function postMessage(value: unknown, transfer?: Transferable[]): void {
-    parentPort!.postMessage(value, transfer);
+    parentPort!.postMessage(value, transfer ?? []);
 }
 
 export const MAX_WORKERS = Math.max(os.availableParallelism?.() ?? os.cpus().length, 2) - 1;
