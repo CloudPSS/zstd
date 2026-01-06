@@ -1,8 +1,11 @@
 import { coercionInput } from '../utils.js';
 import { createModule, type BufferSource } from '../common.js';
 import * as common from './common.js';
-import { Worker as WorkerPolyfill, MAX_WORKERS, TransformStream } from '#worker-polyfill';
 import type { WorkerReady, WorkerRequest, WorkerResponse } from './worker.js';
+import { Worker as WorkerPolyfill, MAX_WORKERS, TransformStream } from '#worker-polyfill';
+
+const MIN_WORKERS = MAX_WORKERS >= 4 ? 2 : 1;
+const IDLE_WORKER_TIMEOUT = 5000; // 5s
 
 await common.ModuleReady;
 
@@ -33,9 +36,7 @@ async function initWorker(): Promise<Worker> {
                 // eslint-disable-next-line no-console
                 console.error('@cloudpss/zstd worker error', ev);
 
-                worker.terminate();
-                BUSY_WORKERS.delete(worker);
-                IDLE_WORKERS.splice(IDLE_WORKERS.indexOf(worker), 1);
+                destroyWorker(worker);
                 handlePendingBorrow();
             });
             resolve(worker);
@@ -69,18 +70,39 @@ function handlePendingBorrow(): void {
     });
 }
 
+let cleanupScheduleId: ReturnType<typeof setTimeout> | null = null;
+/** Schedule cleanup of idle workers */
+function scheduleCleanup(): void {
+    if (cleanupScheduleId != null) clearTimeout(cleanupScheduleId);
+    const id = setTimeout(() => {
+        if (cleanupScheduleId === id) cleanupScheduleId = null;
+        if (PENDING_BORROW.length > 0) return;
+        // destroy extra idle workers
+        while (IDLE_WORKERS.length > MIN_WORKERS) {
+            const worker = IDLE_WORKERS.pop()!;
+            destroyWorker(worker);
+        }
+    }, IDLE_WORKER_TIMEOUT);
+    cleanupScheduleId = id;
+}
+
 /** return worker to pool */
 function returnWorker(worker: Worker): void {
-    if (!BUSY_WORKERS.delete(worker)) return;
+    if (!BUSY_WORKERS.delete(worker)) {
+        // Worker has been destroyed
+        return;
+    }
     IDLE_WORKERS.push(worker);
     handlePendingBorrow();
+    scheduleCleanup();
 }
 
 /** destroy worker */
 function destroyWorker(worker: Worker): void {
     worker.terminate();
     BUSY_WORKERS.delete(worker);
-    IDLE_WORKERS.splice(IDLE_WORKERS.indexOf(worker), 1);
+    const idleIndex = IDLE_WORKERS.indexOf(worker);
+    if (idleIndex >= 0) IDLE_WORKERS.splice(idleIndex, 1);
 }
 
 /** get or wait for an idle worker */
