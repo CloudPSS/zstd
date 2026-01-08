@@ -11,5 +11,6 @@ tsconfig.*.json
 *.config.cjs
 *.config.mjs
 *.ps1
+pnpm-*.yaml
 /*.html
 /*.tgz
