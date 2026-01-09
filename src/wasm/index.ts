@@ -7,18 +7,25 @@ import { Worker as WorkerPolyfill } from '@cloudpss/worker/ponyfill';
 
 await common.ModuleReady;
 
-const POOL = new WorkerPool(() => {
-    // Write in a way that bundler can detect and create proper worker files
-    return typeof Worker == 'function'
-        ? new Worker(new URL('./worker.js', import.meta.url), {
-              type: 'module',
-              name: `@cloudpss/zstd/worker`,
-          })
-        : new WorkerPolyfill(new URL('./worker.js', import.meta.url), {
-              type: 'module',
-              name: `@cloudpss/zstd/worker`,
-          });
-});
+const POOL = new WorkerPool(
+    () => {
+        // Write in a way that bundler can detect and create proper worker files
+        return typeof Worker == 'function'
+            ? new Worker(new URL('./worker.js', import.meta.url), {
+                  type: 'module',
+                  name: `@cloudpss/zstd/worker`,
+              })
+            : new WorkerPolyfill(new URL('./worker.js', import.meta.url), {
+                  type: 'module',
+                  name: `@cloudpss/zstd/worker`,
+              });
+    },
+    {
+        name: '@cloudpss/zstd/worker-pool',
+        minIdleWorkers: 1,
+        creationDelay: 5,
+    },
+);
 
 const MAX_COPY_OVERHEAD = 1024 * 16; // 16KB
 

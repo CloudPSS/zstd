@@ -127,7 +127,4 @@ onMessage(async (data) => {
     }
 });
 
-void ModuleReady.then(
-    () => notifyReady(),
-    (e: Error) => notifyReady(e),
-);
+notifyReady(ModuleReady);
