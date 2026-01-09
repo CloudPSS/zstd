@@ -7,3 +7,6 @@ export const DEFAULT_LEVEL = 3;
 export const MIN_LEVEL = -131_072;
 /** Maximum compression level. */
 export const MAX_LEVEL = 22;
+
+/** Minimum buffer size to use worker */
+export const WORKER_THRESHOLD_SIZE = 8 * 1024; // 8KB

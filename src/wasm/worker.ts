@@ -1,5 +1,6 @@
 import type { Ptr, ZSTD_CStream, ZSTD_DStream } from '../../prebuilds/zstd.js';
-import { onMessage, postMessage } from '#worker-polyfill';
+import { onMessage, postMessage } from '@cloudpss/worker/ponyfill';
+import { notifyReady } from '@cloudpss/worker/pool';
 import { checkError, compress, decompress, fromHeap, Helper, Module, ModuleReady, setWasmCallbacks } from './common.js';
 import { checkLevel } from '../utils.js';
 
@@ -19,9 +20,6 @@ export type WorkerResponse =
     | [seq: number]
     | [null, chunk: Uint8Array<ArrayBuffer>]
     | [null, null, Error];
-
-/** Worker ready */
-export type WorkerReady = 'ready';
 
 let mode: 'Decompressor' | 'Compressor' | undefined;
 let ptr: number | undefined;
@@ -129,4 +127,7 @@ onMessage(async (data) => {
     }
 });
 
-void ModuleReady.then(() => postMessage('ready' satisfies WorkerReady));
+void ModuleReady.then(
+    () => notifyReady(),
+    (e: Error) => notifyReady(e),
+);

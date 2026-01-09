@@ -1,4 +1,4 @@
-import { coercionInput, checkLevel } from './utils.js';
+import { coercionInput, checkLevel, shouldInPlace } from './utils.js';
 
 /** Buffer data */
 export type BufferSource = ArrayBufferView | ArrayBuffer;
@@ -37,7 +37,7 @@ export function createModule(options: {
         compress: async (data, level) => {
             level = checkLevel(level);
             const input = coercionInput(data, true);
-            const output = await compress(input, level);
+            const output = shouldInPlace(input) ? compressSync(input, level) : await compress(input, level);
             return output;
         },
         decompressSync: (data) => {
@@ -47,7 +47,7 @@ export function createModule(options: {
         },
         decompress: async (data) => {
             const input = coercionInput(data, true);
-            const output = await decompress(input);
+            const output = shouldInPlace(input) ? decompressSync(input) : await decompress(input);
             return output;
         },
         compressor: (level) => {

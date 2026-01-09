@@ -1,131 +1,31 @@
 import { coercionInput } from '../utils.js';
 import { createModule, type BufferSource } from '../common.js';
 import * as common from './common.js';
-import type { WorkerReady, WorkerRequest, WorkerResponse } from './worker.js';
-import { Worker as WorkerPolyfill, MAX_WORKERS, TransformStream } from '#worker-polyfill';
-
-const MIN_WORKERS = MAX_WORKERS >= 4 ? 2 : 1;
-const IDLE_WORKER_TIMEOUT = 5000; // 5s
+import type { WorkerRequest, WorkerResponse } from './worker.js';
+import { WorkerPool, type TaggedWorker } from '@cloudpss/worker/pool';
+import { Worker as WorkerPolyfill } from '@cloudpss/worker/ponyfill';
 
 await common.ModuleReady;
 
-const IDLE_WORKERS: Worker[] = [];
-const BUSY_WORKERS = new Set<Worker>();
-const PENDING_BORROW: Array<(value: Worker) => void> = [];
-let SEQ = 0;
-
-/** create and initialize worker */
-async function initWorker(): Promise<Worker> {
-    return new Promise((resolve, reject) => {
-        const worker =
-            typeof Worker == 'function'
-                ? new Worker(new URL('./worker.js', import.meta.url), {
-                      type: 'module',
-                      name: `@cloudpss/zstd/worker`,
-                  })
-                : new WorkerPolyfill(new URL('./worker.js', import.meta.url), {
-                      type: 'module',
-                      name: `@cloudpss/zstd/worker`,
-                  });
-        BUSY_WORKERS.add(worker);
-
-        const onMessage = (ev: MessageEvent): void => {
-            if ((ev.data as WorkerReady) !== 'ready') return;
-            cleanup();
-            worker.addEventListener('error', (ev) => {
-                // eslint-disable-next-line no-console
-                console.error('@cloudpss/zstd worker error', ev);
-
-                destroyWorker(worker);
-                handlePendingBorrow();
-            });
-            resolve(worker);
-        };
-        const onError = (ev: ErrorEvent): void => {
-            cleanup();
-            reject(new Error(ev.message, { cause: ev.error }));
-            BUSY_WORKERS.delete(worker);
-        };
-        const cleanup = (): void => {
-            worker.removeEventListener('message', onMessage);
-            worker.removeEventListener('error', onError);
-        };
-        worker.addEventListener('message', onMessage);
-        worker.addEventListener('error', onError);
-    });
-}
-
-/** handle pending borrow */
-function handlePendingBorrow(): void {
-    void Promise.resolve().then(async () => {
-        while (PENDING_BORROW.length > 0 && IDLE_WORKERS.length > 0) {
-            const worker = IDLE_WORKERS.pop()!;
-            BUSY_WORKERS.add(worker);
-            PENDING_BORROW.shift()!(worker);
-        }
-        while (PENDING_BORROW.length > 0 && BUSY_WORKERS.size < MAX_WORKERS) {
-            const worker = await initWorker();
-            PENDING_BORROW.shift()!(worker);
-        }
-    });
-}
-
-let cleanupScheduleId: ReturnType<typeof setTimeout> | null = null;
-/** Schedule cleanup of idle workers */
-function scheduleCleanup(): void {
-    if (cleanupScheduleId != null) clearTimeout(cleanupScheduleId);
-    const id = setTimeout(() => {
-        if (cleanupScheduleId === id) cleanupScheduleId = null;
-        if (PENDING_BORROW.length > 0) return;
-        // destroy extra idle workers
-        while (IDLE_WORKERS.length > MIN_WORKERS) {
-            const worker = IDLE_WORKERS.pop()!;
-            destroyWorker(worker);
-        }
-    }, IDLE_WORKER_TIMEOUT);
-    cleanupScheduleId = id;
-}
-
-/** return worker to pool */
-function returnWorker(worker: Worker): void {
-    if (!BUSY_WORKERS.delete(worker)) {
-        // Worker has been destroyed
-        return;
-    }
-    IDLE_WORKERS.push(worker);
-    handlePendingBorrow();
-    scheduleCleanup();
-}
-
-/** destroy worker */
-function destroyWorker(worker: Worker): void {
-    worker.terminate();
-    BUSY_WORKERS.delete(worker);
-    const idleIndex = IDLE_WORKERS.indexOf(worker);
-    if (idleIndex >= 0) IDLE_WORKERS.splice(idleIndex, 1);
-}
-
-/** get or wait for an idle worker */
-async function borrowWorker(): Promise<Worker> {
-    if (IDLE_WORKERS.length > 0) {
-        const worker = IDLE_WORKERS.pop()!;
-        BUSY_WORKERS.add(worker);
-        return worker;
-    }
-    if (BUSY_WORKERS.size < MAX_WORKERS) {
-        const worker = await initWorker();
-        return worker;
-    }
-    return await new Promise((resolve) => {
-        PENDING_BORROW.push(resolve);
-    });
-}
+const POOL = new WorkerPool(() => {
+    // Write in a way that bundler can detect and create proper worker files
+    return typeof Worker == 'function'
+        ? new Worker(new URL('./worker.js', import.meta.url), {
+              type: 'module',
+              name: `@cloudpss/zstd/worker`,
+          })
+        : new WorkerPolyfill(new URL('./worker.js', import.meta.url), {
+              type: 'module',
+              name: `@cloudpss/zstd/worker`,
+          });
+});
 
 const MAX_COPY_OVERHEAD = 1024 * 16; // 16KB
 
+let SEQ = 0;
 /** Call to a specific worker */
 async function callWorker(
-    worker: Worker,
+    worker: TaggedWorker,
     method: WorkerRequest[1],
     args: WorkerRequest[2],
     transferable?: Transferable[],
@@ -174,29 +74,22 @@ async function callWorker(
 
 /** Call to worker pool */
 async function call(method: WorkerRequest[1], args: WorkerRequest[2]): Promise<Uint8Array<ArrayBuffer>> {
-    const worker = await borrowWorker();
+    const worker = await POOL.borrowWorker();
     try {
         return await callWorker(worker, method, args);
     } finally {
-        returnWorker(worker);
+        POOL.returnWorker(worker);
     }
 }
 
 /** cleanup all workers */
 export function terminate(): void {
-    for (const worker of IDLE_WORKERS) {
-        worker.terminate();
-    }
-    for (const worker of BUSY_WORKERS) {
-        worker.terminate();
-    }
-    IDLE_WORKERS.length = 0;
-    BUSY_WORKERS.clear();
+    POOL.destroy();
 }
 
 /** get current worker status */
-export function workers(): { idle: number; busy: number } {
-    return { idle: IDLE_WORKERS.length, busy: BUSY_WORKERS.size };
+export function workers(): { total: number; idle: number; busy: number; initializing: number } {
+    return POOL.status();
 }
 
 /** Proxy to worker */
@@ -205,7 +98,7 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array<Ar
         protected readonly method: WorkerRequest[1],
         protected readonly args: WorkerRequest[2],
     ) {}
-    protected ctx: Worker | null = null;
+    protected ctx: TaggedWorker | null = null;
     protected controller!: TransformStreamDefaultController<Uint8Array<ArrayBuffer>>;
 
     /** receive from worker */
@@ -228,9 +121,9 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array<Ar
         }
         if (error != null) {
             this.controller.error(error);
-            if (ctx) destroyWorker(ctx);
+            if (ctx) POOL.destroyWorker(ctx);
         } else {
-            if (ctx) returnWorker(ctx);
+            if (ctx) POOL.returnWorker(ctx);
         }
         this.ctx = null;
     }
@@ -238,7 +131,7 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array<Ar
     async start(controller: TransformStreamDefaultController<Uint8Array<ArrayBuffer>>): Promise<void> {
         this.controller = controller;
         try {
-            this.ctx = await borrowWorker();
+            this.ctx = await POOL.borrowWorker();
             this.ctx.addEventListener('message', this.onMessage);
             await callWorker(this.ctx, this.method, this.args);
         } catch (ex) {

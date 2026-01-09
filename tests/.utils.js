@@ -12,8 +12,9 @@ export const emptyCompressed = new Uint8Array([0x28, 0xb5, 0x2f, 0xfd, 0x20, 0x0
 
 /**
  * 转换 buffer
- * @param {ArrayBufferView} data
- * @returns {Uint8Array}
+ * @template  {ArrayBufferLike} T
+ * @param {ArrayBufferView<T>} data
+ * @returns {Uint8Array<T>}
  */
 export function asUint8Array(data) {
     return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);

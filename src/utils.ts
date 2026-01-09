@@ -1,4 +1,4 @@
-import { DEFAULT_LEVEL, MAX_SIZE, MIN_LEVEL, MAX_LEVEL } from './config.js';
+import { DEFAULT_LEVEL, MAX_SIZE, MIN_LEVEL, MAX_LEVEL, WORKER_THRESHOLD_SIZE } from './config.js';
 
 /** Check input */
 function isBlob(value: NonNullable<unknown>): value is Blob {
@@ -48,4 +48,11 @@ export function checkLevel(level: number | undefined): number {
     if (level < MIN_LEVEL) return MIN_LEVEL;
     if (level > MAX_LEVEL) return MAX_LEVEL;
     return Math.trunc(level);
+}
+
+/** Should use current thread for given data */
+export function shouldInPlace(data: Blob | Uint8Array): data is Uint8Array {
+    // Always use worker for Blob
+    if (!ArrayBuffer.isView(data)) return false;
+    return data.byteLength < WORKER_THRESHOLD_SIZE;
 }

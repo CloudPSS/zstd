@@ -1,13 +1,25 @@
 import { jest } from '@jest/globals';
+import { availableParallelism } from 'node:os';
 import { emptyCompressed, emptyRaw } from './.utils.js';
 
-jest.unstable_mockModule('#worker-polyfill', () => ({
-    onMessage: jest.fn((callback: (data: unknown) => void) => (messageCallback = callback)),
-    postMessage: jest.fn(),
-}));
+beforeAll(async () => {
+    jest.unstable_mockModule('@cloudpss/worker/ponyfill', () => ({
+        onMessage: jest.fn((callback: (data: unknown) => void) => (messageCallback = callback)),
+        postMessage: jest.fn(),
+        HARDWARE_CONCURRENCY: availableParallelism(),
+        IS_WORKER_THREAD: true,
+        Worker: null,
+    }));
+    ({ onMessage, postMessage } = await import('@cloudpss/worker/ponyfill'));
+});
+
+afterAll(() => {
+    jest.unstable_unmockModule('@cloudpss/worker/pool');
+});
 
 let messageCallback: (data: unknown) => void;
-const { onMessage, postMessage } = await import('#worker-polyfill');
+let onMessage: typeof import('@cloudpss/worker/ponyfill').onMessage,
+    postMessage: typeof import('@cloudpss/worker/ponyfill').postMessage;
 
 let workerLoaded = false;
 async function loadWorker() {
@@ -21,7 +33,7 @@ async function loadWorker() {
 test('wasm worker init', async () => {
     await loadWorker();
     expect(postMessage).toHaveBeenCalledTimes(1);
-    expect(postMessage).toHaveBeenCalledWith('ready');
+    expect(postMessage).toHaveBeenCalledWith(expect.any(Object));
     expect(onMessage).toHaveBeenCalledTimes(1);
     expect(onMessage).toHaveBeenCalledWith(expect.any(Function));
     expect(messageCallback).toBeInstanceOf(Function);
