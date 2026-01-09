@@ -81,7 +81,7 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
-    "@cloudpss/worker": "^0.1.0",
+    "@cloudpss/worker": "^0.1.1",
     "node-addon-api": "^8.5.0",
     "node-gyp-build": "^4.8.4"
   }

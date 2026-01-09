@@ -8,8 +8,8 @@ importers:
   .:
     dependencies:
       '@cloudpss/worker':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.1
+        version: 0.1.1
       node-addon-api:
         specifier: ^8.5.0
         version: 8.5.0
@@ -295,9 +295,9 @@ packages:
     peerDependencies:
       typescript: '>=5'
 
-  '@cloudpss/worker@0.1.0':
+  '@cloudpss/worker@0.1.1':
     resolution:
-      { integrity: sha512-pC4k7hjE6ffieZz6dfhvCWtwSz48vIxMqc8ptFLl6NYY2oIBPJbAWVEom7jaLFNG8cPSZGq7hD7shqHa0SuliA== }
+      { integrity: sha512-ZtVRCyXY+MS6SrbvCX+LSZOedLYbqbS1NpOxPAuub1Nlg3xiB3lpRzaiRUmy9jlAc0zu1u9U5+8TDNhiup2SYg== }
     engines: { node: '>= 20' }
 
   '@commitlint/cli@20.3.1':
@@ -4521,7 +4521,7 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
-  '@cloudpss/worker@0.1.0': {}
+  '@cloudpss/worker@0.1.1': {}
 
   '@commitlint/cli@20.3.1(@types/node@25.0.3)(typescript@5.9.3)':
     dependencies:
