@@ -128,7 +128,7 @@ abstract class TransformProxy implements Transformer<BufferSource, Uint8Array<Ar
         }
         if (error != null) {
             this.controller.error(error);
-            if (ctx) POOL.destroyWorker(ctx);
+            if (ctx) POOL.destroyWorker(ctx, error as Error);
         } else {
             if (ctx) POOL.returnWorker(ctx);
         }

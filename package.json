@@ -4,7 +4,7 @@
   "description": "Zstd n-api addon for node.js & wasm for browsers.",
   "author": "OpportunityLiu <opportunity@live.in>",
   "license": "MIT",
-  "packageManager": "pnpm@10.27.0",
+  "packageManager": "pnpm@10.28.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CloudPSS/zstd.git"
@@ -68,7 +68,7 @@
     "@cloudpss/tsconfig": "^3.0.36",
     "@jest/globals": "^30.2.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.0.8",
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "prebuildify": "^6.0.1",
@@ -76,12 +76,12 @@
     "pretty-bytes": "^7.1.0",
     "rimraf": "^6.1.2",
     "ts-jest": "29.4.6",
-    "type-fest": "^5.3.1",
+    "type-fest": "^5.4.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   },
   "dependencies": {
-    "@cloudpss/worker": "^0.1.1",
+    "@cloudpss/worker": "^0.1.9",
     "node-addon-api": "^8.5.0",
     "node-gyp-build": "^4.8.4"
   }
