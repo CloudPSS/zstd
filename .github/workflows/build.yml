@@ -24,7 +24,7 @@ jobs:
         run: pnpm build:deps
 
       - name: Upload common artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-common
           path: |
@@ -52,7 +52,7 @@ jobs:
         run: pnpm build:wasm
 
       - name: Upload prebuild artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: prebuilds-wasm
           path: prebuilds/zstd.js
@@ -80,7 +80,7 @@ jobs:
         run: pnpm build:gyp -t $(node -v) --arch x64
 
       - name: Upload prebuild artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: prebuilds-windows
           path: prebuilds/
@@ -113,7 +113,7 @@ jobs:
         run: pnpm build:gyp-cross -t $(node -v) --tag-libc musl  -i linux-arm64-musl
 
       - name: Upload prebuild artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: prebuilds-linux
           path: prebuilds/
@@ -141,7 +141,7 @@ jobs:
         run: pnpm build:gyp -t $(node -v) --arch x64
 
       - name: Upload prebuild artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: prebuilds-macos
           path: prebuilds/
@@ -166,7 +166,7 @@ jobs:
           merge-multiple: true
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build
           path: |
