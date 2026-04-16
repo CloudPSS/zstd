@@ -14,7 +14,7 @@ runs:
   using: 'composite'
   steps:
     - name: Install
-      uses: wyvox/action-setup-pnpm@v3
+      uses: wyvox/action-setup-pnpm@v4
       with:
         node-version-file: ''
         node-version: ${{ inputs.node-version }}
