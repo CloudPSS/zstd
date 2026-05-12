@@ -18,11 +18,12 @@ runs:
       with:
         node-version-file: ''
         node-version: ${{ inputs.node-version }}
-    - name: Install pnpm
-      uses: pnpm/action-setup@v6
-      with:
-        standalone: true
-        cache: true
+        cache: 'pnpm'
+    # - name: Install pnpm
+    #   uses: pnpm/action-setup@v6
+    #   with:
+    #     standalone: true
+    #     cache: true
     - name: Install dependencies
       shell: bash
-      run: pnpm --version && pnpm install ${{ inputs.args }}
+      run: pnpm install ${{ inputs.args }}
