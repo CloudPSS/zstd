@@ -13,16 +13,16 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Install pnpm
-      uses: pnpm/action-setup@v5
-      with:
-        standalone: true
-        cache: true
     - name: Install node
       uses: actions/setup-node@v6
       with:
         node-version-file: ''
         node-version: ${{ inputs.node-version }}
+    - name: Install pnpm
+      uses: pnpm/action-setup@v6
+      with:
+        standalone: true
+        cache: true
     - name: Install dependencies
       shell: bash
-      run: pnpm install ${{ inputs.args }}
+      run: pnpm --version && pnpm install ${{ inputs.args }}
