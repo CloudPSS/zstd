@@ -1,9 +1,5 @@
-publicHoistPattern:
-  - '*eslint*'
-  - '*prettier*'
-  - '*commitlint*'
-  - 'lint-staged'
-shellEmulator: true
-onlyBuiltDependencies:
-  - esbuild
-  - unrs-resolver
+allowBuilds:
+  unrs-resolver: false
+
+configDependencies:
+  '@cloudpss/pnpm-plugin-config': 'latest'

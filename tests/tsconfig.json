@@ -5,9 +5,7 @@
     "allowJs": true,
     "checkJs": true,
     "rootDir": "..",
-    "module": "Node16",
-    "moduleResolution": "Node16",
-    "isolatedModules": true
+    "types": ["node", "jest"]
   },
   "include": ["./**/*.ts", "./**/*.js", "./.*.js", "./.*.ts"]
 }
