@@ -16,6 +16,9 @@ runs:
     - name: Install pnpm
       shell: bash
       run: npm install -g pnpm
+    - name: Check pnpm version
+      shell: bash
+      run: pnpm --version
     - name: Install node
       uses: actions/setup-node@v6
       with:
