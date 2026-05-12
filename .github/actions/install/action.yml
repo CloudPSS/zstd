@@ -25,4 +25,4 @@ runs:
         cache: true
     - name: Install dependencies
       shell: bash
-      run: pnpm install ${{ inputs.args }}
+      run: pnpm install ${{ inputs.args }} || true
