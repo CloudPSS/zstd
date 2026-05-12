@@ -19,9 +19,10 @@ runs:
         node-version-file: ''
         node-version: ${{ inputs.node-version }}
     - name: Install pnpm
-      uses: pnpm/action-setup@v6
+      uses: pnpm/action-setup@master
       with:
+        standalone: true
         cache: true
     - name: Install dependencies
       shell: bash
-      run: $PNPM_HOME/bin/pnpm install ${{ inputs.args }}
+      run: pnpm install ${{ inputs.args }}
