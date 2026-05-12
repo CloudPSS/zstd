@@ -22,6 +22,7 @@ runs:
       uses: pnpm/action-setup@v6
       with:
         version: 11
+        package_json_file: ''
         standalone: true
         cache: true
     - name: Install dependencies
