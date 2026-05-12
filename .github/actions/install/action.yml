@@ -15,7 +15,7 @@ runs:
   steps:
     - name: Install pnpm
       shell: bash
-      run: npm install -g pnpm
+      run: npm install -g @pnpm/exe@^11
     - name: Check pnpm version
       shell: bash
       run: pnpm --version
