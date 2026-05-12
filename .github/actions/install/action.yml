@@ -14,7 +14,7 @@ runs:
   using: 'composite'
   steps:
     - name: Install pnpm
-      uses: pnpm/action-setup@master
+      uses: pnpm/action-setup@v5
       with:
         standalone: true
         cache: true
