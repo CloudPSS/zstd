@@ -24,4 +24,4 @@ runs:
         cache: true
     - name: Install dependencies
       shell: bash
-      run: pnpm install ${{ inputs.args }}
+      run: $PNPM_HOME/bin/pnpm install ${{ inputs.args }}
