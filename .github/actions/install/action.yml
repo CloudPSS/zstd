@@ -13,6 +13,9 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Install pnpm
+      shell: bash
+      run: npm install -g pnpm
     - name: Install node
       uses: actions/setup-node@v6
       with:
@@ -24,9 +27,6 @@ runs:
     #   with:
     #     standalone: true
     #     cache: true
-    - name: Install pnpm
-      shell: bash
-      run: npm install -g pnpm
     - name: Install dependencies
       shell: bash
       run: pnpm install ${{ inputs.args }}
