@@ -24,6 +24,9 @@ runs:
     #   with:
     #     standalone: true
     #     cache: true
+    - name: Install pnpm
+      shell: bash
+      run: npm install -g pnpm
     - name: Install dependencies
       shell: bash
       run: pnpm install ${{ inputs.args }}
