@@ -69,12 +69,12 @@ jobs:
         with:
           args: --ignore-scripts --frozen-lockfile
 
-      - uses: shaowenchen/debugger-action@v2
-        name: debugger
-        timeout-minutes: 30
-        continue-on-error: false
-        with:
-          ngrok_token: ${{ secrets.NGROK_TOKEN }}
+      # - uses: shaowenchen/debugger-action@v2
+      #   name: debugger
+      #   timeout-minutes: 30
+      #   continue-on-error: false
+      #   with:
+      #     ngrok_token: ${{ secrets.NGROK_TOKEN }}
 
       - name: Download common artifacts
         uses: actions/download-artifact@v8
