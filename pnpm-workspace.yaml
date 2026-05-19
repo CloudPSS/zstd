@@ -1,5 +1,5 @@
+configDependencies:
+  '@cloudpss/pnpm-plugin-config': '~4.0.2'
+
 allowBuilds:
   unrs-resolver: false
-
-configDependencies:
-  '@cloudpss/pnpm-plugin-config': 'latest'
